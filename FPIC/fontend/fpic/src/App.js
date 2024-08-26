@@ -1,6 +1,7 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import ZoomableImage from "./ZoomableImage";
 
 function App() {
   const [imgs, setImgs] = useState([]);
@@ -18,9 +19,8 @@ function App() {
   }, []);
 
   const handleClick = (img) => {
-    setSelectedImg(img); // Đặt ảnh được chọn khi click
+    setSelectedImg(img);
   };
-
   return (
     <div className="App">
       <div className="d-flex flex-wrap">
@@ -32,8 +32,8 @@ function App() {
             data-bs-target="#imageModal"
           >
             <img
-              src={img.img1}
-              alt={img.name}
+              src={img?.img1}
+              alt={img?.name}
               className="img-fluid rounded m-3"
               style={{ cursor: "pointer", width: "150px" }}
             />
@@ -63,18 +63,7 @@ function App() {
               ></button>
             </div>
             <div className="modal-body">
-              {selectedImg && (
-                <div className="text-center">
-                  <img
-                    src={selectedImg.img1}
-                    alt={selectedImg.name}
-                    className="img-fluid rounded"
-                    style={{ maxWidth: "100%" }}
-                  />
-                  <p className="mt-3">{selectedImg.description}</p>
-                </div>
-              )}
-              <hr />
+              <ZoomableImage data={selectedImg} />
             </div>
             <div className="modal-footer">
               <button
