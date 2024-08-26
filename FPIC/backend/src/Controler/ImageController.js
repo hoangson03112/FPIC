@@ -11,6 +11,17 @@ class ImageController {
         .json({ message: "Failed to retrieve images", error: error.message });
     }
   }
+
+  async getImage(req, res) {
+    try {
+      const image = await Image.findOne({ _id: req.params.id });
+      res.status(200).json(image);
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Failed to retrieve images", error: error.message });
+    }
+  }
 }
 
 module.exports = new ImageController();
