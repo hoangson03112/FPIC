@@ -21,7 +21,11 @@ function App() {
         {imgs?.map((img, index) => {
           return (
             <a key={index}>
-              <img src={img.img1} alt={img.name}></img>
+              <img
+                src={img.img1}
+                alt={img.name}
+                className="img-fluid rounded m-3"
+              />
             </a>
           );
         })}
