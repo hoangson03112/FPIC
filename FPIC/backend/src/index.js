@@ -10,4 +10,6 @@ db.connect();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ extended: true }));
 app.get("/images", ImageController.getImages);
+app.get("/image/:id", ImageController.getImage);
+
 app.listen(9999, () => console.log("Server is running on port 9999"));
