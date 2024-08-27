@@ -41,19 +41,18 @@ function App() {
         ))}
       </div>
 
-      {/* Modal */}
       <div
-        className="modal fade"
+        className="modal fade "
         id="imageModal"
         tabIndex="-1"
         aria-labelledby="staticBackdropLabel"
         aria-hidden="true"
       >
-        <div className="modal-dialog modal-lg">
+        <div className="modal-dialog modal-fullscreen  p-5">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="staticBackdropLabel">
-                {selectedImg ? selectedImg.name : ""}
+                {selectedImg?.name}
               </h5>
               <button
                 type="button"
@@ -62,17 +61,11 @@ function App() {
                 aria-label="Close"
               ></button>
             </div>
-            <div className="modal-body">
-              <ZoomableImage data={selectedImg} />
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Đóng
-              </button>
+            <div className="modal-body row">
+              <div className="col-9">
+                <ZoomableImage data={selectedImg} />
+              </div>
+              <div className="col-3"></div>
             </div>
           </div>
         </div>
