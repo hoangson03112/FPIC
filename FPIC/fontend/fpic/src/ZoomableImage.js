@@ -12,7 +12,7 @@ const ZoomableImage = ({ data }) => {
         minScale={0.5}
         maxScale={4}
         centerOnInit={true}
-        limitToBounds={false} 
+        limitToBounds={false}
         panning={{ disabled: false }}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
