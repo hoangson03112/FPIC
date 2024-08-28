@@ -6,10 +6,8 @@ function CustomButtonGroup({ fileData }) {
   const [classes, setClasses] = useState([]);
   const [clickedButtons, setClickedButtons] = useState([]);
 
-
-
   useEffect(() => {
-    setClickedButtons([])
+    setClickedButtons([]);
     axios
       .get("http://localhost:9999/get-classes")
       .then((response) => {
@@ -34,23 +32,31 @@ function CustomButtonGroup({ fileData }) {
   const filteredClasses = classes?.filter((classItem) =>
     classIds?.includes(classItem.id)
   );
-  console.log(filteredClasses);
+ 
 
   return (
-    <div className="button-group">
-      {filteredClasses.map((button) => (
-        <button
-          key={button.title}
-          className={`button ${
-            clickedButtons.includes(button.title) ? "faded" : ""
-          }`}
-          onClick={() => handleClick(button.title)}
-          aria-pressed={clickedButtons.includes(button.title) ? "true" : "false"}
-          style={{ borderColor: button.color, color: button.color }}
-        >
-          <span style={{ backgroundColor: button.color }}></span> {button.title}
-        </button>
-      ))}
+    <div className="mt-5">
+      <span className="text-body-tertiary ">
+        {fileData?.size?.height}x{fileData?.size?.width}
+      </span>
+      <div className="button-group my-3">
+        {filteredClasses.map((button) => (
+          <button
+            key={button.title}
+            className={`button ${
+              clickedButtons.includes(button.title) ? "faded" : ""
+            }`}
+            onClick={() => handleClick(button.title)}
+            aria-pressed={
+              clickedButtons.includes(button.title) ? "true" : "false"
+            }
+            style={{ borderColor: button.color, color: button.color }}
+          >
+            <span style={{ backgroundColor: button.color }}></span>{" "}
+            {button.title}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
