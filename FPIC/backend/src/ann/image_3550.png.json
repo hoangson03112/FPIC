@@ -1,0 +1,82 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36237360,
+            "classId": 52228,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.458Z",
+            "updatedAt": "2023-09-12T12:39:42.458Z",
+            "tags": [],
+            "classTitle": "BTN",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIrgdidkRlIuoV+nQek2AJ8QlyB9P///5fenH8XyGIsCfILZnB4diMNyOn0dHEMqZjz9qIhX4MCD+sFKXb3/gOBNrPkehd/4ejha+Ny4Vx2/2DGlIN5tc7cf11clA4tWcX5RitF2OqA84tl81cnncvh+ha5Un+Tzacg09lNR5PSzuo+4+N/+W32S0XzinP8Nht2H/nDcnt6pY5lGNeW+0aSrqF/9lwrcTwgV3ync4ah9RnjtP5Iv4pfDeFVxWuYrNd8lQE6isHT1c9lnVNCEwA/Fldc",
+                "origin": [
+                    12,
+                    697
+                ]
+            }
+        },
+        {
+            "id": 36237359,
+            "classId": 52228,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.458Z",
+            "updatedAt": "2023-09-12T12:39:42.458Z",
+            "tags": [],
+            "classTitle": "BTN",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIrgNiWkRlIMuttYAdSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5MR7ujiGVMx5e0mR74ABD/MBD9bmSqf5m5Z/Pd3MHLjXl6tzTlPjxIy25QrHlS4xCJ9iO/M+tLF5K/Pz9aEhsaZv1vx+vvjd1qsR7eVLF25eKqV96XZ0oKu0xedIyedT+0KMY16wLt5xJX+Glkov0CoGT1c/l3VOCU0AILhExw==",
+                "origin": [
+                    377,
+                    707
+                ]
+            }
+        },
+        {
+            "id": 36237358,
+            "classId": 52228,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.458Z",
+            "updatedAt": "2023-09-12T12:39:42.458Z",
+            "tags": [],
+            "classTitle": "BTN",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIyQGzNyAwkg7IqIoEUW4BPiCuQ/v///9Kb8+8CWYwlQX7BDA7PbqQBOXKeLo4hFXOSExISDBiS2poWeklcmLACqJj5cL0CI0P7Smnvg17WoUCVDJ6ufi7rnBKaANVTIsY=",
+                "origin": [
+                    740,
+                    709
+                ]
+            }
+        },
+        {
+            "id": 36237357,
+            "classId": 52234,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.457Z",
+            "updatedAt": "2023-09-12T12:39:42.457Z",
+            "tags": [],
+            "classTitle": "V",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBg8mZgYLzJyAwUWWP6dgqQYgvwCXEF0v///196c/5dIIuxJMgvmMHh2Y00oHp3TxfHkIo5b+/E9q1yEGh7+K7i4FLrGfdO7tiSpr5ZdNohoR1fmpof89v3bnNvyRd5opvM5PuRpVvI6mLCm4XiO29e9V7Z6V5YczT58nKux6+X6szL/15W3+71KyTT2mRevOrV728/XP+419ZG2n65UUy7//GA6xstQ47Ne2U4d9eRjXJ+LlOtVl0KPG43JTDy9kQmL1VHIHDV5GcFga0mIH7rlPamScGWIkBwRWdFfQD3cq+7d3eaBIDB6cUuQmCZ9CA5LhDIOjrFowkMokxDX65gvmKt8VByTnp3nY2qTXPN3IW3ZjyfqtjehA1UcT4tnXI58OTjNQun1M4xnRJ0NdYj1WiVSYB/oFyWx5vSEMavfFrXA1f2GRm9uvPmLfM89aNPD571c5zrv+BZ4wnxrM8WHwvnVDsWS57tWfPOdKvsHuesd7V9Vaf/qyu47t39OvhsQezLqrdlTEGslcwrdj27WCfvn1t6xTe9d3nOTBbmkyKnnoS5fWV75vwyqzSPfcXuELatH4wrphdZZbGzmvprVXfdYtcU1rDWP6XTmRV0ZUozyIu2oa9W2PiZsmsvmPXwZ5CrSqrK1H0Nt1illwdXpljOEfBZPiuu6VLA23WTV5qxAsPmWkjx+XjZ1F1THEOEAnYLAgO2KcpiKjDE9/ZsCpB6tXPmGfegNLspv421YgWvXuN9tTZESscZKJ2pKb7Gf8m6PgEuL7+d777telkXZPM3c6mknA9vR//ymg3V5o1/WA+l98b7HeHVBqYvBk9XP5d1TglNAFIeI4o=",
+                "origin": [
+                    127,
+                    25
+                ]
+            }
+        }
+    ]
+}

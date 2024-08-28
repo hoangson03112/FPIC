@@ -30,6 +30,8 @@ const ZoomableImage = ({ data }) => {
                 src={data?.img1}
                 alt={data?.name}
                 className="zoomable-image"
+                width={"auto"}
+                height={"80%"}
               />
             </TransformComponent>
           </>

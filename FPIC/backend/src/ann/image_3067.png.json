@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240249,
+            "classId": 52219,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:08.194Z",
+            "updatedAt": "2023-09-12T12:43:08.194Z",
+            "tags": [],
+            "classTitle": "L",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtK2QCzLyAwklRm+zQFSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Eh6ujiGVMxJXvGfn01eQuHLf3nljkD+xBoGhkcvntplnNu9E6iIwdPVz2WdU0ITACTSITc=",
+                "origin": [
+                    35,
+                    18
+                ]
+            }
+        }
+    ]
+}

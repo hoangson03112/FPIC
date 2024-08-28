@@ -1,0 +1,100 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239083,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:51.509Z",
+            "updatedAt": "2023-09-12T12:41:51.509Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIWQFzLyAwkz941agJSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5BR5ujiGVMx5e2kj5wEFAdYLzSLTzJ3cCreseaYhedCo9ciC7/Usu7VbRDZWaryy/+iSLT39zV2ljdWnGV8nzTwcc00wYHrlIZOzf7W2zOE5/jtcut5e5X/tl9bwb1fZ1m6cHNFwoOVrTy3r85vvv5paPbWcy7NDvpI/cA5zovjmuhag7Qyern4u65wSmgAIxVBe",
+                "origin": [
+                    296,
+                    83
+                ]
+            }
+        },
+        {
+            "id": 36239082,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:51.509Z",
+            "updatedAt": "2023-09-12T12:41:51.509Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIWQNzIyAwk1/e+fgCk2AJ8QlyB9P///5fenH8XyGIsCfILZnB4diMNyKn3dHEMqZhz9vJB3gYFHtYLUnwykgsXG0j1PNPoe8DAEvLLe9HECqenn5hatk1w2iejHLgiTcuoTXqBe5yT7CaBo7U7z77+57Rs16RWPqNzxo8MH32/8mfxe8tTH7yLw/l/Kstu2b7smv+jPysaL7u+9W/fUZVf2b79t/N92631RevsF+XdYlC+YatQwFfoDnQKg6ern8s6p4QmAASMVnU=",
+                "origin": [
+                    50,
+                    85
+                ]
+            }
+        },
+        {
+            "id": 36239081,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:51.509Z",
+            "updatedAt": "2023-09-12T12:41:51.509Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJmQNzMyAwk//RURQAptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcqo9XRxDKuZsvWzI16DAw3ohX0bCksn9Y0aFSd8hQQnZDonTxzsM9YKmiU9a9leWK/jc9ISjvH5nps8TU42uP/5zs0Qgd8DZF/9Tj6qwSVyLfnfx15dniXrOd698Wf/s/qtn0tODrf9v73STsvifucTz7LTjhfMe/qmyX/Fuu/XnTccYJacbeD2a/2gR0BkMnq5+LuucEpoA2fVVlA==",
+                "origin": [
+                    141,
+                    85
+                ]
+            }
+        },
+        {
+            "id": 36239080,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:51.508Z",
+            "updatedAt": "2023-09-12T12:41:51.508Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJmQNzIyAwkN7rcDgZSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5FR6ujiGVMx5e3kjb4OCAOuFfB0dycZACV63ZBG3BUsUFs2L51Qxi5ohkRnX8PgHq8P00pQDOWIHuhrdZsllr1jW9Vf9nnlHXjnbddnXNudbvX0n//4e+9h97XufTrnFLzTKrv9fYnH9zvY1+r0T1Wblz9pVZ1o+//sJ1f/Zdp/1CjQ1TVWqTyQDHcHg6ernss4poQkAYRJQEw==",
+                "origin": [
+                    394,
+                    85
+                ]
+            }
+        },
+        {
+            "id": 36239079,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:51.508Z",
+            "updatedAt": "2023-09-12T12:41:51.508Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLcQFzLyAwk/SS5dwIptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcuw9XRxDKuYk/7h/4MN/hsP/2V2UFzxia6vn4bFP4Djxj99d4HKbXhbDz0f8k95PuMjO1sbOw8Ob8In/zv4lSgEdjAxL9A699GJeaQY0isHT1c9lnVNCEwDY8zFL",
+                "origin": [
+                    0,
+                    86
+                ]
+            }
+        }
+    ]
+}

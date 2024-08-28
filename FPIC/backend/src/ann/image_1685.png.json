@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36242639,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.399Z",
+            "updatedAt": "2023-09-12T12:45:54.399Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJWQKzMyAwk/6/ptgBSbAE+Ia4g7v//S2/OvwtkMZYE+QUzODy7kQbkyHi6OIZUzEle8Z+fjZdH4Nd/Ri/Jr4fnJvInmjAwZIYxSM/WyDICqmPwdPVzWeeU0AQAn4MgJw==",
+                "origin": [
+                    243,
+                    338
+                ]
+            }
+        },
+        {
+            "id": 36242638,
+            "classId": 52218,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.398Z",
+            "updatedAt": "2023-09-12T12:45:54.398Z",
+            "tags": [],
+            "classTitle": "J",
+            "bitmap": {
+                "data": "eJwB2gIl/YlQTkcNChoKAAAADUlIRFIAAAFgAAABIQEDAAAAe6voxgAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAKCSURBVHic7drNcYMwEAVgZ3zwUSWoFJUmSlMHaYESOPrgsfJjQwR5D/ZNTKJ4tJfE9jcgVlohYR8OyzjlMa7fPmv4cEpGfBz/vxjwaXEWG84YuwLHbMazaLiMTsEJYq/gYMGhv/2N65h8DDFpJMSnbfgRt9TZbF5LK8ZBwbEObLQSvir4IuD77GXDgzDkRuwVbGvHiJ2CTYfuN8oZ4+O2zeepruPtjdc1PTW6DIbJDQhjcgMKWGPsd8OuatzthtOzYykbEob2iTAp2AdgMm9gfFYwthgPCk514L4OTPqEdMqgYGls7DdE68b+lzGpq4BxB3HcDWP7Da8ulkb8soYW2FlsXs3rIq7Cce84KthmG56HjqOCvYJN4zNroy4LQ3+aN0yHniaZqGCLXkxf+X5PMuH10zxin0Jw13DDBKc/xJ0346Gs/Epwt43d9ALa4mAlJmtRjHGT5834eLTZv69EiJ3jrWj4tzHb9jT8WJxZTRP8GRJe6XmIL0dc3xCzy2UYrjgYhpmhGDX6P2Lf8N/iruEigKUYVjfDcN5guFcwsiW+FHsnvAUq8HC4P07poJzjdHvH8R9FFJgagMnyDGPDDegL9wpOdeDuH+JUBx4UbBgcBd4++AxvFcACJwVPJ3hBhYNxvjp0EoLx1XIMapJj0GiOwVzDMch5w8+LpbHx9FgqK6lgJTxUi52C+W/Xfor5t1cA80f5APOvNhCOCg4K9gp2CqaJRpjmDmGaDoiDgtkVQsyuEK56GYbraYbhap4NUohZovE+QcJRwWE37BXsFEx6BWPSKxiTXiGbNwnHOnBQsFewUzDuQoJxFxKMu5BtvyUcFRx2w17BMNHs2QHM3fkN5EB0WGeh/k0AAAAASUVORK5CYIJFD1CY",
+                "origin": [
+                    35,
+                    0
+                ]
+            }
+        }
+    ]
+}

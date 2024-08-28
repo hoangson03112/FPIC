@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239853,
+            "classId": 52232,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.372Z",
+            "updatedAt": "2023-09-12T12:42:37.372Z",
+            "tags": [],
+            "classTitle": "T",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgbADiOEZmoMg226jFQIotwCfEFUj///9/6c35d4EsxpIgv2AGh2c30oBsEU8Xx5CKOW9vnuZtNuBpeKjAJ2PMtNhAqueYRs8FZfYrIUtDLiTNili0KvivHVu9oNebjvbijxqHbI+1nFE9Jdlip7ubK9sivDzwgXlCgW9Hk9oeN5EtUQJTFgQ0ff8iceOsPPNSsZCoB1sXXGty447SvfF8Pk9L7Wk+jqUsDBKshyzZGBiCGg/OM+PgyZNh+HD8wAPFhA+Jsgwn2CXeZDIoyC94t+N9/SemJQzN7YYME/gNblxOa3hfuuDGHx4fptQZYdoNZfZma8MYDt0oPSn+bNLBz3ZLvfezXpKay7rrsKstQ/+tCXH77Znm87VJXnn5wKhZTbbn+FTFZn9GBrzAp0G67wEr38Yiz1Ugrqern8s6p4QmACbqgXE=",
+                "origin": [
+                    384,
+                    418
+                ]
+            }
+        },
+        {
+            "id": 36239852,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.372Z",
+            "updatedAt": "2023-09-12T12:42:37.372Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgbAGyHRmZgeRrRUdlIMUW4BPiCqT///+/9Ob8u0AWY0mQXzCDw7MbaUDOK08Xx5CKOU+v2PIdMuBpS1Ru67N16r+0+Kr76cCilj7JRU5Cq7i6gj8ZKbDM+6xhP19254FZrVz9rb8bLsgLfupNOqj0by1HxJmICp071klJTq5uOmxqLkvcFbauK/FYcuJpj0tXjB+Qkahg193JMf2oR0uaocBERq4UzSYWoW6FxinHXRsrdGTEuloDCqtjLkUwch91WtERYaEjwr0w6fai3Jzt0eb9uTvEdYUfyTl4p698s1rd2qTjuWxcDf9mxr7W44eY2pMMW2VPTopXmbFAa9epvdlKt7q9b24M59tydce64pu3r9+9uoHrrHKw/QXRbZV5V3ZubdAC+prB09XPZZ1TQhMA1MR+zQ==",
+                "origin": [
+                    139,
+                    0
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240626,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:21.941Z",
+            "updatedAt": "2023-09-12T12:43:21.941Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgZAXi04zMQJHfu+TFgBRbgE+IK5D+////0pvz7wJZjCVBfsEMDs9upAHZ+z1dHEMq5ry97TipyUCA9UKEXsQzDpnWxVvdH2vIHXyqo2Os4eyRdumngkfrw+9aYfYX+5ZImUoYt5WaX7YoLioP3nntyvmH0zkXv5Pr3j3n7uLD1/nKD+/WyxMBg4krNLYJO/7p2LHWPalj5qF1BT1prBOZJlo4FrYtajrkNFFHVYjJVahFKTZH49LRNqVYL40sjUtLW5R40ziX3oh0mtnnsMT+d4CJR0b+YvGoS9xfX05uTfnsz8hwtK/1S/NqvQOTFntwXtwU9+RAmtOmn5POBXftdFqgkbH3jXvHtK9K7FxCk85OL1ELPuK0QMJpskg+p6p519Pwx3sW2W8S0OB61fJbcFHq3hOM36K7joK1/VFXjLrWLfPg1LIIHZYuRZNKm8b1TVvjny/nfvvVHWjpwVaHwAD1O/0XJsV9sDZy/QnSdDZXaduLV29+i5xu+dIcJv50zQq7FH6nk71NsXMfbQbau2jhDL0pdzR+rBc/KqQYsOamdraGjkhFusa92K7yFVlP2ZwWZCzYoM2R6sTU+F1d+2kbiL9i4YaAB7EPK9J/alV/vC+8/71UxZ+Z2yJuTM/Y/VKen/3I0lOd1/dygsJ3vuj9ny1l3t9q/EKA8crg6ernss4poQkAU5bqIw==",
+                "origin": [
+                    507,
+                    309
+                ]
+            }
+        },
+        {
+            "id": 36240625,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:21.940Z",
+            "updatedAt": "2023-09-12T12:43:21.940Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJzgHgJIzOQjIi/eg5IsQX4hLgC6f///y+9Of8ukMVYEuQXzODw7EYakBPm6eIYUjHn7bWNvA0GPKyBwYFVLP2PLu4xUpX1KAncN6WDjaX86ewHOZa7zIpbPyb7tLJum8Hl/PCXxq5DDI4CLPkLm/MP/ZCZduieQ0GHae/KC8s3/jx/d53ffHuHhSct9pYAbWDwdPVzWeeU0AQAPftBeA==",
+                "origin": [
+                    612,
+                    48
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239892,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.376Z",
+            "updatedAt": "2023-09-12T12:42:37.376Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLTgLiSkRlIPrzr9Q1IsQX4hLgC6f///y+9Of8ukMVYEuQXzODw7EYakFPk6eIYUjHn7bXdvAcUeFwDlbumSCouNphlK7U4hcVLfGIHxyPlgolCAts/Cy6qY1B9u1/j7oviiz3rFz/ra5t78/61i5fK/DMt5lpe7EmYnvB8W2vvwxdvJE992ZbLPVPqWIRB1tm2u8GSywunnJ3KuPSW+8IvhS9ZT4b63/qyz5YDaDuDp6ufyzqnhCYAVGtScg==",
+                "origin": [
+                    581,
+                    0
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36237695,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:40:12.239Z",
+            "updatedAt": "2023-09-12T12:40:12.239Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgrAGyaxmZgeRsJq8ZQIotwCfEFUj///9/6c35d4EsxpIgv2AGh2c30oCcLk8Xx5CKOW8vOvI1G/C4XFwZUbBGrlemd3FBi87uDoaF0y55MVY6vPn3JunnyW2LTnqLMcDBESOLBRmdjHF6J7Y3H2Tdyz2J023mgh0KuxVmPvh7vvDDTgW+Tdy/RG2S/npC1J9jvHrwvPbK268W6zG8bXoepv/LP5qVPXPf5OYF2x7EHeaRcGIPFtk9ZRZIraern8s6p4QmAADJUkw=",
+                "origin": [
+                    0,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36237694,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:40:12.239Z",
+            "updatedAt": "2023-09-12T12:40:12.239Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJwBtwFI/olQTkcNChoKAAAADUlIRFIAAACnAAABOwEDAAAAggsDIwAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAFfSURBVHic7dgxbgMhEAVQLBeUHGGOMkeb3CRXiZQix0gkXyBdXC0Ba4t4/99ihEGODQ3SswVjC2a/NoQgeQmW/44lhFCmN9Bjmb5BY5nOoFon0Mu81UPGsVw2Q41Uk0PFodqsNlQJTr2h2lDVZhWHJofyW8hvLL/d7A9euwYqKWLtO6ikiKKkiLXLEcUiqmIRVXG7qrjEA6lQhQ+mTp3aTVNmavkLtTS/M2ppnwtqlVdQLfMnqOXt2O2pvCsnqkoVN9t9irTnybEpk6s61JqV4MOoNatSlWZNndRzqj1Z7gYJj6tRVYcK1USVJ0dXRjSqWMTaaYniwmtfZwpL/EuF43M3T9OpU59bI0uOtUeh8n4mVI0q4H5G5L06UcUShufJsSnTo/J0mjpprxzVnrna1ZXauFqzqkPFoYmq5z1it7eLQjWWL/+Alt9xekeNHy9H1LAt+p70QPX6VHRXvdJfVlzVXfTPCXIAAAAASUVORK5CYILtPMK9",
+                "origin": [
+                    601,
+                    0
+                ]
+            }
+        }
+    ]
+}

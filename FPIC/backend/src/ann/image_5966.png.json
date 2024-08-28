@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36237260,
+            "classId": 52235,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.437Z",
+            "updatedAt": "2023-09-12T12:39:42.437Z",
+            "tags": [],
+            "classTitle": "LED",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIOQKzEyAwkr872PQOk2AJ8QlyB9P///5fenH8XyGIsCfILZnB4diMNyAnxdHEMqZgz9fxG0QYDDpYLr43EFk+8KNMqGBT1w8ZX6Rj71OsfuPv2OHg49xc9OTDH5v+D3Ld92z7EmJ04wsYSUv+P263Dee85Bu8Mzp/NMRdYPj61Xnpdf0b4132rmxfMBZrP4Onq57LOKaEJAL4SQTo=",
+                "origin": [
+                    22,
+                    283
+                ]
+            }
+        },
+        {
+            "id": 36237259,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.433Z",
+            "updatedAt": "2023-09-12T12:39:42.433Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJqQCzCyAwkbzve9QZSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Ch6ujiGVMxJ3gCU/8/eVqXws5nR489/Z+FNcn7/EhhuczAs/JXgGPvn7CqgYgZPVz+XdU4JTQD5/She",
+                "origin": [
+                    40,
+                    230
+                ]
+            }
+        },
+        {
+            "id": 36237258,
+            "classId": 52218,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:42.431Z",
+            "updatedAt": "2023-09-12T12:39:42.431Z",
+            "tags": [],
+            "classTitle": "J",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtK5QLyBkRlI2k8regKk2AJ8QlyB9P///5fenH8XyGIsCfILZnB4diMNyCn2dHEMqZjz9vJB3gYDDtYL90sY3AtEwl+nlU3pe3CxOfOqlPCHA57BPg+/8bXUMGlsCZPoXbXzRYKQpGvbd45jZ2a6uE08eKPpxexPRU+6c4++73P0PBC/4bCt/xzmh4IXiq2cPqy39tyl/fGBrXb8l9RlJalr7jTIcjFcFp3mxT0FaD2Dp6ufyzqnhCYAextQPQ==",
+                "origin": [
+                    0,
+                    0
+                ]
+            }
+        }
+    ]
+}

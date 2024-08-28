@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240624,
+            "classId": 52222,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:21.940Z",
+            "updatedAt": "2023-09-12T12:43:21.940Z",
+            "tags": [],
+            "classTitle": "RN",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtKpQOzHyAwkmW96VQIptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDck57ujiGVMx5e8mQ77ACD2uAO49kdYtMa3ap8V7JUP2mKQu1k7VCC/c3Wji+5I1Sca87ktCicNAjTmXDGpdVU10X5Wj9F9xdolP/d0PcXLEjOac6rOPOb9XYeCIhX9PJ456v3OdlCzaZS7zav77rsueet5P0T/ic7jgz/ZS6FO+JKt+nsfZfBE64Cff5rHtRJhIcekGS592T03obM606VTPPK+1dHXczd6p7ZbDBUrV3KmoMsZ/vyd4PWfp3zrTXUntVPa4vk3qypSGZV+rcp4VsE/XyHjP/j9Ndzr/2TCTQWwyern4u65wSmgAS5XYN",
+                "origin": [
+                    667,
+                    0
+                ]
+            }
+        }
+    ]
+}

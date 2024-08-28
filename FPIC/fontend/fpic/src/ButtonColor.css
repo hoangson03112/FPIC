@@ -1,0 +1,27 @@
+/* App.css */
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.custom-btn {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #d9dde2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.green-btn {
+  background-color: #ccffcc;
+  color: #808080;
+}
+
+.red-btn {
+  background-color: #ff3333;
+  color: white;
+}

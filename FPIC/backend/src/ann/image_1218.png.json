@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239345,
+            "classId": 52222,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:06.689Z",
+            "updatedAt": "2023-09-12T12:42:06.689Z",
+            "tags": [],
+            "classTitle": "RN",
+            "bitmap": {
+                "data": "eJwBawGU/olQTkcNChoKAAAADUlIRFIAAABmAAAAgAEDAAAAwwyOvgAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAETSURBVHic1dRBbsQgDAVQj5DKkiPkCnMDrtUd6c3oTZB6AZZZMFDiQPhOp2k16mLqFU8ixthJiIh04SCO0mJecbkvf6LwRa6jRMh/VBLKD6qURSg9rWSdEUQuCPmhTK/Qz0xXHplr6beYWnpUFOIR0QvKliY/ErJUAKmadlfQ9chvFA2Ki/sfgvvVzkfUFLHzJqC0H+I5XM2ecA3TN3Jo2Lg1/wdlfKypH1DONAsloSxUDqqvxdBbvcbQmuhvNAnZE+FOWUsUCqQ/+tpXqfdd9Ts6/LNIqh85g259EHarA7+jMy13ZQvKtetc+MSmpLgalBJ316DHO6+fRDeh5BZS3nVZ6ETrb9eCA4vQ6l/JbAp1+QkjmBmKKxkoNQAAAABJRU5ErkJggvJQm+c=",
+                "origin": [
+                    185,
+                    32
+                ]
+            }
+        },
+        {
+            "id": 36239344,
+            "classId": 52222,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:06.688Z",
+            "updatedAt": "2023-09-12T12:42:06.688Z",
+            "tags": [],
+            "classTitle": "RN",
+            "bitmap": {
+                "data": "eJwBeAGH/olQTkcNChoKAAAADUlIRFIAAABnAAAAgAEDAAAALM7lgAAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAEgSURBVHic3dQ7bgQhDAZgR1tMyQ3CUbhWikiQPodCyjWiaLttNx1RLDu8Buzd2VG6PKjmE8Mw+JcBqOPAjO3JcB3UZLfEW3Jd4Up3vI7oEZahY/6sGXrPsjfEv1zTmE8+lbLMUFRzUa0LYGgqF+3Rrq/JVLp6EcM3ZJSs+orbEIFD8PNPPIE4LP8/vSpF4NOAD0Lksl6GLAAH01Vah0oPlZnaR9hzaI3zAG2yt9i+6rp0qQVHmlmOwKfDurfIKO8nzxeVUImU+OmHc8DLHMQIQuilkgOh470SSMUr5cvIlufPtT2qPlj2yshhQ6guvi6/JdpR+9N5RzKfx+3Z9vQ3hUr0N2TfhNA8C6VFliXN4nKpCswEewm1+sq9IHRkZYMvwdosUPwO+UEAAAAASUVORK5CYIJp3qxd",
+                "origin": [
+                    186,
+                    225
+                ]
+            }
+        }
+    ]
+}

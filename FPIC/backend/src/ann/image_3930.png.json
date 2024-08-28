@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240163,
+            "classId": 52224,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:51.758Z",
+            "updatedAt": "2023-09-12T12:42:51.758Z",
+            "tags": [],
+            "classTitle": "IC",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgZAGyTRmZgeTc6exfgRRbgE+IK5D+////0pvz7wJZjCVBfsEMDs9upAE52zxdHEMq5ty9vJf3sIIA6wPxpQUnOXoOZaSZuH3kmCLCIsTMuc+hKGLTFPld37+IFqQrGx1vEObWfiPP+W+rO0fdqx9TCjr+ecas2MCQphXDM2HrpbUfFGLdW8JWbD+0RUlO8cuEgHjNFPcT8iLZQrKKHQ7uVxozdr0KdwrcGPZVSUK4aLlH/KfHhokBHEqX5FtXmtQF+Fi3et/daWKSe3SlybQlOjra067cve4ZLKZWXpyXccopebfOrDzmPUwT5JxOPi/l6QD6gMHT1c9lnVNCEwB8eWWx",
+                "origin": [
+                    0,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36240162,
+            "classId": 52224,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:51.758Z",
+            "updatedAt": "2023-09-12T12:42:51.758Z",
+            "tags": [],
+            "classTitle": "IC",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJPGBgY8xmZgayEmV8TgRRbgE+IK5D+////0pvz7wJZjCVBfsEMDs9upAHZpp4ujiEVc97ess07rCDBlqDFL1fcItO6eKZucv+FxSIrnY/FMQKJTVebT4cb6CUwmWyctWrivXKDX184PlsfitB8srjrx4YV/5JTHd+636javsXOJjDz9d9LeYH7Lj3MmptcVHuxM2hd+8aVwSu4f2VE/boS4tf5rNis+W7iqlW7lRyX/+npOLarbtd9Vtnzv4NCYgMir/JfZwudOe9OhmPq8nMlXFq/Mpcen3rrt3rQ28y4qf2F5j5qVQtUNq9yiZ/tNV17a+iHHeasso/uiUx59OuUl/TUBQEaIlytTguxUuIvf0e11jt9nRvsfT9lBdcqidezTr1atfm7x/7lj/eH1vHfMp969J39632rfqWtylu1e1lZ6NR1L7K1kgq3buLdJbPx49HN8+suJL0Lef2D9UegcllM4ZZGYGgyeLr6uaxzSmgCAJlgtZ4=",
+                "origin": [
+                    0,
+                    138
+                ]
+            }
+        }
+    ]
+}

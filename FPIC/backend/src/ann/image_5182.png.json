@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36238146,
+            "classId": 52226,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:40:45.660Z",
+            "updatedAt": "2023-09-12T12:40:45.660Z",
+            "tags": [],
+            "classTitle": "CR",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJiQLyIkRlI1iuulwZSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5CR7ujiGVMx5emkjb0MAR0uiW7qJWyKLV9f05elMH1Uusursm9T229X1SdJRRYWTTbzsl5OOek6QCbt5+KLIm2Z+Rs7XyzfVGfx/pP8/WMl/z3GlPfHvT1VLX9w9Mfbtlneaq4zXPysoYlrDWbJVZsHzFKB1DJ6ufi7rnBKaAAbJRnI=",
+                "origin": [
+                    0,
+                    9
+                ]
+            }
+        }
+    ]
+}

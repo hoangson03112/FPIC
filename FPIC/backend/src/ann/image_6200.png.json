@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239402,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:06.707Z",
+            "updatedAt": "2023-09-12T12:42:06.707Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgBjIZSxhB1LrkM8ZAii3AJ8QVSP///3/pzfl3wfJBfsEMDs9upAHV23q6OIZUzHl707DosZlIQ2JRyIYjggUiMrzfVhTsdD8RqNTfPcXS6YXnxEs3tE7oNE3/zuD17NYkXetPeZs+L57AwFQh79DJ4sLb/CambNPE2Bmx81KmaM+PkUv9sHm2eWZwWyJHlYv0sbnbN22bcfu2wQ+bqwvVrxvfu3VaxjTEvk53s35c3peIT0dPhi19c9ptndOnzE0MiR1VKVMiny14Ghi95J8Z+1vDIwff33lTfWDBOQ3PLY9ecSpYXmE7cqlhhnOZK7vQeqsCfc1pYpbbLF9PkFqQPLM2SOHVHGfZ13IXVr47x6jzINChOkNGW33uVrMrlu27JrLu2GYZJySxdY2hWu+dhrVnBRlA4MFvhig7piveTLsm2TPtOvRuy9wdWQ5hB6bd+tz4R8vgloHIhc4zQWt+v5VaUb0glc+hbyvzUxuFEofzsd2z5RhnlpQnzZ84LV+3Kd9ZI+xjmsJP1hPxjGVc3a2736eu1gj7r9/wgYUje0Gtb8zsi+zM1gwN3gyMIEulmX4ubmT5EM+QN4/x+3TWO8IJk+73Mz3+zbCfQerhsveT7lo3rjxayRLDrpM8+9qrp5O3aXy0XGCvL6Ywjylp4xmgY8Lq+J7wZfQn3i5/ytuRtFzBk1e2g3vC7/fNKu6Na3m/WEywVlgqn3vgSsO2k+f/fj/gZxxVqDufvyE057pDrWTG1Xhmv3dVn2eLbYg6ILrg6e6/7buu9snznvgv3sHAoN5QJOMhzrzpPbdzTvl51Qdbc+XusdyZy5IWfvfTjBV3p0z6Kn1rv1X/gTLeLRPP7K1hOLaZsTouRPrBK7kVs00vzPt95m+h//7P01fe/xnPeCd4wRymU5+mHJnmE9sTy/xMni3jpavDk7sHmmsmqv7V5fqzbGaZ+LuGPyr1r0SXZW5mE6lhnGCqcPzy+V+6eQcU/94qUxb69tT/dxv/r6odfGIO+hLVHj+mn9A8cCn99fe2lOdR+hPsvz2Nf/NU9YESJwM9wYM3X/gjqr6qm7tovATxPV39XNY5JTQBAMQVcpc=",
+                "origin": [
+                    0,
+                    396
+                ]
+            }
+        },
+        {
+            "id": 36239401,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:06.706Z",
+            "updatedAt": "2023-09-12T12:42:06.706Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtK3gLiAkRlIOoX8EQBSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Gh7ujiGVMx5e9KQkcGAg9lgTvMWy2Suqo9q+avMZ53a7u+luXRKkJfm+5uWz5mfKounfnA71Q/UxuDp6ueyzimhCQAzpyml",
+                "origin": [
+                    110,
+                    133
+                ]
+            }
+        }
+    ]
+}
