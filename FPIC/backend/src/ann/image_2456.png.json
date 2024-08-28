@@ -1,0 +1,100 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36242671,
+            "classId": 52227,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.404Z",
+            "updatedAt": "2023-09-12T12:45:54.404Z",
+            "tags": [],
+            "classTitle": "M",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgUgWymxiZgeRiVa3rQIotwCfEFUj///9/6c35d4EsxpIgv2AGh2c30oCcAk8Xx5CKOW/P7OZsMGBwOJjzgKPvUca6nJlOF5xyVVqOcNTtuL6f+zSv70PfUx4LAzREuFqdwNTTw15/FhohCbQ6VbrMlJpqmRMb0vd3UdGt7Klf4takfN+7L/e8xsYaf82vv+Oub8tfm7skSev2gohtQLsZPF39XNY5JTQBALByS4c=",
+                "origin": [
+                    157,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36242670,
+            "classId": 52227,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.404Z",
+            "updatedAt": "2023-09-12T12:45:54.404Z",
+            "tags": [],
+            "classTitle": "M",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBg0mRgYKxhZAaKGHzb2QKk2AJ8QlyB9P///5fenH8XyGIsCfILZnB4diMNyGbwdHEMqZjz9u5B3iYDibbEHvb+vgcafW2LLbuUK74kOCR7eLTcmjZJ4sHPd++Lf7BnrF6V8/vb3uzE+2/Dbvgn8h226+b8nnnG8Jr7jCt2R1K+MT8zWfl+5qJ96a8qZ0iKnLk2w5rtc/iyYwkGEjxszQdB1LPN7Gyb2Z71HISLzVhq7M/DZmxefAihzOefFA/b5rxnHQhls5OigAzPhEXrExIR6l7qAZmbTdKe3C2CCp3xOfNC3zCydnumz+e/z73UPv95ZzyzeoF/at7+3xrFvq8O+/jZHeI5N3/j3f7Py9+z8p8r36b449ErYMAweLr6uaxzSmgCADQyjeI=",
+                "origin": [
+                    156,
+                    223
+                ]
+            }
+        },
+        {
+            "id": 36242669,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.403Z",
+            "updatedAt": "2023-09-12T12:45:54.403Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIBQGzEyAwkPz4+tx9IsQX4hLgC6f///y+9Of8ukMVYEuQXzODw7EYakBPl6eIYUjEnOaGByZqN7dn/gIKGRtljNQ0JdQ4G9QYfkhP/JU5QP7Kl3fB/Yuq/4wfXuK9Qncxp/pr/7cz/K06vUW/M9O/Q7C/Qt+/5yWC5SzLxDDOPw9H/Eg56mQwMeT9PL3nFFzwFaAuDp6ufyzqnhCYAivhBvA==",
+                "origin": [
+                    537,
+                    151
+                ]
+            }
+        },
+        {
+            "id": 36242668,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.403Z",
+            "updatedAt": "2023-09-12T12:45:54.403Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtK+QGzAyAwk86pT3wAptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcrw9XRxDKuYkJ2z4z8/Gy8NzRuDaf3kenjcBz+rZ2OokNjc6yh2raUioa5BkuNR+ZI1648/6KZ6cm+W0L8sd+9MgE/nH4BnzE4s0Ns9GRoacuYcC+wKjJYDGMni6+rmsc0poAgBOgjX2",
+                "origin": [
+                    425,
+                    152
+                ]
+            }
+        },
+        {
+            "id": 36242667,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:45:54.402Z",
+            "updatedAt": "2023-09-12T12:45:54.402Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtIVQOzMyAwkc8WD/wMptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcsw8XRxDKuYkJzQ0/wIq+c94qee/4AP5CJGZ/+un2Pf8/O/+M+TZdX5NO6+6egYt0TeNPcwdTkwMj88fl46RmNYGNIHB09XPZZ1TQhMAI3EyDA==",
+                "origin": [
+                    631,
+                    623
+                ]
+            }
+        }
+    ]
+}

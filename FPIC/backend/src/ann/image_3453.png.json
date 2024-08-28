@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239254,
+            "classId": 52238,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:51.538Z",
+            "updatedAt": "2023-09-12T12:41:51.538Z",
+            "tags": [],
+            "classTitle": "JP",
+            "bitmap": {
+                "data": "eJwBYAGf/olQTkcNChoKAAAADUlIRFIAAAD+AAAAawEDAAAAbfOt4gAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAEISURBVHic7dexDcIwEAXQi1KkZARGyWhxR8lK2YAVMkJKF5YPIsz9D1xkJESDfJVlP+cuSvMjsledbpV2z6WvgaEGDj8Ho1bA9DkoK9WwAx7nOtfA4oPBwErYlqm87laxfJ/7PA7I5fvc5zFwtE2ldnNnYAQIeNoCMAHMACsAznVBu9h7YEW75IKIdmnwQALILsi0dgHXuQYuXwNtoIEGGmiggQb+H1CE8QGFID15gGIUAzyXgpj2HqAol8UD4oMRmwwmA0fYgcBou3YtUiDFPQKceaNtPwObZ5b+Hdxitc0j0r2DIDZlFi9XB77mJfOAa1GsXcK7CcBqPyiv/xeTzbsDqKqgzJausumQzMz9UaMAAAAASUVORK5CYIJY3JPX",
+                "origin": [
+                    514,
+                    219
+                ]
+            }
+        }
+    ]
+}

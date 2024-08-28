@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240806,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.189Z",
+            "updatedAt": "2023-09-12T12:43:38.189Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtKBQCzPyAwklwpvzgRSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Dh4ujiGVMxJ/sHPzsPDfDgvYYV70m3llYkT2o3+M95887+ewfP3f/kDb9gUTv7/z9DBO4llkySbqPTMlH/NCpKN8xgYfgqs3597cakQ0CwGT1c/l3VOCU0AJToy9w==",
+                "origin": [
+                    182,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36240805,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.188Z",
+            "updatedAt": "2023-09-12T12:43:38.188Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtKeQBzEyAwkldZkHwdSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5OR7ujiGVMx5O9mQr0GBx9VbQsJWyFy471igRdPi5o+/7Z1iYn1MPi7/WZm6YMK2tJMa209OzKwL73Pir5DZm2V15bbEBrMnji3vZh5gVy/5KOz88/j75F0GfCHn/d/OalHlWL3BInWn8uNajeAttca593PKGA6vtY3IWjKpgAHkVlc/l3VOCU0AV6xKYA==",
+                "origin": [
+                    188,
+                    127
+                ]
+            }
+        },
+        {
+            "id": 36240804,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.188Z",
+            "updatedAt": "2023-09-12T12:43:38.188Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLqQCzGyAwkK73F64AUW4BPiCuQ/v///9Kb8+8CWYwlQX7BDA7PbqQBOcqeLo4hFXOSNwDl//O3VSn8bGf0+PPfXS3SXymTX+2p4zcmhk8P0ibrlHduBCpn8HT1c1nnlNAEAOV0J14=",
+                "origin": [
+                    113,
+                    222
+                ]
+            }
+        }
+    ]
+}

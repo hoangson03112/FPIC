@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239840,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.372Z",
+            "updatedAt": "2023-09-12T12:42:37.372Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLCQKzKyAwkZ+11sAdSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Oh6ujiGVMxJTvh/+IDC//2NB+V6+A2u/K9nOPa/85iCbYtB4l6F3z//GxsY1CcwMBx7FKE4d5OMBFAjg6ern8s6p4QmANxlLE8=",
+                "origin": [
+                    347,
+                    28
+                ]
+            }
+        },
+        {
+            "id": 36239839,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.371Z",
+            "updatedAt": "2023-09-12T12:42:37.371Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtKCQKzCyAwkQ0WclwMptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcmQ9XRxDKuYkT/h/+EDA//7Gh//rBfIkDGL4t8i/EGPYwh1SxPUysA+okMHT1c9lnVNCEwDN5SM5",
+                "origin": [
+                    386,
+                    28
+                ]
+            }
+        },
+        {
+            "id": 36239838,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.371Z",
+            "updatedAt": "2023-09-12T12:42:37.371Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtICQKzMyAwkl1+WUARSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Mh4ujiGVMxJnvD/cMD//of/66MW/vrP8+2/xI96BoatvE7yDycnSALVMXi6+rmsc0poAgAQbSWQ",
+                "origin": [
+                    315,
+                    31
+                ]
+            }
+        }
+    ]
+}

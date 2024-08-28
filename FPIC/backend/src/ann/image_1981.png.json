@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240666,
+            "classId": 52228,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.168Z",
+            "updatedAt": "2023-09-12T12:43:38.168Z",
+            "tags": [],
+            "classTitle": "BTN",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtK+DAyMEozMQJby55cgii3AJ8QVSP///3/pzfl3gSzGkiC/YAaHZzfSgJxMTxfHkIo5b69u5G1QEGG58FpDsjFQhte9WMR9wRaDeQImC1p7FTOKwvc+ej7r/2R+hmkqRTFPNK5taX1WPadqkuVaj7ZDriKugTXHFf5NKv61R2+t0XL16+58T8ouxEfwzkldZlureNS61soogb3yqgLzIQtHkCMZPF39XNY5JTQBAGUNRTo=",
+                "origin": [
+                    0,
+                    283
+                ]
+            }
+        }
+    ]
+}

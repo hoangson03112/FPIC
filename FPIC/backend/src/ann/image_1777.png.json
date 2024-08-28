@@ -1,0 +1,46 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36241099,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.407Z",
+            "updatedAt": "2023-09-12T12:43:51.407Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLzGRgY7RiZgayVjwJigBRbgE+IK5D+////0pvz7wJZjCVBfsEMDs9upAE5Wz1dHEMq5ry94cvVbCBw9ONOz/6svmuzXwi25G3SqCuN/N/amJlya49OPQfbl72dt6ri/IW5fh/iinjTs5vz84PYG3L8bEdkdGWTD0UJ14ln+pT0FvOop9/uqf57uPTlqiCNnC75NMNnHIYSEQsNOH/dr+w5k/qj/mbLWXutKVd9eJ8d9/wxe0ZBntlBabnO5njhf+sOb9NsqZjAoXTvRHyDbpXmDwuhpF37ZUobaldd0j+QECnqVP0w6X028w+jmupmzWehQA8weLr6uaxzSmgCADMcbfg=",
+                "origin": [
+                    0,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36241098,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.406Z",
+            "updatedAt": "2023-09-12T12:43:51.406Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJwBnwFg/olQTkcNChoKAAAADUlIRFIAAAEcAAABOwEDAAAANZOsLQAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAFHSURBVHic7dnNjYMwEAXgWa2UPboEl+LSTGkphRJy5GBBMIFLDn5vJWsygeH8Sbb8Nw9bFvw9pB/Kmmg0iO4G0eBI7KHZINIep54TDMkkGFUDm9tQBGxDN5EEkThy1AcVR4600c7aZKlZJUKzhiwKgQ69UD4xItMhNo5shnab8T85UkbZHLL4IwFL1EdQhGZWRwGiwqARoy0V/DGIyhdIHVnFkaOeKF8XTY6U0T4xP21Tz3F0sPIVIXVD2VFiUDSIgiJabKJ4apQujvrtlnJqdPptTqGoiIjBnNNAlPwaHSgEa9meVVKzT44ccehfjw3RkSU0fSta6n0mge7E29WKfhkUGIQ61BUNjiikPC09UcBoJO4LHFUUro6Y9VSY+6d69uLGBIbRmTnqHRlGgUFgQRUegVJ9pJ6mOhJG8yb2saO3FTzK+/cEGCL0e+b0A8wAAAAASUVORK5CYIKRFKqh",
+                "origin": [
+                    373,
+                    0
+                ]
+            }
+        }
+    ]
+}

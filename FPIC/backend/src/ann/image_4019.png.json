@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36241735,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:44:40.580Z",
+            "updatedAt": "2023-09-12T12:44:40.580Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJwBQgS9+4lQTkcNChoKAAAADUlIRFIAAAK8AAACBwEDAAAAR3kdtgAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAPqSURBVHic7d1BlqIwEAbg+Fy45AgcJVeaGxRH4yjMmwtkdix8MCTQmjAGA6nSjv3XBp/iF4FYlUS7VaNMGAUYMODPgHvlghdV92B1Bw8mRrdTsQAMGLA4fB5tduOEvRCEiQ8LYRkXMGDAgBOiZc2UqwoiBpMUXFIxBQz4Q+DasMJeYOwGGDBgwGlhl95OojAxw9e5YIQV5JSJruoRYMCAy4aDNogPC2EZFzBgwIDfDZMUHASvBhgwYMA72+CENR8WwgQYMGDAgPfAmlWLBQEGDBhwQhtFwJrNWsEEGDBgwO+EtRQcRGYrXbQ0AQYMWA72whQI81krmAADBgw4pnlRHqyl4CAIMGDAgBPa4IQ1m7WCCTBgwIATYP2j4SC711JwEIABAy4QjrdRBKz5sBAmwIABA46En9AAy8O6ZawgYsUUMOAXwvcwkjDxcT6sJdhyKghgwIABp4Sf28Vg7f+TbE64jGIKGPAnwPcwgFcw8Yk3WLObC0yAAQMGnABrt2X/QRbefNxJ1TzAgD8B9sIAfiHMZy6wZhZvMAEGDLhw+OontPJg/XWvyc+dAcyZ6AEDBvwO2AvzCvjMx2LsBhgw4M+CGy9Zlgdr7/6/nLAf2b8EARgw4KQwgO+w5sNCmAADBhyHtRRcu21P7PBl/DNtO80OKzs1H5j+VrgLC4ce++mFC8AuiANuH1a8y/g70x0eugwVBPAb4dxVrDhMUrCWgmspuJKCM1NRfNE0bxUyyuZ25A04ryNvwSQF6ww33idUXkdutuBKCs7pyJtwTkfehHM68iac09+24VoK3nn1Om//TTf+pjbL6Z/eQ2bWhummhZej7JLhZhrTnQO4rW9wW/lwP12bZzA5pr0EcFPnw5NWB3B3fgt8loLVcbgFLH6OU+FWCn7iAgYM+BvApyis98KUCNNeeAT8EL4C/kS4EYIH9VNhJQTb5y3wwAzfJjfXDNh8wfUD2G5C2C7D22T1HG5XcBXA5wBu1XQMtSth++G6NHjKChtwdRy2/SQO1wdg9QS+HoTdcx/CXe0e7A7Dk3i5wXbWvMBKZ8DawdO1ucHV/zDth10efwqPu+H5or8ObmKwyYRt5xCBT6+HLyLwVF4qEXgsAx4Pwg/f0h58Avxd4REwYMB74eFrqrPA84Cg3wtfQ3i66YZvM7wMnN1IYzmcZLi/w8YOr2+wm3ssk7MZHtRBuHsEu+8WNQdgkwC70j/Dm5/xznBTObhLgvUX3D+F5+PSdt6SAJMc3AHeDY+AAQN+PUzFwTotCc2rV3tgpdJgpXLgZl4aahXZr+XaKtic3Ett5/16tx9dpwdNAnxx569RvxL2jcY/zyBxxIMiwmAAAAAASUVORK5CYIK3wOh1",
+                "origin": [
+                    68,
+                    0
+                ]
+            }
+        }
+    ]
+}

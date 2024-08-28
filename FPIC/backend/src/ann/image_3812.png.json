@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240400,
+            "classId": 52217,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:08.213Z",
+            "updatedAt": "2023-09-12T12:43:08.213Z",
+            "tags": [],
+            "classTitle": "Q",
+            "bitmap": {
+                "data": "eJwBTQGy/olQTkcNChoKAAAADUlIRFIAAACiAAAAtQEDAAAA5u+2ewAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAD1SURBVHic7dZBagMxDIVhdZVlb9AcJUerjqaj+AheamE0TQMh4/EfGGESshjt/CEeksFgWbYVcq1BF1ZN6u+gltCS0JpQT2hLaCR0yahOq01rSWidVn+RtrdqvEiX96qm9LJb7dBDD/1IffaOz7tV9mtMa5tWn9aa0DKtNq06rUIaCW2ontCKWhJqqJpQIY2ENlRHragF1VA1of8o3xsM1IbqqBW1oBqqJlRIA7WhVtSCqqhC2lAdtaAaqpAGqqPWu55gM5Eviu2+jvWh53HaPlhWNc7VRdha7xEhAs0uxCbAbYu3BXVQ6fZazQGt19sglJ/u9AebaksE1ue7XgAAAABJRU5ErkJggrO8ksM=",
+                "origin": [
+                    64,
+                    0
+                ]
+            }
+        }
+    ]
+}

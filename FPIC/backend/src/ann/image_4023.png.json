@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36237397,
+            "classId": 52218,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:57.268Z",
+            "updatedAt": "2023-09-12T12:39:57.268Z",
+            "tags": [],
+            "classTitle": "J",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgEgVif0ZmoMhH+y1rgBRbgE+IK5D+////0pvz7wJZjCVBfsEMDs9upAHZMZ4ujiEVc97eMixqNhBgDaiOsZjbtyB7yemLJy4WifQ9uNTKrtrokyQtvMSRtee+/tbFy1Mbucp2Fzp5razeEDfpR+qS1mO3t3+M25J8pSy/ZorEY+Xu3lqvt3eDgrNkguZ/FnpsIRH7eXfmfK90qUuPt4j2eLM+Vl/OdexrweP4/vCvMskvnny4L7n5WMH1/slfzQ7vOBPzSfOwx/bNEtL6km7z0zYV1Z01XXZ57nTpzsJ8H/uGn8e+dH+Y49Y700iCh615Y5iyAYg+mACj0npPJNh0CkpcBdIGZuksx3o3TsuPyv7Z3rLRTznEQKl5IyNCS89EQUmE7o2ei1cm6KihmkcBlXz3mLrrsQWV5W775gMDncHT1c9lnVNCEwA5/6oM",
+                "origin": [
+                    235,
+                    177
+                ]
+            }
+        },
+        {
+            "id": 36237396,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:57.268Z",
+            "updatedAt": "2023-09-12T12:39:57.268Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtKzgJiLkRlIloVfFQdSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Ah7ujiGVMxJ/tHPyWfAI3qwSqeJ4VjpEed1wp/nAKUZPF39XNY5JTQBAGzSHkU=",
+                "origin": [
+                    614,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36237395,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:39:57.267Z",
+            "updatedAt": "2023-09-12T12:39:57.267Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJCQDybkRlIhu6PZAFSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Ih7ujiGVMxJ/vF/f+PD//+ZF1eIXJYwZ2CI814xa+c19TtAJQyern4u65wSmgA87iKH",
+                "origin": [
+                    0,
+                    84
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,100 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240944,
+            "classId": 52220,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.375Z",
+            "updatedAt": "2023-09-12T12:43:51.375Z",
+            "tags": [],
+            "classTitle": "RA",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLBQGzDyAwkFe6JnAFSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5AR4ujiGVMxJXvH//+F/9p//M///L5/w4/9//7//v/3n//+/3uDETQODU8ukZssf+5fOnyIv5/Om/s3/2Ylv7M/8l0x8w89TL+Hw5tf/+ifyBiEML5kZ9ASCz6v8fTgLaDaDp6ufyzqnhCYAo31EEQ==",
+                "origin": [
+                    329,
+                    240
+                ]
+            }
+        },
+        {
+            "id": 36240943,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.375Z",
+            "updatedAt": "2023-09-12T12:43:51.375Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgCgOyIxmZgeSxRT8WACm2AJ8QVyD9////pTfn3wWyGEuC/IIZHJ7dSANyFnm6OIZUzHl7/TRvg4KAa2AP9/QpDprBUmJ5V46skJh2TjWrJviAp8Szj5zcYcEVq6c6nnbIXs24xeqC066yCM4tHW17775y7JboEhMT/HjZKLI/knOLUgajopVuQkR36oKpdQmuFz7xu278szxx45/rucqnHbSbplUr60+zvhu/wShDMqPyvm/46dkekZtSTk5S9Z6mA2L86jBtW/UuutjX0m7x71dhfDob7+rbupwBupbB09XPZZ1TQhMAbVJiBQ==",
+                "origin": [
+                    170,
+                    0
+                ]
+            }
+        },
+        {
+            "id": 36240942,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.374Z",
+            "updatedAt": "2023-09-12T12:43:51.374Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtJ1QJzFyAwkHVaVuwEptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcuo9XRxDKuYkJwDBf362/xIJDfJKH+azMFavOMBosP6fPVfFgYZT//8zxz44v4JhKZNE4i8GSym5Be4hzFUhfHWMIcuVK/mUPtSHNLxi+vqCySOpgPHnQb0PDHdfKnxg3DtFSncKW6eD7aoD/E9WsDTyKzBmLG1d0Xgj8VaneILbpgZGhlWH+A/pKAq+BDqFwdPVz2WdU0ITAEmuTJo=",
+                "origin": [
+                    568,
+                    176
+                ]
+            }
+        },
+        {
+            "id": 36240941,
+            "classId": 52237,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.371Z",
+            "updatedAt": "2023-09-12T12:43:51.371Z",
+            "tags": [],
+            "classTitle": "QA",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgvAVkKzIyA0kXjh9NQIotwCfEFUj///9/6c35d4EsxpIgv2AGh2c30oCcdZ4ujiEVc95ePMh7WIGHNUCZ784rQYmjiw9m9DiZPwjjC4xRCA2a2ObSOWWVV63RofPynA2+rWfeOEYYrHy5febGEiPGJcznrkrsCU1PXXq2UTZhAutut665MZbVe/gbryRmHjJSs397UlJNiL/xzHq/PbkO7F3uhwQ/tT7aJRcaHuefyX11cuD5gljW+j0vz4r1rHbm3TNvQ8/RvNkbbJqe238SltDv+HrdIFZgtr2d4Pvt7B+FeTZM1ZqdmbMN6HIGT1c/l3VOCU0Av+JmYA==",
+                "origin": [
+                    294,
+                    735
+                ]
+            }
+        },
+        {
+            "id": 36240940,
+            "classId": 52215,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:51.369Z",
+            "updatedAt": "2023-09-12T12:43:51.369Z",
+            "tags": [],
+            "classTitle": "C",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLyQGzByAwk7U9u/AKk2AJ8QlyB9P///5fenH8XyGIsCfILZnB4diMNyJHwdHEMqZiTvAIoz38YSPzvFTJgElFhiN9592kjj9UUoBoGT1c/l3VOCU0AuekkOA==",
+                "origin": [
+                    497,
+                    173
+                ]
+            }
+        }
+    ]
+}

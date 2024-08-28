@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36240817,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.189Z",
+            "updatedAt": "2023-09-12T12:43:38.189Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLxQBzIyAwk+zpeHANSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5LR5ujiGVMw5e+Ug3wEBHoYLetYWv1Tmm81/FvyLs4/PKNk1+yTfNNkvV9ybupgYLIL4uEVU/fs+vWXzczT85iJYsWfdWuk9LgsdJnSsdvR80/NBZ/25i1PDDqyXmLZMuMSlszjxyHShALF0e2djn9ust28vLzhQOU/4Qzbj8eDZ89zzthhc3eJ8/XN9AaNowvnnBzacvQV0EYOnq5/LOqeEJgDzOlYw",
+                "origin": [
+                    175,
+                    47
+                ]
+            }
+        },
+        {
+            "id": 36240816,
+            "classId": 52221,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.189Z",
+            "updatedAt": "2023-09-12T12:43:38.189Z",
+            "tags": [],
+            "classTitle": "D",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLxQBzMyAwkDzt4ngVSbAE+Ia5A+v///0tvzr8LZDGWBPkFMzg8u5EG5Mz2dHEMqZhz9rKhUIsCD+uF/Ztbl7o/0JDhtV7/NNCmaWmrc5jCpP191ucidlza2/TBk4FhzhruXTVOyzk4D2u2fDglwS3lvG63osazXdFb2BJTfP47JlSwXYgKeLA30WCKnIiOuWNNXlbvZoNHzR9Fp6w7ML2bPYO379W1RNe6/P2Kf62Odd198Zz9gLFM8y+zm/WvXmS7xbjzLfRf0+KhXsewsO+iBl/Vg36gMxk8Xf1c1jklNAEAjjtfBg==",
+                "origin": [
+                    357,
+                    49
+                ]
+            }
+        },
+        {
+            "id": 36240815,
+            "classId": 52214,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:43:38.188Z",
+            "updatedAt": "2023-09-12T12:43:38.188Z",
+            "tags": [],
+            "classTitle": "R",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJAtLsQCzGyAwkzcRE1gEptgCfEFcg/f///6U3598FshhLgvyCGRye3UgDcoQ9XRxDKuYkb0hekfzDnWVN8gZmhpXFwqGqiVWHgNIMnq5+LuucEpoAGNEdEg==",
+                "origin": [
+                    761,
+                    128
+                ]
+            }
+        }
+    ]
+}

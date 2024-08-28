@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36238427,
+            "classId": 52216,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:41:00.670Z",
+            "updatedAt": "2023-09-12T12:41:00.670Z",
+            "tags": [],
+            "classTitle": "U",
+            "bitmap": {
+                "data": "eJwBzAEz/olQTkcNChoKAAAADUlIRFIAAAEaAAABrQEDAAAA87IpNAAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAF0SURBVHic7dpBasMwEAXQCV102RvVB+siOpqgB+gVcgRBNy4Yq7YFTWhJ/i8Mztj52iSQhx0iW5nvkVU4RjOhPaNBqGdQJlAxjKZJMXvC3wijwqATg7KQM3oW2jcCpuaOQB/z7YnQcqMLCQkJcbWKkJCQ0Dz8lh6qVqHQVEF9QTTVTwdkCoMMo8EI1DOoMOgkJMRdKo+AOgbdNhz6rDV5PetRdBNyRRGLByEhIRZF7G0IhUR+0Y0qQyjEVD1zUEINkLnG8mleZTeU3JA9PBqFIqJ/TDDqcDGprBqXpailJ+Lfa8TNGhSqEVHaKspCK6OIV4HQdlHE5XDXaOXNiSv3yqiCBj+LblmKOZu9IcQELr8EJCQk5I9eAFpiIDLk+rTvBCQkpNgtJCTURsQFIyK6Q69sOBKoIDTnu4RQNns1gNouP4ASgdqBAGoHAr+U0HaRbRuB/XtCFBqvovfz23J1WtLvs12M8ydde+3/kMtx+Llsl/ENh8ERytiSRx0AAAAASUVORK5CYILi7b66",
+                "origin": [
+                    0,
+                    0
+                ]
+            }
+        }
+    ]
+}

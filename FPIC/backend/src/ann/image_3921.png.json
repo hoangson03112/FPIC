@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239854,
+            "classId": 52224,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:37.373Z",
+            "updatedAt": "2023-09-12T12:42:37.373Z",
+            "tags": [],
+            "classTitle": "IC",
+            "bitmap": {
+                "data": "eJzrDPBz5+WS4mJgYOD19HAJYmBgOsrAwMzAyAwU+Rbe8QJIsQX4hLgC6f///y+9Of8ukMVYEuQXzODw7EYakM3h6eIYUjHn7RlDXgYGDuYNP8PPHA+ZULCFaZatkeHss2mbb+aYDX/q/DMmp5T3HZ4mVxSAAcTg6ernss4poQkAOdmpmg==",
+                "origin": [
+                    59,
+                    0
+                ]
+            }
+        }
+    ]
+}

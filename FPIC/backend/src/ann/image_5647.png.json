@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 768,
+        "width": 768
+    },
+    "objects": [
+        {
+            "id": 36239359,
+            "classId": 52217,
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "ea@datasetninja.com",
+            "createdAt": "2023-09-12T12:42:06.694Z",
+            "updatedAt": "2023-09-12T12:42:06.694Z",
+            "tags": [],
+            "classTitle": "Q",
+            "bitmap": {
+                "data": "eJwBSgG1/olQTkcNChoKAAAADUlIRFIAAADEAAAAXwEDAAAAjcn6qAAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAADySURBVHic3dLBDYMwDAVQUA8cMwKjMFoyGqNkBI45ILtq5CYQ+0cqQlXVHPuE7P/dYZD34NdLg35Tlt0Qx4hEqP2dywtnGKus1nhrkKvC4ItmkDtJPMh8EoLCWCKUDQpBOQxaGqmJfCO1ugYOK7SSoBAUxhKglOXarWtzC1xbSYKyQyG4QQmk4B1ohPLQIlEnLRLVaZGos5YE4pSoXguhOB1hFFSiYjEqkBKMCqQEZ8kGJUHZQW0iiyV0QbgvHooJHQmg6lypWfU1iT0xD5cP5L4hCZw0H/VjIXS43xBvC6M/yN0SLomHsvyVrFAilO1eeQJTg0zLNylGRQAAAABJRU5ErkJggmm9gFs=",
+                "origin": [
+                    400,
+                    673
+                ]
+            }
+        }
+    ]
+}
