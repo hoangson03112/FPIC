@@ -10,9 +10,6 @@ function App() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [resetKey, setResetKey] = useState(0); // State để lưu key cho ZoomableImage
   const [fileData, setFileData] = useState(null);
-  const [classes, setClasses] = useState([]);
-  console.log(fileData);
-  console.log(classes);
 
   useEffect(() => {
     axios
@@ -24,14 +21,6 @@ function App() {
         console.error("Error fetching images:", error);
       });
 
-    axios
-      .get("http://localhost:9999/get-classes")
-      .then((response) => {
-        setClasses(response.data.jsonData.classes);
-      })
-      .catch((error) => {
-        console.error("Error fetching images:", error);
-      });
   }, []);
 
   const handleImageClick = (index) => {
@@ -209,7 +198,7 @@ function App() {
                 )}
               </div>
               <div className="col-2">
-                <CustomButtonGroup />
+                <CustomButtonGroup fileData={fileData} />
               </div>
             </div>
           </div>

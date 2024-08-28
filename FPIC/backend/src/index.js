@@ -34,7 +34,6 @@ app.get("/images", (req, res) => {
 
 app.post("/get-json-file", (req, res) => {
   const { fileName } = req.body; // Lấy tên file từ request body
-  console.log(fileName);
 
   const filePath = path.join(
     "D:\\Git\\FPIC\\FPIC\\backend\\src\\ann",
@@ -55,7 +54,6 @@ app.post("/get-json-file", (req, res) => {
           .json({ message: "Error reading file", error: err });
       }
 
-   
       try {
         const jsonData = JSON.parse(data);
         res.json({ jsonData });
@@ -68,31 +66,31 @@ app.post("/get-json-file", (req, res) => {
   });
 });
 app.get("/get-classes", (req, res) => {
-    // Xác định đường dẫn tới file JSON cố định
-    const filePath = path.join("D:\\Git\\FPIC\\FPIC\\backend\\src", "meta.json");
-  
-    // Kiểm tra xem file có tồn tại không
-    fs.access(filePath, fs.constants.F_OK, (err) => {
+  // Xác định đường dẫn tới file JSON cố định
+  const filePath = path.join("D:\\Git\\FPIC\\FPIC\\backend\\src", "meta.json");
+
+  // Kiểm tra xem file có tồn tại không
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    // Đọc file JSON
+    fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
-        return res.status(404).json({ error: "File not found" });
+        return res.status(500).json({ error: "Error reading file" });
       }
-  
-      // Đọc file JSON
-      fs.readFile(filePath, "utf8", (err, data) => {
-        if (err) {
-          return res.status(500).json({ error: "Error reading file" });
-        }
-  
-        // Chuyển đổi dữ liệu JSON từ chuỗi sang object và trả về client
-        try {
-          const jsonData = JSON.parse(data);
-          res.json({ jsonData });
-        } catch (error) {
-          res.status(500).json({ error: "Error parsing JSON" });
-        }
-      });
+
+      // Chuyển đổi dữ liệu JSON từ chuỗi sang object và trả về client
+      try {
+        const jsonData = JSON.parse(data);
+        res.json({ jsonData });
+      } catch (error) {
+        res.status(500).json({ error: "Error parsing JSON" });
+      }
     });
   });
+});
 
 app.use("/images", express.static(IMAGES_DIR));
 
