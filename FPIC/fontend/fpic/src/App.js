@@ -210,9 +210,6 @@ function App() {
               </div>
               <div className="col-2">
                 <CustomButtonGroup />
-                <CustomButtonGroup />
-                <CustomButtonGroup />
-
               </div>
             </div>
           </div>

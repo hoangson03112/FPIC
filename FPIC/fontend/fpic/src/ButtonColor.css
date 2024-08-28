@@ -1,27 +1,110 @@
-/* App.css */
 .button-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.custom-btn {
-  width: 50px;
-  height: 50px;
-  border: 1px solid #d9dde2;
+.button-group div {
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 20px;
+  justify-content: space-between;
+  width: auto;
+  height: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  color: black;
+  font-size: 14px;
   font-weight: bold;
-  border-radius: 8px;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.3s ease; /* Thêm hiệu ứng chuyển đổi mờ dần */
 }
 
-.green-btn {
-  background-color: #ccffcc;
-  color: #808080;
+.button-group div span {
+  display: block;
+  width: 8px;
+  height: 8px;
+  background-color: currentColor;
+
+  margin-right: 5px;
 }
 
-.red-btn {
-  background-color: #ff3333;
-  color: white;
+.button-group div.faded {
+  opacity: 0.3;
 }
+
+.button-group .D span {
+  background-color: rgb(106, 255, 0);
+}
+.button-group .R span {
+  background-color: #ff0000;
+}
+.button-group .CR span {
+  background-color: #e0b0ff;
+}
+.button-group .RA span {
+  background-color: #0000ff;
+}
+.button-group .M span {
+  background-color: #00ffff;
+}
+.button-group .T span {
+  background-color: #008000;
+}
+.button-group .V span {
+  background-color: #c0c0c0;
+}
+.button-group .TP span {
+  background-color: #ffc0cb;
+}
+.button-group .FB span {
+  background-color: #0000a0;
+}
+.button-group .S span {
+  background-color: #800080;
+}
+.button-group .BTN span {
+  background-color: #800000;
+}
+.button-group .QA span {
+  background-color: #00ff00;
+}
+.button-group .C span {
+  background-color: #ffff00;
+}
+.button-group .U span {
+  background-color: #add8e6;
+}
+.button-group .J span {
+  background-color: #ffa500;
+}
+.button-group .L span {
+  background-color: #00ff00;
+}
+.button-group .Q span {
+  background-color: #8b00ff;
+}
+.button-group .P span {
+  background-color: #f5f5dc;
+}
+.button-group .IC span {
+  background-color: #b0e0e6;
+}
+.button-group .RN span {
+  background-color: #ba55d3;
+}
+.button-group .CRA span {
+  background-color: #8b4513;
+} /* Màu nâu */
+.button-group .LED span {
+  background-color: #ffa500;
+} /* Màu cam nhạt */
+.button-group .F span {
+  background-color: #808080;
+} /* Màu xám */
+.button-group .SW span {
+  background-color: #800080;
+} /* Màu tím đậm */
+.button-group .JP span {
+  background-color: #ffffe0;
+} /* Màu vàng nhạt */
