@@ -20,7 +20,6 @@ function App() {
       .catch((error) => {
         console.error("Error fetching images:", error);
       });
-
   }, []);
 
   const handleImageClick = (index) => {

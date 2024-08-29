@@ -1,16 +1,13 @@
 const express = require("express");
-const db = require("./config/db/index");
 const app = express();
 const cors = require("cors");
-const ImageController = require("./Controler/ImageController");
 const path = require("path");
-
 const IMAGES_DIR = path.join(__dirname, "img");
 const fs = require("fs");
 
 app.use(cors());
 app.use(express.json());
-db.connect();
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ extended: true }));
 
