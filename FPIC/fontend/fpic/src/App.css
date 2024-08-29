@@ -1,0 +1,7 @@
+.App {
+  background-color: rgb(243, 234, 225);
+  padding-top: 15px;
+}
+.img-thumbnail:hover {
+  transform: translateY(-5px);
+}
