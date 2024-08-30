@@ -68,7 +68,7 @@ function App() {
     <Container fluid>
       <Col>
         <Row>
-          <Header></Header>
+          <Header />
         </Row>
         <Row className="App">
           <div className="d-flex flex-wrap justify-content-center">

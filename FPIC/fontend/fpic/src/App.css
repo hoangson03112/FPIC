@@ -5,3 +5,16 @@
 .img-thumbnail:hover {
   transform: translateY(-5px);
 }
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  justify-content: center;
+}
+
+.modal-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  justify-content: start;
+}
