@@ -49,7 +49,7 @@ function CustomButtonGroup({ fileData }) {
             aria-pressed={
               clickedButtons.includes(button.title) ? "true" : "false"
             }
-            style={{ borderColor: "black", color: button.color }}
+            style={{ borderColor: button.color, color: button.color }}
           >
             <span style={{ backgroundColor: button.color }}></span>{" "}
             {button.title}
