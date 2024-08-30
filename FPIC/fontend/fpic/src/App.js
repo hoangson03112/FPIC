@@ -3,41 +3,21 @@ import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./App.css";
 import CustomButtonGroup from "./ButtonColor";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  NavDropdown,
-  Navbar,
-  Form,
-  Nav,
-} from "react-bootstrap";
 import Header from "./elements/Header";
+import { Link } from "react-router-dom";
+import { Col, Container, Row, Image } from "react-bootstrap";
 function App() {
   const [images, setImages] = useState([]);
   const [showAll, setShowAll] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [resetKey, setResetKey] = useState(0); // State để lưu key cho ZoomableImage
   const [fileData, setFileData] = useState(null);
-  const [classes, setClasses] = useState([]);
-  console.log(fileData);
-  console.log(classes);
 
   useEffect(() => {
     axios
       .get("http://localhost:9999/images")
       .then((response) => {
         setImages(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching images:", error);
-      });
-
-    axios
-      .get("http://localhost:9999/get-classes")
-      .then((response) => {
-        setClasses(response.data.jsonData.classes);
       })
       .catch((error) => {
         console.error("Error fetching images:", error);
@@ -86,9 +66,11 @@ function App() {
 
   return (
     <Container fluid>
-      <Header></Header>
-      <Row className="App">
-        <div>
+      <Col>
+        <Row>
+          <Header></Header>
+        </Row>
+        <Row className="App">
           <div className="d-flex flex-wrap justify-content-center">
             {!showAll &&
               images.slice(0, 30).map((image, index) => (
@@ -98,19 +80,12 @@ function App() {
                   data-bs-toggle="modal"
                   data-bs-target="#imageModal"
                   className="img-thumbnail"
-                  style={{
-                    margin: "5px",
-                    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.32)",
-                  }}
                 >
                   <img
                     src={image?.img1}
                     alt={image?.name}
                     className="img-fluid rounded m-3"
-                    style={{
-                      cursor: "pointer",
-                      width: "180px",
-                    }}
+                    style={{ cursor: "pointer", width: "150px" }}
                   />
                 </a>
               ))}
@@ -123,10 +98,6 @@ function App() {
                   data-bs-toggle="modal"
                   data-bs-target="#imageModal"
                   className="img-thumbnail"
-                  style={{
-                    margin: "5px",
-                    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.32)",
-                  }}
                 >
                   <img
                     src={image?.img1}
@@ -238,14 +209,14 @@ function App() {
                     )}
                   </div>
                   <div className="col-2">
-                    <CustomButtonGroup />
+                    <CustomButtonGroup fileData={fileData} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </Row>
+        </Row>
+      </Col>
     </Container>
   );
 }
