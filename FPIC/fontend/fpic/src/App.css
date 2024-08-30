@@ -1,20 +1,97 @@
-.App {
-  background-color: rgb(243, 234, 225);
-  padding-top: 15px;
-}
-.img-thumbnail:hover {
+/* Hover effect for image thumbnails */
+.m-2:hover {
   transform: translateY(-5px);
-}
-.image-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-  justify-content: center;
+  transition: transform 0.3s ease;
 }
 
-.modal-image-grid {
+/* Main image grid for the gallery */
+.image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-  justify-content: start;
+  grid-template-columns: repeat(6, 1fr); /* 8 cột */
+  grid-gap: 10px; /* Khoảng cách giữa các ảnh */
+  justify-items: center; /* Căn giữa các ảnh */
+  padding: 10px;
+}
+
+.image-grid .card {
+  width: 100%;
+  border: 1 black;
+  background-color: transparent !important; /* Loại bỏ màu nền mặc định */
+}
+
+.image-grid .card img {
+  object-fit: cover;
+  height: 150px;
+  width: 100%;
+  transition: transform 0.3s ease; /* Tạo hiệu ứng mượt cho hover */
+}
+
+.image-grid .card img:hover {
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+}
+
+/* Modal chỉnh kích thước */
+.modal-dialog {
+  max-width: 100%;
+  margin: 0; /* Loại bỏ khoảng cách ngoài cho modal */
+}
+
+.modal-content {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Nền mờ cho card-body */
+.card-body {
+  background-color: rgba(255, 255, 255, 0.5);
+  text-align: start;
+  background-color: transparent;
+}
+.card-body .card-title {
+  color: #fff; /* Màu tiêu đề trắng */
+}
+/* Thay đổi màu văn bản trong card */
+.card-body .card-text {
+  color: #fff; /* Màu văn bản trắng */
+}
+
+/* Background image for the entire app */
+.bg-image {
+  background-image: url("D:\downloads\Git\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg"); /* Sử dụng đường dẫn tương đối */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Nền cố định khi cuộn */
+  min-height: 100vh; /* Chiều cao tối thiểu cho trang */
+  padding: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .image-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 cột cho màn hình nhỏ */
+  }
+
+  .image-grid .card {
+    width: 100px;
+  }
+}
+.pagination {
+  display: flex;
+  align-items: center; /* Canh giữa các phần tử theo chiều dọc */
+  justify-content: center; /* Canh giữa các phần tử theo chiều ngang */
+  gap: 10px; /* Khoảng cách giữa các phần tử */
+}
+
+.pagination .btn {
+  flex: 0 0 auto; /* Đảm bảo rằng các nút không mở rộng hoặc thu hẹp */
+}
+
+.pagination span {
+  flex: 1; /* Phần tử span chiếm không gian còn lại */
+  text-align: center; /* Canh giữa nội dung trong span */
+}
+
+.pagination input {
+  width: 50px; /* Đặt chiều rộng của trường nhập liệu */
+  text-align: center; /* Canh giữa văn bản trong trường nhập liệu */
 }

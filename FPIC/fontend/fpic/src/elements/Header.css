@@ -1,27 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Matemasie&display=swap");
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: #f5f5f5;
-}
-
-.header-start {
-  display: flex;
-  align-items: center;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #ccc;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-}
 .srch {
   position: relative;
   --size-button: 35px;
@@ -178,5 +155,12 @@
   width: 4px;
 }
 .account-menu {
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
+  background-color: transparent; /* Nền mờ với màu trắng */
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 5); /* Bóng đổ mềm mại để header nổi lên */
+  padding: 10px 20px; /* Tạo khoảng đệm bên trong */
+  backdrop-filter: blur(10px); /* Hiệu ứng mờ */
+  -webkit-backdrop-filter: blur(100px); /* Hỗ trợ trên Safari */
+  top: 0;
+  width: 100%;
+  z-index: 1000;
 }
