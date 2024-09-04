@@ -13,6 +13,17 @@ function App() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [resetKey, setResetKey] = useState(0); // Reset ảnh khi chuyển ảnh
   const [fileData, setFileData] = useState(null);
+  const handlePreviousImage = () => {
+    if (selectedImageIndex > 0) {
+      handleImageClick(selectedImageIndex - 1);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (selectedImageIndex < images.length - 1) {
+      handleImageClick(selectedImageIndex + 1);
+    }
+  };
 
   useEffect(() => {
     axios
@@ -66,7 +77,8 @@ function App() {
 
   return (
     <div className="bg-image">
-      <Header />
+      <Header></Header>
+
       <div className="App">
         <div className="image-grid">
           {currentImages.map((image, index) => (
@@ -154,8 +166,29 @@ function App() {
                 <Col xs={10}>
                   {selectedImage && (
                     <div className="d-flex flex-column">
-                      <div className="d-flex justify-content-center align-items-center mb-3">
-                        <ZoomableImage key={resetKey} data={selectedImage} />
+                      <div className="d-flex flex-row justify-content-between align-items-center mb-3">
+                        <button
+                          className="btn btn-custom"
+                          onClick={handlePreviousImage}
+                          disabled={selectedImageIndex === 0}
+                        >
+                          Previous
+                        </button>
+                        <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+                          {selectedImage && (
+                            <ZoomableImage
+                              key={resetKey}
+                              data={selectedImage}
+                            />
+                          )}
+                        </div>
+                        <button
+                          className="btn btn-custom"
+                          onClick={handleNextImage}
+                          disabled={selectedImageIndex === images.length - 1}
+                        >
+                          Next
+                        </button>
                       </div>
 
                       <div className="w-100 mt-4">
@@ -182,13 +215,6 @@ function App() {
                                   alt={image?.name}
                                   style={{ width: "100%" }}
                                 />
-                                <Card.Body>
-                                  <Card.Title>{image?.name}</Card.Title>
-                                  <Card.Text>
-                                    Some quick example text to build on the card
-                                    title.
-                                  </Card.Text>
-                                </Card.Body>
                               </Card>
                             ))}
                         </div>

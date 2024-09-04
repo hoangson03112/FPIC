@@ -37,10 +37,11 @@
 }
 
 .modal-content {
-  padding: 20px;
+  height: 100vh; /* Fullscreen height */
+  display: flex;
+  flex-direction: column;
   background-color: rgba(255, 255, 255, 0.8);
 }
-
 /* Nền mờ cho card-body */
 .card-body {
   background-color: rgba(255, 255, 255, 0.5);
@@ -94,4 +95,23 @@
 .pagination input {
   width: 50px; /* Đặt chiều rộng của trường nhập liệu */
   text-align: center; /* Canh giữa văn bản trong trường nhập liệu */
+}
+.App {
+  margin-top: 50px;
+}
+.btn-custom {
+  height: 40px; /* Chiều cao của nút */
+  line-height: 40px; /* Căn giữa nội dung theo chiều dọc */
+  padding: 0 15px; /* Khoảng cách bên trái và phải */
+  font-size: 16px; /* Kích thước chữ của nút */
+  display: flex;
+  align-items: center; /* Căn giữa nội dung theo chiều dọc */
+  min-width: 100px; /* Đặt chiều rộng tối thiểu nếu cần */
+}
+
+/* Tùy chọn thêm để chỉnh sửa màu nền, viền, và trạng thái disabled nếu cần */
+.btn-custom:disabled {
+  background-color: #6c757d; /* Màu nền khi nút bị disabled */
+  border-color: #6c757d; /* Màu viền khi nút bị disabled */
+  cursor: not-allowed; /* Con trỏ khi di chuột qua nút bị disabled */
 }

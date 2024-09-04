@@ -91,15 +91,15 @@
 }
 
 .menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
+  position: fixed; /* Thay đổi từ absolute sang fixed */
+  top: 60px; /* Điều chỉnh vị trí tùy theo nhu cầu */
+  right: 20px; /* Điều chỉnh khoảng cách từ cạnh phải */
   background-color: #fff;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
   margin-top: 8px;
   border-radius: 4px;
   overflow: visible;
-  z-index: 1000;
+  z-index: 9999; /* Giữ z-index để đảm bảo menu nổi trên các phần tử khác */
 }
 
 .menu-item {
@@ -145,6 +145,7 @@
   font-weight: 500;
   font-style: normal;
   font-variation-settings: "ELGR" 1, "ELSH" 2;
+  color: #fff;
 }
 
 .letter:hover {
