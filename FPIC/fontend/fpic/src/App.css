@@ -103,11 +103,24 @@
   transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
 }
 
+/* Nút điều khiển menu */
+.menu-button-app {
+  position: sticky;
+  top: 0px;
+  left: 0px;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
 /* Menu Sticky */
 .menu-app {
-  position: sticky;
-  top: 0; /* Gắn menu vào đầu trang */
-  left: 0; /* Gắn menu vào cạnh trái */
+  position: fixed;
+  top: 0px; /* Gắn menu vào đầu trang */
+  left: 0px; /* Gắn menu vào cạnh trái */
   width: 250px;
   height: 100vh; /* Chiều cao bằng 100% của viewport */
   background-color: #333;
@@ -132,15 +145,8 @@
   background-color: #575757;
 }
 
-/* Nút điều khiển menu */
-.menu-button-app {
-  position: sticky;
-  top: 16px;
-  left: 16px;
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  z-index: 1001;
+/* App container */
+.App {
+  margin-top: 50px;
+  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
 }

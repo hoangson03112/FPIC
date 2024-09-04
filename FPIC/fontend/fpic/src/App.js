@@ -91,14 +91,18 @@ function App() {
     <div className="bg-image">
       <Header />
       <div>
-        <div className={`menu-app ${menuOpen ? "open" : ""}`}>
+        <div
+          className={`menu-app ${menuOpen ? "open" : "closed"}`}
+          aria-hidden={!menuOpen}
+          tabIndex={menuOpen ? "0" : "-1"}
+        >
           <a href="#">Trang chủ</a>
           <a href="#">Danh mục 1</a>
           <a href="#">Danh mục 2</a>
           <a href="#">Danh mục 3</a>
         </div>
 
-        <div className={`App ${menuOpen ? "menu-open" : ""}`}>
+        <div className={`App ${menuOpen ? "menu-open" : "menu-close"}`}>
           <button
             className="menu-button-app"
             onClick={() => setMenuOpen(!menuOpen)}
