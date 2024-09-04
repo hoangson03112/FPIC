@@ -4,8 +4,9 @@ import ZoomableImage from "./ZoomableImage";
 import "./App.css";
 import CustomButtonGroup from "./ButtonColor";
 import Header from "./elements/Header";
-import { Col, Row, Card } from "react-bootstrap";
+import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import ScrollToTopButton from "./elements/ScrollToTopButton";
 
 function App() {
   const { currentPage = 1 } = useParams();
@@ -16,7 +17,6 @@ function App() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [resetKey, setResetKey] = useState(0);
   const [fileData, setFileData] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const handlePreviousImage = () => {
     if (selectedImageIndex > 0) {
@@ -54,7 +54,7 @@ function App() {
     if (page > 1) {
       const newPage = page - 1;
       setPage(newPage);
-      navigate(`/page/${newPage}`);
+      navigate(`/home/page/${newPage}`);
     }
   };
 
@@ -62,7 +62,7 @@ function App() {
     if (page < Math.ceil(images.length / imagesPerPage)) {
       const newPage = page + 1;
       setPage(newPage);
-      navigate(`/page/${newPage}`);
+      navigate(`/home/page/${newPage}`);
     }
   };
 
@@ -90,25 +90,12 @@ function App() {
   return (
     <div className="bg-image">
       <Header />
-      <div>
-        <div
-          className={`menu-app ${menuOpen ? "open" : "closed"}`}
-          aria-hidden={!menuOpen}
-          tabIndex={menuOpen ? "0" : "-1"}
-        >
-          <a href="#">Trang chủ</a>
-          <a href="#">Danh mục 1</a>
-          <a href="#">Danh mục 2</a>
-          <a href="#">Danh mục 3</a>
-        </div>
-
-        <div className={`App ${menuOpen ? "menu-open" : "menu-close"}`}>
-          <button
-            className="menu-button-app"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? "Close Menu" : "Open Menu"}
-          </button>
+      <Container fluid>
+        <Row>
+          <Col></Col>
+          <Col></Col>
+        </Row>
+        <div className="App">
           <div className="image-grid">
             {currentImages.map((image, index) => (
               <Card
@@ -134,41 +121,79 @@ function App() {
               </Card>
             ))}
           </div>
-
-          <Row className="pagination">
-            <button
-              onClick={showPreviousPage}
-              disabled={page === 1}
-              className="btn btn-custom"
-              style={{ width: 150, backgroundColor: "white" }}
-            >
-              Trang trước
-            </button>
-            <span>
-              Trang
-              <input
-                type="text"
-                value={page}
-                onChange={(e) => setPage(Number(e.target.value))}
-                onBlur={() => {
-                  if (page < 1) setPage(1);
-                  if (page > Math.ceil(images.length / imagesPerPage))
-                    setPage(Math.ceil(images.length / imagesPerPage));
-                }}
-                disabled
-              />
-              / {Math.ceil(images.length / imagesPerPage)}
-            </span>
-            <button
-              onClick={showNextPage}
-              disabled={page === Math.ceil(images.length / imagesPerPage)}
-              className="btn btn-custom"
-              style={{ width: 150, backgroundColor: "white" }}
-            >
-              Trang sau
-            </button>
+          <Row className="pagination justify-content-center">
+            <Col xs={3}>
+              <button
+                onClick={showPreviousPage}
+                disabled={page === 1}
+                className="btn btn-custom"
+                style={{ width: 50, backgroundColor: "white", height: 30 }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  className="bi bi-chevron-double-left"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+                  />
+                </svg>
+              </button>
+            </Col>
+            <Col xs={3}>
+              <span>
+                Trang
+                <input
+                  type="text"
+                  value={page}
+                  onChange={(e) => setPage(Number(e.target.value))}
+                  onBlur={() => {
+                    if (page < 1) setPage(1);
+                    if (page > Math.ceil(images.length / imagesPerPage))
+                      setPage(Math.ceil(images.length / imagesPerPage));
+                  }}
+                  disabled
+                />
+                / {Math.ceil(images.length / imagesPerPage)}
+              </span>
+            </Col>
+            <Col xs={3}>
+              <button
+                onClick={showNextPage}
+                disabled={page === Math.ceil(images.length / imagesPerPage)}
+                className="btn btn-custom"
+                style={{ width: 50, backgroundColor: "white", height: 30 }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  className="bi bi-chevron-double-right"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"
+                  />
+                </svg>
+              </button>
+            </Col>
           </Row>
 
+          <ScrollToTopButton />
           <div
             className="modal fade"
             id="imageModal"
@@ -198,8 +223,29 @@ function App() {
                             className="btn btn-custom"
                             onClick={handlePreviousImage}
                             disabled={selectedImageIndex === 0}
+                            style={{
+                              width: 50,
+                              backgroundColor: "white",
+                              height: 30,
+                            }}
                           >
-                            Previous
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              fill="currentColor"
+                              class="bi bi-chevron-double-left"
+                              viewBox="0 0 16 16"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+                              />
+                              <path
+                                fill-rule="evenodd"
+                                d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+                              />
+                            </svg>
                           </button>
                           <div className="flex-grow-1 d-flex justify-content-center align-items-center">
                             {selectedImage && (
@@ -213,8 +259,29 @@ function App() {
                             className="btn btn-custom"
                             onClick={handleNextImage}
                             disabled={selectedImageIndex === images.length - 1}
+                            style={{
+                              width: 50,
+                              backgroundColor: "white",
+                              height: 30,
+                            }}
                           >
-                            Next
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              fill="currentColor"
+                              class="bi bi-chevron-double-right"
+                              viewBox="0 0 16 16"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"
+                              />
+                              <path
+                                fill-rule="evenodd"
+                                d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"
+                              />
+                            </svg>
                           </button>
                         </div>
 
@@ -261,7 +328,7 @@ function App() {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

@@ -17,7 +17,8 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}></Route>
-        <Route path="/page/:currentPage" element={<App />} />
+        <Route path="/home" element={<App />}></Route>
+        <Route path="/home/page/:currentPage" element={<App />} />
         <Route path="/auth/login" element={<Login />}></Route>
         <Route path="/auth/signup" element={<Register />}></Route>
         <Route path="/profile" element={<Profile />}></Route>

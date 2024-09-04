@@ -2,7 +2,7 @@
 .srch {
   position: relative;
   --size-button: 45px;
-  color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
 }
 
 .inputsrch {
@@ -10,11 +10,12 @@
   height: 30px;
   font-size: 15px;
   border: none;
-  color: #000000;
+  color: #ffffff;
   outline: none;
   width: 100%;
   transition: box-shadow 0.3s ease;
-  background-color: #f3f3f3;
+  background-color: rgba(255, 255, 255, 0.2); /* Nền mờ với độ trong suốt */
+  backdrop-filter: blur(10px);
   box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.25),
     inset 0px 0px 0px #0e0e0e, inset 0px -0px 0px #5f5e5e;
   border-radius: 50px;
@@ -90,10 +91,11 @@
 }
 
 .menu {
-  position: fixed; /* Thay đổi từ absolute sang fixed */
-  top: 60px; /* Điều chỉnh vị trí tùy theo nhu cầu */
+  position: absolute; /* Thay đổi từ absolute sang fixed */
+  top: 58px; /* Điều chỉnh vị trí tùy theo nhu cầu */
   right: 20px; /* Điều chỉnh khoảng cách từ cạnh phải */
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.2); /* Nền mờ với độ trong suốt */
+  backdrop-filter: blur(10px);
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
   margin-top: 8px;
   border-radius: 4px;
@@ -113,7 +115,7 @@
 
 .lik {
   text-decoration: none;
-  color: black;
+  color: rgb(255, 255, 255);
 }
 
 .menu-item-avatar {

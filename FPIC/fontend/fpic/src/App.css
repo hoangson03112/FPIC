@@ -15,10 +15,12 @@
 
 .image-grid .card {
   width: 100%;
-  border: 1px solid black; /* Đổi border thành 1px solid black */
   background-color: transparent !important; /* Loại bỏ màu nền mặc định */
 }
-
+.image-grid .card:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Nền mờ với độ trong suốt */
+  backdrop-filter: blur(200px);
+}
 .image-grid .card img {
   object-fit: cover;
   height: 150px;
@@ -45,7 +47,7 @@
 
 /* Nền mờ cho card-body */
 .card-body {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: transparent !important;
   text-align: start;
 }
 
@@ -76,77 +78,29 @@
   }
 }
 
+/* App container */
+.App {
+  margin-top: 50px;
+  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
+}
+
+/* App container */
+.App {
+  margin-top: 50px;
+  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
+}
 .pagination {
   display: flex;
-  align-items: center; /* Canh giữa các phần tử theo chiều dọc */
-  justify-content: center; /* Canh giữa các phần tử theo chiều ngang */
-  gap: 10px; /* Khoảng cách giữa các phần tử */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
 }
-
-.pagination .btn {
-  flex: 0 0 auto; /* Đảm bảo rằng các nút không mở rộng hoặc thu hẹp */
-}
-
-.pagination span {
-  flex: 1; /* Phần tử span chiếm không gian còn lại */
-  text-align: center; /* Canh giữa nội dung trong span */
-}
-
 .pagination input {
-  width: 50px; /* Đặt chiều rộng của trường nhập liệu */
-  text-align: center; /* Canh giữa văn bản trong trường nhập liệu */
+  width: 50px;
 }
-
-/* App container */
-.App {
-  margin-top: 50px;
-  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
+.pagination .col-3 {
+  display: flex;
+  justify-content: center;
 }
-
-/* Nút điều khiển menu */
-.menu-button-app {
-  position: sticky;
-  top: 0px;
-  left: 0px;
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  z-index: 1001;
-}
-
-/* Menu Sticky */
-.menu-app {
-  position: fixed;
-  top: 0px; /* Gắn menu vào đầu trang */
-  left: 0px; /* Gắn menu vào cạnh trái */
-  width: 250px;
-  height: 100vh; /* Chiều cao bằng 100% của viewport */
-  background-color: #333;
-  color: white;
-  transition: transform 0.3s ease; /* Hiệu ứng trượt */
-  transform: translateX(-100%); /* Ẩn menu ra ngoài màn hình */
-  z-index: 1000;
-}
-
-.menu-app.open {
-  transform: translateX(0); /* Hiển thị menu khi nút nhấn */
-}
-
-.menu-app a {
-  display: block;
-  color: white;
-  padding: 16px;
-  text-decoration: none;
-}
-
-.menu-app a:hover {
-  background-color: #575757;
-}
-
-/* App container */
-.App {
-  margin-top: 50px;
-  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
+.btn-custom svg {
+  margin: 0;
 }
