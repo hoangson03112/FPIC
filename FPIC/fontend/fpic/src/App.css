@@ -7,7 +7,7 @@
 /* Main image grid for the gallery */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr); /* 8 cột */
+  grid-template-columns: repeat(6, 1fr); /* 6 cột */
   grid-gap: 10px; /* Khoảng cách giữa các ảnh */
   justify-items: center; /* Căn giữa các ảnh */
   padding: 10px;
@@ -15,7 +15,7 @@
 
 .image-grid .card {
   width: 100%;
-  border: 1 black;
+  border: 1px solid black; /* Đổi border thành 1px solid black */
   background-color: transparent !important; /* Loại bỏ màu nền mặc định */
 }
 
@@ -42,16 +42,15 @@
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.8);
 }
+
 /* Nền mờ cho card-body */
 .card-body {
   background-color: rgba(255, 255, 255, 0.5);
   text-align: start;
-  background-color: transparent;
 }
-.card-body .card-title {
-  color: #fff; /* Màu tiêu đề trắng */
-}
+
 /* Thay đổi màu văn bản trong card */
+.card-body .card-title,
 .card-body .card-text {
   color: #fff; /* Màu văn bản trắng */
 }
@@ -76,6 +75,7 @@
     width: 100px;
   }
 }
+
 .pagination {
   display: flex;
   align-items: center; /* Canh giữa các phần tử theo chiều dọc */
@@ -96,22 +96,51 @@
   width: 50px; /* Đặt chiều rộng của trường nhập liệu */
   text-align: center; /* Canh giữa văn bản trong trường nhập liệu */
 }
+
+/* App container */
 .App {
   margin-top: 50px;
-}
-.btn-custom {
-  height: 40px; /* Chiều cao của nút */
-  line-height: 40px; /* Căn giữa nội dung theo chiều dọc */
-  padding: 0 15px; /* Khoảng cách bên trái và phải */
-  font-size: 16px; /* Kích thước chữ của nút */
-  display: flex;
-  align-items: center; /* Căn giữa nội dung theo chiều dọc */
-  min-width: 100px; /* Đặt chiều rộng tối thiểu nếu cần */
+  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
 }
 
-/* Tùy chọn thêm để chỉnh sửa màu nền, viền, và trạng thái disabled nếu cần */
-.btn-custom:disabled {
-  background-color: #6c757d; /* Màu nền khi nút bị disabled */
-  border-color: #6c757d; /* Màu viền khi nút bị disabled */
-  cursor: not-allowed; /* Con trỏ khi di chuột qua nút bị disabled */
+/* Menu Sticky */
+.menu-app {
+  position: sticky;
+  top: 0; /* Gắn menu vào đầu trang */
+  left: 0; /* Gắn menu vào cạnh trái */
+  width: 250px;
+  height: 100vh; /* Chiều cao bằng 100% của viewport */
+  background-color: #333;
+  color: white;
+  transition: transform 0.3s ease; /* Hiệu ứng trượt */
+  transform: translateX(-100%); /* Ẩn menu ra ngoài màn hình */
+  z-index: 1000;
+}
+
+.menu-app.open {
+  transform: translateX(0); /* Hiển thị menu khi nút nhấn */
+}
+
+.menu-app a {
+  display: block;
+  color: white;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.menu-app a:hover {
+  background-color: #575757;
+}
+
+/* Nút điều khiển menu */
+.menu-button-app {
+  position: sticky;
+  top: 16px;
+  left: 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  z-index: 1001;
 }

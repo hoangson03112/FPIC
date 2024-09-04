@@ -4,15 +4,20 @@ import ZoomableImage from "./ZoomableImage";
 import "./App.css";
 import CustomButtonGroup from "./ButtonColor";
 import Header from "./elements/Header";
-import { Col, Row, Button, Card } from "react-bootstrap";
+import { Col, Row, Card } from "react-bootstrap";
+import { useParams, useNavigate } from "react-router-dom";
 
 function App() {
+  const { currentPage = 1 } = useParams();
+  const navigate = useNavigate();
   const [images, setImages] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [imagesPerPage] = useState(24); // Số lượng ảnh mỗi trang
+  const [page, setPage] = useState(Number(currentPage));
+  const [imagesPerPage] = useState(24);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
-  const [resetKey, setResetKey] = useState(0); // Reset ảnh khi chuyển ảnh
+  const [resetKey, setResetKey] = useState(0);
   const [fileData, setFileData] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const handlePreviousImage = () => {
     if (selectedImageIndex > 0) {
       handleImageClick(selectedImageIndex - 1);
@@ -36,25 +41,28 @@ function App() {
       });
   }, []);
 
-  // Tính toán vị trí bắt đầu và kết thúc của ảnh cho trang hiện tại
-  const indexOfLastImage = currentPage * imagesPerPage;
+  const indexOfLastImage = page * imagesPerPage;
   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
   const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
 
   const handleImageClick = (index) => {
     setSelectedImageIndex(index);
-    setResetKey((prevKey) => prevKey + 1); // Tăng key để reset ZoomableImage khi ảnh thay đổi
+    setResetKey((prevKey) => prevKey + 1);
   };
 
   const showPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (page > 1) {
+      const newPage = page - 1;
+      setPage(newPage);
+      navigate(`/page/${newPage}`);
     }
   };
 
   const showNextPage = () => {
-    if (currentPage < Math.ceil(images.length / imagesPerPage)) {
-      setCurrentPage(currentPage + 1);
+    if (page < Math.ceil(images.length / imagesPerPage)) {
+      const newPage = page + 1;
+      setPage(newPage);
+      navigate(`/page/${newPage}`);
     }
   };
 
@@ -75,156 +83,176 @@ function App() {
     }
   }, [selectedImage]);
 
+  useEffect(() => {
+    setPage(Number(currentPage));
+  }, [currentPage]);
+
   return (
     <div className="bg-image">
-      <Header></Header>
-
-      <div className="App">
-        <div className="image-grid">
-          {currentImages.map((image, index) => (
-            <Card
-              key={index}
-              className="m-2"
-              style={{ cursor: "pointer" }}
-              onClick={() => handleImageClick(indexOfFirstImage + index)}
-              data-bs-toggle="modal"
-              data-bs-target="#imageModal"
-            >
-              <Card.Img
-                variant="top"
-                src={image?.img1}
-                alt={image?.name}
-                style={{ width: "100%", height: "150px", objectFit: "cover" }}
-              />
-              <Card.Body>
-                <Card.Title>{image?.name}</Card.Title>
-                <Card.Text>
-                  Some quick example text to build on the card title.
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          ))}
+      <Header />
+      <div>
+        <div className={`menu-app ${menuOpen ? "open" : ""}`}>
+          <a href="#">Trang chủ</a>
+          <a href="#">Danh mục 1</a>
+          <a href="#">Danh mục 2</a>
+          <a href="#">Danh mục 3</a>
         </div>
 
-        {/* Phân trang */}
-        <Row className="pagination">
-          <Button
-            onClick={showPreviousPage}
-            disabled={currentPage === 1}
-            className="btn"
-            style={{ width: 150 }}
+        <div className={`App ${menuOpen ? "menu-open" : ""}`}>
+          <button
+            className="menu-button-app"
+            onClick={() => setMenuOpen(!menuOpen)}
           >
-            Trang trước
-          </Button>
-          <span>
-            Trang
-            <input
-              type="text"
-              value={currentPage}
-              onChange={(e) => setCurrentPage(Number(e.target.value))}
-              onBlur={() => {
-                if (currentPage < 1) setCurrentPage(1);
-                if (currentPage > Math.ceil(images.length / imagesPerPage))
-                  setCurrentPage(Math.ceil(images.length / imagesPerPage));
-              }}
-              disabled
-            />
-            / {Math.ceil(images.length / imagesPerPage)}
-          </span>
-          <Button
-            onClick={showNextPage}
-            disabled={currentPage === Math.ceil(images.length / imagesPerPage)}
-            className="btn"
-            style={{ width: 150 }}
+            {menuOpen ? "Close Menu" : "Open Menu"}
+          </button>
+          <div className="image-grid">
+            {currentImages.map((image, index) => (
+              <Card
+                key={index}
+                className="m-2"
+                style={{ cursor: "pointer" }}
+                onClick={() => handleImageClick(indexOfFirstImage + index)}
+                data-bs-toggle="modal"
+                data-bs-target="#imageModal"
+              >
+                <Card.Img
+                  variant="top"
+                  src={image?.img1}
+                  alt={image?.name}
+                  style={{ width: "100%", height: "150px", objectFit: "cover" }}
+                />
+                <Card.Body>
+                  <Card.Title>{image?.name}</Card.Title>
+                  <Card.Text>
+                    Some quick example text to build on the card title.
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            ))}
+          </div>
+
+          <Row className="pagination">
+            <button
+              onClick={showPreviousPage}
+              disabled={page === 1}
+              className="btn btn-custom"
+              style={{ width: 150, backgroundColor: "white" }}
+            >
+              Trang trước
+            </button>
+            <span>
+              Trang
+              <input
+                type="text"
+                value={page}
+                onChange={(e) => setPage(Number(e.target.value))}
+                onBlur={() => {
+                  if (page < 1) setPage(1);
+                  if (page > Math.ceil(images.length / imagesPerPage))
+                    setPage(Math.ceil(images.length / imagesPerPage));
+                }}
+                disabled
+              />
+              / {Math.ceil(images.length / imagesPerPage)}
+            </span>
+            <button
+              onClick={showNextPage}
+              disabled={page === Math.ceil(images.length / imagesPerPage)}
+              className="btn btn-custom"
+              style={{ width: 150, backgroundColor: "white" }}
+            >
+              Trang sau
+            </button>
+          </Row>
+
+          <div
+            className="modal fade"
+            id="imageModal"
+            tabIndex="-1"
+            aria-labelledby="staticBackdropLabel"
+            aria-hidden="true"
           >
-            Trang sau
-          </Button>
-        </Row>
-
-        {/* Modal hiển thị ảnh */}
-        <div
-          className="modal fade"
-          id="imageModal"
-          tabIndex="-1"
-          aria-labelledby="staticBackdropLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-fullscreen p-5 pb-0">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="staticBackdropLabel">
-                  {selectedImage?.name}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body row">
-                <Col xs={10}>
-                  {selectedImage && (
-                    <div className="d-flex flex-column">
-                      <div className="d-flex flex-row justify-content-between align-items-center mb-3">
-                        <button
-                          className="btn btn-custom"
-                          onClick={handlePreviousImage}
-                          disabled={selectedImageIndex === 0}
-                        >
-                          Previous
-                        </button>
-                        <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                          {selectedImage && (
-                            <ZoomableImage
-                              key={resetKey}
-                              data={selectedImage}
-                            />
-                          )}
+            <div className="modal-dialog modal-fullscreen">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="staticBackdropLabel">
+                    {selectedImage?.name}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div className="modal-body row">
+                  <Col xs={10}>
+                    {selectedImage && (
+                      <div className="d-flex flex-column">
+                        <div className="d-flex flex-row justify-content-between align-items-center mb-3">
+                          <button
+                            className="btn btn-custom"
+                            onClick={handlePreviousImage}
+                            disabled={selectedImageIndex === 0}
+                          >
+                            Previous
+                          </button>
+                          <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+                            {selectedImage && (
+                              <ZoomableImage
+                                key={resetKey}
+                                data={selectedImage}
+                              />
+                            )}
+                          </div>
+                          <button
+                            className="btn btn-custom"
+                            onClick={handleNextImage}
+                            disabled={selectedImageIndex === images.length - 1}
+                          >
+                            Next
+                          </button>
                         </div>
-                        <button
-                          className="btn btn-custom"
-                          onClick={handleNextImage}
-                          disabled={selectedImageIndex === images.length - 1}
-                        >
-                          Next
-                        </button>
-                      </div>
 
-                      <div className="w-100 mt-4">
-                        <h6>More images:</h6>
-                        <div className="d-flex flex-wrap justify-content-start">
-                          {images
-                            .filter(
-                              (img, index) => index !== selectedImageIndex
-                            )
-                            .slice(0, 19)
-                            .map((image, index) => (
-                              <Card
-                                key={index}
-                                className="m-2"
-                                style={{ width: "100px", cursor: "pointer" }}
-                                onClick={() =>
-                                  handleImageClick(images.indexOf(image))
-                                }
-                                data-bs-target="#imageModal"
-                              >
-                                <Card.Img
-                                  variant="top"
-                                  src={image?.img1}
-                                  alt={image?.name}
-                                  style={{ width: "100%" }}
-                                />
-                              </Card>
-                            ))}
+                        <div className="w-100 mt-4">
+                          <h6>More images:</h6>
+                          <div className="d-flex flex-wrap justify-content-start">
+                            {images
+                              .filter(
+                                (img, index) => index !== selectedImageIndex
+                              )
+                              .slice(0, 19)
+                              .map((image, index) => (
+                                <Card
+                                  key={index}
+                                  className="m-2"
+                                  style={{ width: "100px", cursor: "pointer" }}
+                                  onClick={() =>
+                                    handleImageClick(images.indexOf(image))
+                                  }
+                                  data-bs-target="#imageModal"
+                                >
+                                  <Card.Img
+                                    variant="top"
+                                    src={image?.img1}
+                                    alt={image?.name}
+                                    style={{
+                                      width: "100%",
+                                      height: "100px",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </Card>
+                              ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </Col>
-                <Col xs={2}>
-                  <CustomButtonGroup fileData={fileData} />
-                </Col>
+                    )}
+                  </Col>
+                  <Col xs={2}>
+                    <CustomButtonGroup fileData={fileData} />
+                  </Col>
+                </div>
               </div>
             </div>
           </div>

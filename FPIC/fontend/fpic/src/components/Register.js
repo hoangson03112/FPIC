@@ -1,14 +1,19 @@
 import React, { useState } from "react";
-import "./Login.css";
+import "./Register.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-function Login() {
+function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false); // Thêm trạng thái cho việc đã gửi biểu mẫu
 
   const validate = () => {
     let valid = true;
@@ -27,13 +32,26 @@ function Login() {
       setPasswordError("");
     }
 
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match.");
+      valid = false;
+    } else {
+      setConfirmPasswordError("");
+    }
+
+    if (!termsChecked) {
+      valid = false;
+    }
+
     return valid;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setFormSubmitted(true); // Đánh dấu đã gửi biểu mẫu
+
     if (validate()) {
-      // Submit the form or handle login logic
+      // Xử lý logic đăng ký
     }
   };
 
@@ -41,8 +59,12 @@ function Login() {
     setPasswordVisible(!passwordVisible);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordVisible(!confirmPasswordVisible);
+  };
+
   return (
-    <div className="bg-image-login">
+    <div className="bg-image-register">
       <form className="form" onSubmit={handleSubmit}>
         <div className="flex-column">
           <label>Email </label>
@@ -96,21 +118,61 @@ function Login() {
           {passwordError && <p className="error-message">{passwordError}</p>}
         </div>
 
-        <div className="flex-row">
-          <div>
-            <input type="checkbox" />
-            <label style={{ marginLeft: 10 }}>Remember me </label>
+        <div className="flex-column">
+          <label>Confirm Password </label>
+          <div className="inputForm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi bi-lock-fill"
+              viewBox="0 0 16 16"
+            >
+              <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2" />
+            </svg>
+            <input
+              type={confirmPasswordVisible ? "text" : "password"}
+              className="input"
+              placeholder="Confirm your Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <span
+              onClick={toggleConfirmPasswordVisibility}
+              className="eye-icon"
+            >
+              {confirmPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
-          <Link className="span" to={"/auth/forgotpass"}>
-            Forgot password?
-          </Link>
+          {confirmPasswordError && (
+            <p className="error-message">{confirmPasswordError}</p>
+          )}
         </div>
 
-        <button className="button-submit">Sign In</button>
+        <div className="flex-row">
+          <div>
+            <input
+              type="checkbox"
+              checked={termsChecked}
+              onChange={(e) => setTermsChecked(e.target.checked)}
+            />
+            <label style={{ marginLeft: 10 }}>
+              I agree to the terms and conditions
+            </label>
+          </div>
+        </div>
+        {formSubmitted && !termsChecked && (
+          <p className="error-message">
+            You must agree to the terms and conditions.
+          </p>
+        )}
+
+        <button className="button-submit">Register</button>
         <p className="p">
-          Don't have an account?{" "}
-          <Link className="span" to={"/auth/signup"}>
-            Sign Up
+          Already have an account?{" "}
+          <Link className="span" to="/auth/login">
+            Log In
           </Link>
         </p>
       </form>
@@ -118,4 +180,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;

@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
 import MyAccount from "./components/MyAccount";
+import Register from "./components/Register";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -16,7 +17,9 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}></Route>
+        <Route path="/page/:currentPage" element={<App />} />
         <Route path="/auth/login" element={<Login />}></Route>
+        <Route path="/auth/signup" element={<Register />}></Route>
         <Route path="/profile" element={<Profile />}></Route>
         <Route path="/myaccount" element={<MyAccount />}></Route>
         <Route></Route>

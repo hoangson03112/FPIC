@@ -33,7 +33,7 @@ const AccountMenu = () => {
         <Col xs={1}>
           <Link to={"/"}>
             <Image
-              src="logo192.png"
+              src="/logo192.png"
               style={{
                 width: "60%",
               }}
@@ -98,6 +98,7 @@ const AccountMenu = () => {
             to="/contact"
             style={{
               textDecoration: "none",
+              color: "white",
             }}
           >
             Contact
@@ -123,7 +124,9 @@ const AccountMenu = () => {
               <div className="avatar">M</div>
             </button>
 
-            <div style={{ marginLeft: "10px", textAlign: "left" }}>
+            <div
+              style={{ marginLeft: "10px", textAlign: "left", color: "white" }}
+            >
               <div>User name</div>
               <div>User</div>
             </div>
