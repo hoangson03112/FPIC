@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./App.css";
-import CustomButtonGroup from "./ButtonColor";
+import CustomButtonGroup from "./ButtonColor"; // Đảm bảo đúng tên và đường dẫn
 import Header from "./elements/Header";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import ScrollToTopButton from "./elements/ScrollToTopButton";
+import ScrollToTopButton from "./elements/ScrollToTopButton"; // Đảm bảo đúng tên và đường dẫn
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 function App() {
   const { currentPage = 1 } = useParams();
@@ -18,10 +19,12 @@ function App() {
   const [resetKey, setResetKey] = useState(0);
   const [fileData, setFileData] = useState(null);
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [classes, setClasses] = useState([]); // Thêm dòng này
 
   const toggleMenu = () => {
     setMenuOpen(!isMenuOpen);
   };
+
   const handlePreviousImage = () => {
     if (selectedImageIndex > 0) {
       handleImageClick(selectedImageIndex - 1);
@@ -45,9 +48,36 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:9999/get-classes")
+      .then((response) => {
+        setClasses(response.data.jsonData.classes);
+      })
+      .catch((error) => {
+        console.error("Error fetching classes:", error);
+      });
+  }, []);
+
+  const classIds = fileData?.objects?.map((object) => object.classId);
+  const filteredClasses = classes?.filter((classItem) =>
+    classIds?.includes(classItem.id)
+  );
+  console.log(classes);
+
   const indexOfLastImage = page * imagesPerPage;
   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
   const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+
+  const [likedImages, setLikedImages] = useState(
+    Array(images.length).fill(false)
+  );
+
+  const toggleLike = (index) => {
+    const newLikedImages = [...likedImages];
+    newLikedImages[index] = !newLikedImages[index];
+    setLikedImages(newLikedImages);
+  };
 
   const handleImageClick = (index) => {
     setSelectedImageIndex(index);
@@ -102,33 +132,61 @@ function App() {
           <Col className={`main-content ${isMenuOpen ? "shrinked" : ""}`}>
             <div className="App">
               <div className="image-grid">
-                {currentImages.map((image, index) => (
-                  <Card
-                    key={index}
-                    className="m-2"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleImageClick(indexOfFirstImage + index)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#imageModal"
-                  >
-                    <Card.Img
-                      variant="top"
-                      src={image?.img1}
-                      alt={image?.name}
-                      style={{
-                        width: "100%",
-                        height: "150px",
-                        objectFit: "cover",
-                      }}
-                    />
-                    <Card.Body>
-                      <Card.Title>{image?.name}</Card.Title>
-                      <Card.Text>
-                        Some quick example text to build on the card title.
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                ))}
+                {currentImages.map((image, index) => {
+                  let createdAt;
+                  try {
+                    if (fileData?.objects?.createdAt) {
+                      console.log("Raw createdAt value:", image.createdAt);
+                      createdAt = parseISO(image.createdAt);
+                      console.log("Parsed createdAt value:", createdAt);
+                    }
+                  } catch (error) {
+                    console.error("Invalid date format:", image?.createdAt);
+                    createdAt = null;
+                  }
+
+                  return (
+                    <Card key={index} className="m-2">
+                      <Card.Img
+                        variant="top"
+                        src={image?.img1}
+                        alt={image?.name}
+                        data-bs-toggle="modal"
+                        data-bs-target="#imageModal"
+                        onClick={() => handleImageClick(index)}
+                        style={{
+                          cursor: "pointer",
+                          width: "100%",
+                          height: "150px",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <Card.Body>
+                        <Card.Title>{image?.name}</Card.Title>
+                        <Card.Text>
+                          {createdAt
+                            ? `Đã đăng: ${formatDistanceToNow(createdAt, {
+                                addSuffix: true,
+                              })}`
+                            : "Ngày đăng không hợp lệ"}
+                        </Card.Text>
+                        <Card.Text>
+                          Some quick example text to build on the card title.
+                        </Card.Text>
+                        <button
+                          className={`btnn ${
+                            likedImages[index]
+                              ? "btn-success"
+                              : "btn-outline-primary"
+                          }`}
+                          onClick={() => toggleLike(index)}
+                        >
+                          {likedImages[index] ? "Đã thích" : "Thích"}
+                        </button>
+                      </Card.Body>
+                    </Card>
+                  );
+                })}
               </div>
               <Row className="pagination justify-content-center">
                 <Col xs={3}>
@@ -201,8 +259,7 @@ function App() {
                   </button>
                 </Col>
               </Row>
-
-              <ScrollToTopButton />
+              <ScrollToTopButton /> {/* Đảm bảo đúng tên và đường dẫn */}
               <div
                 className="modal fade"
                 id="imageModal"
@@ -243,15 +300,15 @@ function App() {
                                   width="16"
                                   height="16"
                                   fill="currentColor"
-                                  class="bi bi-chevron-double-left"
+                                  className="bi bi-chevron-double-left"
                                   viewBox="0 0 16 16"
                                 >
                                   <path
-                                    fill-rule="evenodd"
+                                    fillRule="evenodd"
                                     d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
                                   />
                                   <path
-                                    fill-rule="evenodd"
+                                    fillRule="evenodd"
                                     d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
                                   />
                                 </svg>
@@ -281,15 +338,15 @@ function App() {
                                   width="16"
                                   height="16"
                                   fill="currentColor"
-                                  class="bi bi-chevron-double-right"
+                                  className="bi bi-chevron-double-right"
                                   viewBox="0 0 16 16"
                                 >
                                   <path
-                                    fill-rule="evenodd"
+                                    fillRule="evenodd"
                                     d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"
                                   />
                                   <path
-                                    fill-rule="evenodd"
+                                    fillRule="evenodd"
                                     d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"
                                   />
                                 </svg>

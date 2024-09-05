@@ -32,7 +32,7 @@ function CustomButtonGroup({ fileData }) {
   const filteredClasses = classes?.filter((classItem) =>
     classIds?.includes(classItem.id)
   );
-
+  console.log(filteredClasses);
   return (
     <div className="mt-5">
       <span className="text-body-tertiary ">

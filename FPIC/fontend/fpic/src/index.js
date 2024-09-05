@@ -23,6 +23,10 @@ root.render(
         <Route path="/auth/signup" element={<Register />}></Route>
         <Route path="/profile" element={<Profile />}></Route>
         <Route path="/myaccount" element={<MyAccount />}></Route>
+        <Route path="/myaccount/dashboard" element={<MyAccount />}></Route>
+        <Route path="/myaccount/manageAccount" element={<MyAccount />}></Route>
+        <Route path="/myaccount/images" element={<MyAccount />}></Route>
+        <Route path="/myaccount/fllists" element={<MyAccount />}></Route>
         <Route></Route>
         <Route></Route>
         <Route></Route>
