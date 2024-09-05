@@ -94,9 +94,9 @@
   position: absolute; /* Thay đổi từ absolute sang fixed */
   top: 58px; /* Điều chỉnh vị trí tùy theo nhu cầu */
   right: 20px; /* Điều chỉnh khoảng cách từ cạnh phải */
-  background-color: rgba(255, 255, 255, 0.2); /* Nền mờ với độ trong suốt */
-  backdrop-filter: blur(10px);
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.32);
+  background-color: rgba(0, 0, 0, 0.774); /* Nền mờ với độ trong suốt */
+  backdrop-filter: blur(1000px);
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.32);
   margin-top: 8px;
   border-radius: 4px;
   overflow: visible;
@@ -157,10 +157,12 @@
   width: 4px;
 }
 .account-menu {
-  background-color: transparent; /* Nền mờ với màu trắng */
+  background-color: rgba(2, 0, 0, 0.2); /* Nền mờ với độ trong suốt */
+  backdrop-filter: blur(90px);
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 5); /* Bóng đổ mềm mại để header nổi lên */
   padding: 10px 20px; /* Tạo khoảng đệm bên trong */
   top: 0;
   width: 100%;
   z-index: 1000;
+  height: 80px;
 }

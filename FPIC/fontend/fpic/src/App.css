@@ -46,15 +46,15 @@
 }
 
 /* Nền mờ cho card-body */
-.card-body {
+.main-content .card-body {
   background-color: transparent !important;
   text-align: start;
 }
 
 /* Thay đổi màu văn bản trong card */
-.card-body .card-title,
-.card-body .card-text {
-  color: #fff; /* Màu văn bản trắng */
+.main-content .card-body .card-title,
+.main-content .card-body .card-text {
+  color: #ffffff; /* Màu văn bản trắng */
 }
 
 /* Background image for the entire app */
@@ -83,12 +83,6 @@
   margin-top: 50px;
   transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
 }
-
-/* App container */
-.App {
-  margin-top: 50px;
-  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
-}
 .pagination {
   display: flex;
   justify-content: center; /* Căn giữa theo chiều ngang */
@@ -103,4 +97,48 @@
 }
 .btn-custom svg {
   margin: 0;
+}
+.account-menu {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* Màu nền cho header */
+  z-index: 1000; /* Đảm bảo header nằm trên các phần tử khác */
+  width: 100%; /* Header chiếm toàn bộ chiều rộng */
+  border-bottom: 1px solid #ddd; /* Đường viền dưới */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bóng cho hiệu ứng nổi */
+  transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu nền khi cuộn */
+}
+
+/* Các lớp khác trong Header.css giữ nguyên */
+
+/* App.css */
+.side-menu {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  height: 100%;
+  width: 250px; /* Chiều rộng của menu thanh trượt */
+  background-color: rgba(0, 0, 0, 0.425); /* Nền mờ với độ trong suốt */
+  backdrop-filter: blur(1000px);
+  color: white;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease; /* Hiệu ứng chuyển động khi mở/đóng menu */
+  overflow-y: auto; /* Cuộn khi nội dung nhiều hơn chiều cao của menu */
+  z-index: 999; /* Đảm bảo menu nằm trên nội dung */
+}
+
+/* Menu mở */
+.side-menu.open {
+  transform: translateX(0);
+}
+
+/* Nội dung chính thu hẹp */
+.main-content {
+  transition: margin-left 0.3s ease; /* Hiệu ứng chuyển động khi nội dung thu hẹp */
+  margin-left: 0; /* Giá trị mặc định khi menu đóng */
+}
+
+/* Nội dung thu hẹp khi menu mở */
+.main-content.shrinked {
+  margin-left: 250px; /* Độ rộng của menu thanh trượt */
 }
