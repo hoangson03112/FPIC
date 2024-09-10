@@ -135,13 +135,14 @@ app.post("/login", async (req, res) => {
   }
 });
 app.get("/authentication", async (req, res) => {
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmRmYTkwMzhiNTRmMzg2Y2UxMDIzNzMiLCJpYXQiOjE3MjU5NTI3MTEsImV4cCI6MTcyNTk2MzUxMX0.EyWjg3YQQRH23mvHh7ZxkYpmh2DUok-u5_NQwIXiGTE";
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
-    return { message: "Chưa đăng nhập", status: 401 };
+    return res
+      .status(401)
+      .json({ status: "error", message: "No token provided" });
   }
-  const data = jwt.verify(token, "sown");
 
+  const data = jwt.verify(token, "sown");
   const account = await Account.findById(data._id);
 
   res.json({

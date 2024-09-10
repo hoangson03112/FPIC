@@ -4,16 +4,23 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Col, Container, Row, Image } from "react-bootstrap";
 import AccountContext from "../http/AccountContext";
-
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 const AccountMenu = ({ onToggleMenu }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const [account, setAccount] = useState({});
 
+  const navigate = useNavigate();
   const handleClick = (event) => {
     // Ngăn sự kiện tiếp tục từ nút avatar, không để nó gây ra sự kiện "outside click"
     event.stopPropagation();
     setIsOpen((prev) => !prev);
+  };
+  const handleLogout = () => {
+    Cookies.remove("token");
+    navigate("/");
+    window.location.reload();
   };
   useEffect(() => {
     const fetchData = async () => {
@@ -183,7 +190,7 @@ const AccountMenu = ({ onToggleMenu }) => {
 
                     <div className="menu-item">
                       <div className="menu-icon">🚪</div>
-                      <Link to="/logout" className="lik">
+                      <Link to="/" className="lik" onClick={handleLogout}>
                         Logout
                       </Link>
                     </div>
