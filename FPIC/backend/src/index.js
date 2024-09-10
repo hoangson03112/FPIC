@@ -33,7 +33,7 @@ app.post("/get-json-file", (req, res) => {
   const { fileName } = req.body; // Lấy tên file từ request body
 
   const filePath = path.join(
-    "D:\\downloads\\Git\\FPIC\\FPIC\\backend\\src\\ann",
+    "D:\\Git\\FPIC\\FPIC\\backend\\src\\ann",
     fileName + ".json"
   ); // Đường dẫn đến file
 
@@ -64,10 +64,7 @@ app.post("/get-json-file", (req, res) => {
 });
 app.get("/get-classes", (req, res) => {
   // Xác định đường dẫn tới file JSON cố định
-  const filePath = path.join(
-    "D:\\downloads\\Git\\FPIC\\FPIC\\backend\\src",
-    "meta.json"
-  );
+  const filePath = path.join("D:\\Git\\FPIC\\FPIC\\backend\\src", "meta.json");
 
   // Kiểm tra xem file có tồn tại không
   fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -91,6 +88,14 @@ app.get("/get-classes", (req, res) => {
     });
   });
 });
+
+
+
+
+
+
+
+
 
 app.use("/images", express.static(IMAGES_DIR));
 

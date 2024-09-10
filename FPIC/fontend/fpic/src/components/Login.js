@@ -10,36 +10,14 @@ function Login() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const validate = () => {
-    let valid = true;
-
-    if (!email) {
-      setEmailError("Email is required.");
-      valid = false;
-    } else {
-      setEmailError("");
-    }
-
-    if (!password) {
-      setPasswordError("Password is required.");
-      valid = false;
-    } else {
-      setPasswordError("");
-    }
-
-    return valid;
-  };
-
   const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validate()) {
-      // Submit the form or handle login logic
-    }
+    
   };
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+
 
   return (
     <div className="bg-image-login">
@@ -64,6 +42,7 @@ function Login() {
               placeholder="Enter your Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
           {emailError && <p className="error-message">{emailError}</p>}
@@ -88,6 +67,7 @@ function Login() {
               placeholder="Enter your Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <span onClick={togglePasswordVisibility} className="eye-icon">
               {passwordVisible ? <FaEyeSlash /> : <FaEye />}

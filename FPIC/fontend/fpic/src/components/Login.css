@@ -128,7 +128,7 @@
   margin-top: 5px;
 }
 .bg-image-login {
-  background-image: url("D:\downloads\Git\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg"); /* Sử dụng đường dẫn tương đối */
+  background-image: url("D:\Git\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg"); /* Sử dụng đường dẫn tương đối */
   background-size: cover;
   background-position: center;
   background-attachment: fixed; /* Nền cố định khi cuộn */
