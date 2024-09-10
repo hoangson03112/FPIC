@@ -2,28 +2,73 @@ import React, { useState } from "react";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-
-  const handleSubmit = (e) => {
-    
+  const navigate = useNavigate(); // Khai báo useNavigate
+  // Validate email format
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Validate email format
+    if (!validateEmail(email)) {
+      setEmailError("Invalid email format.");
+      return;
+    } else {
+      setEmailError("");
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters long.");
+      return;
+    } else {
+      setPasswordError("");
+    }
+
+    try {
+      const response = await axios.post("http://localhost:9999/login", {
+        email,
+        password,
+      });
+      if (response.data.status) {
+        Cookies.set("token", response.data.token, { expires: 7 }); // Cookie tồn tại trong 7 ngày
+
+        alert("Login successful and token saved!");
+        navigate("/");
+      } else {
+        alert("Login failed");
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setEmailError("Invalid email or password.");
+      } else {
+        setEmailError("An error occurred. Please try again.");
+      }
+    }
+  };
+
+  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-
   return (
     <div className="bg-image-login">
       <form className="form" onSubmit={handleSubmit}>
+        {/* Email Input */}
         <div className="flex-column">
-          <label>Email </label>
+          <label>Email</label>
           <div className="inputForm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -39,6 +84,7 @@ function Login() {
             <input
               type="text"
               className="input"
+              name="email"
               placeholder="Enter your Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -48,8 +94,9 @@ function Login() {
           {emailError && <p className="error-message">{emailError}</p>}
         </div>
 
+        {/* Password Input */}
         <div className="flex-column">
-          <label>Password </label>
+          <label>Password</label>
           <div className="inputForm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -64,6 +111,7 @@ function Login() {
             <input
               type={passwordVisible ? "text" : "password"}
               className="input"
+              name="password"
               placeholder="Enter your Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -76,17 +124,21 @@ function Login() {
           {passwordError && <p className="error-message">{passwordError}</p>}
         </div>
 
+        {/* Remember Me and Forgot Password */}
         <div className="flex-row">
           <div>
             <input type="checkbox" />
-            <label style={{ marginLeft: 10 }}>Remember me </label>
+            <label style={{ marginLeft: 10 }}>Remember me</label>
           </div>
           <Link className="span" to={"/auth/forgotpass"}>
             Forgot password?
           </Link>
         </div>
 
+        {/* Submit Button */}
         <button className="button-submit">Sign In</button>
+
+        {/* Sign Up Link */}
         <p className="p">
           Don't have an account?{" "}
           <Link className="span" to={"/auth/signup"}>

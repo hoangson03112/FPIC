@@ -3,10 +3,12 @@ import "./Header.css";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Col, Container, Row, Image } from "react-bootstrap";
+import AccountContext from "../http/AccountContext";
 
 const AccountMenu = ({ onToggleMenu }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
+  const [account, setAccount] = useState({});
 
   const handleClick = (event) => {
     // Ngăn sự kiện tiếp tục từ nút avatar, không để nó gây ra sự kiện "outside click"
@@ -14,16 +16,31 @@ const AccountMenu = ({ onToggleMenu }) => {
     setIsOpen((prev) => !prev);
   };
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await AccountContext.Authentication(); // Đảm bảo Authentication là một hàm async
+        setAccount(data.account);
+      } catch (error) {
+        console.error("Error during authentication:", error);
+      }
+    };
+
+    fetchData(); // Gọi hàm async
+
+    // Hàm xử lý sự kiện click bên ngoài
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
+
     document.addEventListener("click", handleClickOutside);
+
+    // Dọn dẹp sự kiện khi component bị unmount
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  }, []); // Chạy effect chỉ một lần khi component mount
 
   return (
     <Container fluid className="account-menu">
@@ -129,7 +146,7 @@ const AccountMenu = ({ onToggleMenu }) => {
               alignItems: "center",
             }}
           >
-            {isOpen ? (
+            {account?.fullName ? (
               <div>
                 <button
                   onClick={handleClick}
@@ -147,30 +164,31 @@ const AccountMenu = ({ onToggleMenu }) => {
                     color: "white",
                   }}
                 >
-                  <div>User name</div>
-                  <div>User</div>
+                  <div>{account?.fullName}</div>
                 </div>
-                <div id="account-menu" className="menu" ref={menuRef}>
-                  <div className="menu-item">
-                    <div className="menu-item-avatar" />
-                    <Link to="/profile" className="lik">
-                      Profile
-                    </Link>
-                  </div>
-                  <div className="menu-item">
-                    <div className="menu-item-avatar" />
-                    <Link to="/myaccount" className="lik">
-                      My Account
-                    </Link>
-                  </div>
+                {isOpen && (
+                  <div id="account-menu" className="menu" ref={menuRef}>
+                    <div className="menu-item">
+                      <div className="menu-item-avatar" />
+                      <Link to="/profile" className="lik">
+                        Profile
+                      </Link>
+                    </div>
+                    <div className="menu-item">
+                      <div className="menu-item-avatar" />
+                      <Link to="/myaccount" className="lik">
+                        My Account
+                      </Link>
+                    </div>
 
-                  <div className="menu-item">
-                    <div className="menu-icon">🚪</div>
-                    <Link to="/logout" className="lik">
-                      Logout
-                    </Link>
+                    <div className="menu-item">
+                      <div className="menu-icon">🚪</div>
+                      <Link to="/logout" className="lik">
+                        Logout
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <a href="/auth/login">Đăng nhập</a>

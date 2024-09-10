@@ -4,13 +4,22 @@ const cors = require("cors");
 const path = require("path");
 const IMAGES_DIR = path.join(__dirname, "img");
 const fs = require("fs");
+const db = require("./config/db/index");
+const Account = require("./Model/Account");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
+
 app.use(express.json());
-
+db.connect();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ extended: true }));
-
+app.use(cookieParser());
 app.get("/images", (req, res) => {
   fs.readdir(IMAGES_DIR, (err, files) => {
     if (err) {
@@ -89,14 +98,57 @@ app.get("/get-classes", (req, res) => {
   });
 });
 
+app.post("/login", async (req, res) => {
+  try {
+    let data = req.body;
 
+    const account = await Account.findOne({
+      email: data.email,
+      password: data.password,
+    });
 
+    if (account) {
+      if (account.status === "active") {
+        const token = jwt.sign({ _id: account._id }, "sown", {
+          expiresIn: "3h",
+        });
+        return res.json({
+          status: "success",
+          message: "Login successful",
+          token,
+        });
+      }
+      if (account.status === "inactive") {
+        return res.json({
+          status: "inactive",
+          message: "Tài khoản chưa được kích hoạt",
+        });
+      }
+    } else {
+      return res.status(401).json({
+        status: "login",
+        message: "Sai tên đăng nhập hoặc email",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ status: "error", message: "Server error" });
+  }
+});
+app.get("/authentication", async (req, res) => {
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmRmYTkwMzhiNTRmMzg2Y2UxMDIzNzMiLCJpYXQiOjE3MjU5NTI3MTEsImV4cCI6MTcyNTk2MzUxMX0.EyWjg3YQQRH23mvHh7ZxkYpmh2DUok-u5_NQwIXiGTE";
+  if (!token) {
+    return { message: "Chưa đăng nhập", status: 401 };
+  }
+  const data = jwt.verify(token, "sown");
 
+  const account = await Account.findById(data._id);
 
-
-
-
-
+  res.json({
+    status: "success",
+    account: { fullName: account?.fullName, avatar: account?.avatar },
+  });
+});
 app.use("/images", express.static(IMAGES_DIR));
 
 app.listen(9999, () => console.log("Server is running on port 9999"));
