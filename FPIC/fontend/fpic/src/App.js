@@ -7,7 +7,6 @@ import Header from "./elements/Header";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import ScrollToTopButton from "./elements/ScrollToTopButton";
-import { Button } from "bootstrap/dist/js/bootstrap.bundle.min";
 
 function App() {
   const { currentPage = 1 } = useParams();
@@ -80,7 +79,6 @@ function App() {
           fileName: selectedImage.name,
         })
         .then((response) => {
-
           setFileData(response.data.jsonData);
         })
         .catch((error) => {

@@ -3,7 +3,6 @@ import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
@@ -17,7 +16,6 @@ function Login() {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Validate email format
@@ -41,11 +39,12 @@ function Login() {
         email,
         password,
       });
-      if (response.data.status) {
-        Cookies.set("token", response.data.token, { expires: 7 }); // Cookie tồn tại trong 7 ngày
 
-        alert("Login successful and token saved!");
+      if (response.data.status === "success") {
+        localStorage.setItem("token", response.data.token);
         navigate("/");
+      } else if (response.data.status === "inactive") {
+        alert(response.data.message); // Hiển thị thông báo tài khoản chưa được kích hoạt
       } else {
         alert("Login failed");
       }

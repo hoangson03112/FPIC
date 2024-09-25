@@ -4,21 +4,21 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Col, Container, Row, Image } from "react-bootstrap";
 import AccountContext from "../http/AccountContext";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-const AccountMenu = ({ onToggleMenu }) => {
+
+const Header = ({ onToggleMenu }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const [account, setAccount] = useState({});
 
   const navigate = useNavigate();
   const handleClick = (event) => {
-    // Ngăn sự kiện tiếp tục từ nút avatar, không để nó gây ra sự kiện "outside click"
     event.stopPropagation();
     setIsOpen((prev) => !prev);
   };
   const handleLogout = () => {
-    Cookies.remove("token");
+    localStorage.removeItem("token");
+
     navigate("/");
     window.location.reload();
   };
@@ -26,6 +26,7 @@ const AccountMenu = ({ onToggleMenu }) => {
     const fetchData = async () => {
       try {
         const data = await AccountContext.Authentication(); // Đảm bảo Authentication là một hàm async
+
         setAccount(data.account);
       } catch (error) {
         console.error("Error during authentication:", error);
@@ -34,7 +35,6 @@ const AccountMenu = ({ onToggleMenu }) => {
 
     fetchData(); // Gọi hàm async
 
-    // Hàm xử lý sự kiện click bên ngoài
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -47,7 +47,7 @@ const AccountMenu = ({ onToggleMenu }) => {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []); // Chạy effect chỉ một lần khi component mount
+  }, []);
 
   return (
     <Container fluid className="account-menu">
@@ -153,7 +153,7 @@ const AccountMenu = ({ onToggleMenu }) => {
               alignItems: "center",
             }}
           >
-            {account?.fullName ? (
+            {account?.lastName && account?.firstName ? (
               <div>
                 <button
                   onClick={handleClick}
@@ -171,7 +171,7 @@ const AccountMenu = ({ onToggleMenu }) => {
                     color: "white",
                   }}
                 >
-                  <div>{account?.fullName}</div>
+                  <div>{account?.lastName + " " + account?.firstName}</div>
                 </div>
                 {isOpen && (
                   <div id="account-menu" className="menu" ref={menuRef}>
@@ -183,7 +183,7 @@ const AccountMenu = ({ onToggleMenu }) => {
                     </div>
                     <div className="menu-item">
                       <div className="menu-item-avatar" />
-                      <Link to="/myaccount" className="lik">
+                      <Link to="/my-account" className="lik">
                         My Account
                       </Link>
                     </div>
@@ -207,4 +207,4 @@ const AccountMenu = ({ onToggleMenu }) => {
   );
 };
 
-export default AccountMenu;
+export default Header;

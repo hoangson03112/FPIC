@@ -5,11 +5,11 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
-import MyAccount from "./components/MyAccount";
 import Register from "./components/Register";
+import ManageAccount from "./components/ManageAccount";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -21,9 +21,11 @@ root.render(
         <Route path="/home/page/:currentPage" element={<App />} />
         <Route path="/auth/login" element={<Login />}></Route>
         <Route path="/auth/signup" element={<Register />}></Route>
-        <Route path="/profile" element={<Profile />}></Route>
-        <Route path="/myaccount" element={<MyAccount />}></Route>
-        <Route></Route>
+        <Route path="/my-account" element={<Profile />}></Route>
+        <Route
+          path="/admin/manager-account"
+          element={<ManageAccount />}
+        ></Route>
         <Route></Route>
         <Route></Route>
         <Route></Route>

@@ -38,14 +38,6 @@
   margin: 0; /* Loại bỏ khoảng cách ngoài cho modal */
 }
 
-.modal-content {
-  height: 100vh; /* Fullscreen height */
-  display: flex;
-  flex-direction: column;
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-/* Nền mờ cho card-body */
 .main-content .card-body {
   background-color: transparent !important;
   text-align: start;
