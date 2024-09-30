@@ -179,9 +179,13 @@ const ManageAccount = () => {
         </Row>
       )}
       <Row>
-        <Col>
-          <Table striped bordered hover>
-            <thead>
+        <Col className="card p-0">
+          <Table
+            className="table align-middle  shadow-sm p-0 m-0"
+            bordered
+            hover
+          >
+            <thead className="table-light">
               <tr className="text-center">
                 <th>#</th>
                 <th>Tên</th>
@@ -194,14 +198,13 @@ const ManageAccount = () => {
             </thead>
             <tbody>
               {filteredAccounts.map((account, index) => (
-                <tr key={account?._id} className="text-center">
+                <tr key={account?._id} className="text-center align-middle">
                   <td>{index + 1}</td>
                   <td>{account?.firstName}</td>
                   <td>{account?.lastName}</td>
                   <td>{account?.email}</td>
                   <td>{account?.role}</td>
                   <td>{account?.status}</td>
-
                   <td>
                     <Button
                       variant="warning"
@@ -232,61 +235,72 @@ const ManageAccount = () => {
       </Row>
 
       {/* Modal thêm tài khoản mới */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Tạo tài khoản mới</Modal.Title>
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header
+          closeButton
+          className="bg-primary text-white py-3"
+          style={{ borderRadius: "0.5rem 0.5rem 0 0" }}
+        >
+          <Modal.Title className="mx-auto">Tạo tài khoản mới</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="px-4 py-5">
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Tên tài khoản</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">
+                Tên tài khoản
+              </Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Nhập tên tài khoản"
+                className="form-control-lg rounded-pill"
                 value={newAccount.username}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, username: e.target.value })
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Mật khẩu</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Mật khẩu</Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Nhập mật khẩu"
+                className="form-control-lg rounded-pill"
                 value={newAccount.password}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, password: e.target.value })
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Tên</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Tên</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Nhập tên"
+                className="form-control-lg rounded-pill"
                 value={newAccount.firstName}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, firstName: e.target.value })
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Họ</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Họ</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Nhập họ"
+                className="form-control-lg rounded-pill"
                 value={newAccount.lastName}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, lastName: e.target.value })
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Email</Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Nhập email"
+                className="form-control-lg rounded-pill"
                 value={newAccount.email}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, email: e.target.value })
@@ -295,28 +309,50 @@ const ManageAccount = () => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+        <Modal.Footer
+          className="d-flex justify-content-center py-3"
+          style={{ borderRadius: "0 0 0.5rem 0.5rem" }}
+        >
+          <Button
+            variant="outline-secondary"
+            className="rounded-pill px-4 py-2"
+            onClick={() => setShowModal(false)}
+          >
             Hủy
           </Button>
-          <Button variant="primary" onClick={handleCreateAccount}>
+          <Button
+            variant="primary"
+            className="rounded-pill px-4 py-2 ml-2"
+            onClick={handleCreateAccount}
+          >
             Tạo
           </Button>
         </Modal.Footer>
       </Modal>
 
       {/* Modal cập nhật tài khoản */}
-      <Modal show={showUpdateModal} onHide={() => setShowUpdateModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Cập nhật tài khoản</Modal.Title>
+      <Modal
+        show={showUpdateModal}
+        onHide={() => setShowUpdateModal(false)}
+        centered
+      >
+        <Modal.Header
+          closeButton
+          className="bg-info text-white py-3"
+          style={{ borderRadius: "0.5rem 0.5rem 0 0" }}
+        >
+          <Modal.Title className="mx-auto">Cập nhật tài khoản</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="px-4 py-5">
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Tên tài khoản</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">
+                Tên tài khoản
+              </Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Nhập tên tài khoản"
+                className="form-control-lg rounded-pill"
                 value={accountUpdated.username}
                 onChange={(e) =>
                   setAccountUpdated({
@@ -326,12 +362,12 @@ const ManageAccount = () => {
                 }
               />
             </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Tên</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Tên</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Nhập tên"
+                className="form-control-lg rounded-pill"
                 value={accountUpdated.firstName}
                 onChange={(e) =>
                   setAccountUpdated({
@@ -341,11 +377,12 @@ const ManageAccount = () => {
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Họ</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Họ</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Nhập họ"
+                className="form-control-lg rounded-pill"
                 value={accountUpdated.lastName}
                 onChange={(e) =>
                   setAccountUpdated({
@@ -355,11 +392,12 @@ const ManageAccount = () => {
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Email</Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Nhập email"
+                className="form-control-lg rounded-pill"
                 value={accountUpdated.email}
                 onChange={(e) =>
                   setAccountUpdated({
@@ -369,11 +407,10 @@ const ManageAccount = () => {
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Tình trạng</Form.Label>
-
-              <div className="radio-inputs">
-                <label>
+            <Form.Group className="">
+              <Form.Label className="font-weight-bold">Tình trạng</Form.Label>
+              <div className="radio-inputs d-flex  mt-3">
+                <label className="radio-tile-container">
                   <input
                     className="radio-input"
                     type="radio"
@@ -391,7 +428,7 @@ const ManageAccount = () => {
                     <span className="radio-label">Inactive</span>
                   </span>
                 </label>
-                <label>
+                <label className="radio-tile-container">
                   <input
                     className="radio-input"
                     type="radio"
@@ -413,11 +450,22 @@ const ManageAccount = () => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowUpdateModal(false)}>
+        <Modal.Footer
+          className="d-flex justify-content-center py-3"
+          style={{ borderRadius: "0 0 0.5rem 0.5rem" }}
+        >
+          <Button
+            variant="outline-secondary"
+            className="rounded-pill px-4 py-2"
+            onClick={() => setShowUpdateModal(false)}
+          >
             Hủy
           </Button>
-          <Button variant="primary" onClick={handleUpdateAccount}>
+          <Button
+            variant="info"
+            className="rounded-pill px-4 py-2 ml-2 text-white"
+            onClick={handleUpdateAccount}
+          >
             Lưu thay đổi
           </Button>
         </Modal.Footer>

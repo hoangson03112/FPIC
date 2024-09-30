@@ -10,7 +10,8 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Register from "./components/Register";
 import ManageAccount from "./components/ManageAccount";
-
+import Layout from "./components/Layout";
+import "bootstrap/dist/css/bootstrap.min.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
@@ -22,14 +23,12 @@ root.render(
         <Route path="/auth/login" element={<Login />}></Route>
         <Route path="/auth/signup" element={<Register />}></Route>
         <Route path="/my-account" element={<Profile />}></Route>
-        <Route
-          path="/admin/manager-account"
-          element={<ManageAccount />}
-        ></Route>
-        <Route></Route>
-        <Route></Route>
-        <Route></Route>
-        <Route></Route>
+        <Route element={<Layout />}>
+          <Route
+            path="/admin/manager-account"
+            element={<ManageAccount />}
+          ></Route>
+        </Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

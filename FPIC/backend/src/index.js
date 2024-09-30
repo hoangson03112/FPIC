@@ -4,11 +4,14 @@ const cors = require("cors");
 const path = require("path");
 const IMAGES_DIR = path.join(__dirname, "img");
 const fs = require("fs");
+
 const db = require("./config/db/index");
 const Account = require("./Model/Account");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
+const axios = require("axios");
+
 
 app.use(cors());
 app.use(express.json());
@@ -22,7 +25,6 @@ app.get("/images", (req, res) => {
       return res.status(500).json({ message: "Error reading directory", err });
     }
 
-    // Lọc các tệp ảnh (định dạng jpg, png, jpeg, v.v.)
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
@@ -35,14 +37,35 @@ app.get("/images", (req, res) => {
 });
 
 app.post("/get-json-file", (req, res) => {
-  const { fileName } = req.body; // Lấy tên file từ request body
+  const { fileName } = req.body;
+  const image = fs.readFileSync(
+    "D:\\Git\\FPIC\\FPIC\\backend\\src\\img\\" + fileName,
+    {
+      encoding: "base64",
+    }
+  );
+  axios({
+    method: "POST",
+    url: "https://detect.roboflow.com/smd-component-detection/12",
+    params: {
+      api_key: "QjtjIH4aUqUR86fVMcZJ",
+    },
+    data: image,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  })
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      console.log(error.message);
+    });
 
   const filePath = path.join(
     "D:\\Git\\FPIC\\FPIC\\backend\\src\\ann",
     fileName + ".json"
-  ); // Đường dẫn đến file
-
-  // Kiểm tra xem file có tồn tại không
+  );
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
       return res.status(404).json({ message: "File not found" });
@@ -68,7 +91,6 @@ app.post("/get-json-file", (req, res) => {
   });
 });
 app.get("/get-classes", (req, res) => {
-  // Xác định đường dẫn tới file JSON cố định
   const filePath = path.join("D:\\Git\\FPIC\\FPIC\\backend\\src", "meta.json");
 
   // Kiểm tra xem file có tồn tại không
@@ -83,7 +105,6 @@ app.get("/get-classes", (req, res) => {
         return res.status(500).json({ error: "Error reading file" });
       }
 
-      // Chuyển đổi dữ liệu JSON từ chuỗi sang object và trả về client
       try {
         const jsonData = JSON.parse(data);
         res.json({ jsonData });
