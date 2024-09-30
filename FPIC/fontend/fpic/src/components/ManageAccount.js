@@ -153,22 +153,50 @@ const ManageAccount = () => {
     <Container>
       <Row className="my-4">
         <Col>
-          <h2>Quản lý tài khoản</h2>
+          <h2 className="text-white">Quản lý tài khoản</h2>
         </Col>
         <Col md={2} className="text-end">
-          <Button variant="primary" onClick={() => setShowModal(true)}>
-            Thêm tài khoản
-          </Button>
+          <button class="animated-button" onClick={() => setShowModal(true)}>
+            <svg
+              viewBox="0 0 20 20"
+              className="arr-2 mt-1 "
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+            <span class="text"> Thêm tài khoản</span>
+            <span class="circle"></span>
+            <svg
+              viewBox="0 0 20 20"
+              className="arr-1 mt-1"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+          </button>
         </Col>
       </Row>
       <Row className="mb-3">
         <Col md={4}>
-          <Form.Control
-            type="text"
-            placeholder="Tìm kiếm theo email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div class="group">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="search-icon">
+              <g>
+                <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+              </g>
+            </svg>
+
+            <input
+              id="query"
+              class="input"
+              type="search"
+              placeholder="Tìm kiếm theo email..."
+              name="searchbar"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </Col>
       </Row>
       {errorMessage && (
@@ -180,57 +208,57 @@ const ManageAccount = () => {
       )}
       <Row>
         <Col className="card p-0">
-          <Table
-            className="table align-middle  shadow-sm p-0 m-0"
-            bordered
-            hover
-          >
-            <thead className="table-light">
-              <tr className="text-center">
-                <th>#</th>
-                <th>Tên</th>
-                <th>Họ</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Tình trạng</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAccounts.map((account, index) => (
-                <tr key={account?._id} className="text-center align-middle">
-                  <td>{index + 1}</td>
-                  <td>{account?.firstName}</td>
-                  <td>{account?.lastName}</td>
-                  <td>{account?.email}</td>
-                  <td>{account?.role}</td>
-                  <td>{account?.status}</td>
-                  <td>
-                    <Button
-                      variant="warning"
-                      className="me-2"
-                      onClick={() => {
-                        setAccountToUpdate(account);
-                        setAccountUpdated({ ...account });
-                        setShowUpdateModal(true);
-                      }}
-                    >
-                      Chỉnh sửa
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => {
-                        setAccountToDelete(account);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      Xóa
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <div className="card-body ">
+            <div className="table-responsive">
+              <table className="table align-middle mb-0 ">
+                <thead className="bg-light ">
+                  <tr className="text-center ">
+                    <th>#</th>
+                    <th>Tên</th>
+                    <th>Họ</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Tình trạng</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAccounts.map((account, index) => (
+                    <tr key={account?._id} className="text-center align-middle">
+                      <td>{index + 1}</td>
+                      <td>{account?.firstName}</td>
+                      <td>{account?.lastName}</td>
+                      <td>{account?.email}</td>
+                      <td>{account?.role}</td>
+                      <td>{account?.status}</td>
+                      <td>
+                        <Button
+                          variant="btn btn-outline-warning"
+                          className="me-2"
+                          onClick={() => {
+                            setAccountToUpdate(account);
+                            setAccountUpdated({ ...account });
+                            setShowUpdateModal(true);
+                          }}
+                        >
+                          Chỉnh sửa
+                        </Button>
+                        <Button
+                          variant="btn btn-outline-danger"
+                          onClick={() => {
+                            setAccountToDelete(account);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          Xóa
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </Col>
       </Row>
 

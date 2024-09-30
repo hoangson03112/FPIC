@@ -109,7 +109,7 @@
   align-items: center;
   font-weight: 500;
   gap: 10px;
-  border: 1px solid #ededef;
+  border: 1px solid;
   cursor: pointer;
   transition: 0.2s ease-in-out;
 }

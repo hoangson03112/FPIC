@@ -9,8 +9,8 @@ const Layout = () => {
   const handleShow = () => setShow(true);
 
   return (
-    <div className="">
-      <span onClick={handleShow}>
+    <div className="bg-dark">
+      <span onClick={handleShow} className="text-white">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="50"
