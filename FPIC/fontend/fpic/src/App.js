@@ -4,9 +4,10 @@ import ZoomableImage from "./ZoomableImage";
 import "./App.css";
 import CustomButtonGroup from "./ButtonColor";
 import Header from "./elements/Header";
-import { Col, Row, Card, Container } from "react-bootstrap";
-import { useParams, useNavigate } from "react-router-dom";
+import { Col, Row, Card, Container, Nav } from "react-bootstrap";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import ScrollToTopButton from "./elements/ScrollToTopButton";
+import { Offcanvas } from "bootstrap/dist/js/bootstrap.bundle.min";
 
 function App() {
   const { currentPage = 1 } = useParams();
@@ -95,7 +96,27 @@ function App() {
     <div className="bg-image">
       <Header onToggleMenu={toggleMenu} />
       <div className={`side-menu ${isMenuOpen ? "open" : "closed"}`}>
-        <div>Menu Content</div>
+        <ul class="">
+          <li class="list-group-item active" aria-current="true">
+            <a href="#"> An active item</a>
+          </li>
+          <li class="list-group-item">
+            {" "}
+            <a href="#"> An active item</a>
+          </li>
+          <li class="list-group-item">
+            {" "}
+            <a href="#"> An active item</a>
+          </li>
+          <li class="list-group-item">
+            {" "}
+            <a href="#"> An active item</a>
+          </li>
+          <li class="list-group-item">
+            {" "}
+            <a href="#"> An active item</a>
+          </li>
+        </ul>
       </div>
       <Container fluid>
         <Row>

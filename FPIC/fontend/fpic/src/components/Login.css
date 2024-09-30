@@ -43,6 +43,7 @@
   border: none;
   width: 85%;
   height: 100%;
+  color: rgb(0, 0, 0) !important;
 }
 
 .input:focus {
