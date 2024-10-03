@@ -1,47 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&family=Matemasie&display=swap");
-.srch {
-  position: relative;
-  --size-button: 45px;
-  color: rgb(255, 255, 255);
-}
 
-.inputsrch {
-  padding-left: var(--size-button);
-  height: 30px;
-  font-size: 15px;
-  border: none;
-  color: #ffffff;
-  outline: none;
-  width: 100%;
-  transition: box-shadow 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.2); /* Nền mờ với độ trong suốt */
-  backdrop-filter: blur(10px);
-  box-shadow: 1.5px 1.5px 3px #0e0e0e, -1.5px -1.5px 3px rgba(95, 94, 94, 0.25),
-    inset 0px 0px 0px #0e0e0e, inset 0px -0px 0px #5f5e5e;
-  border-radius: 50px;
-}
 
-.inputsrch::placeholder {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
 
-.inputsrch:focus,
-.inputsrch:not(:invalid) {
-  width: 100%;
-  box-shadow: 0px 0px 0px #0e0e0e, 0px 0px 0px rgba(95, 94, 94, 0.25),
-    inset 1.5px 1.5px 3px #0e0e0e, inset -1.5px -1.5px 3px #5f5e5e;
-}
 
-.srch .icon {
-  position: absolute;
-  width: var(--size-button);
-  height: var(--size-button);
-  top: -7px;
-  left: -8px;
-  padding: 8px;
-  pointer-events: none;
-}
+
+
 
 .header-end {
   display: flex;
@@ -157,16 +120,16 @@
   width: 4px;
 }
 .account-menu {
-  background-color: rgba(2, 0, 0, 0.2); /* Nền mờ với độ trong suốt */
+
   backdrop-filter: blur(90px);
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 5); /* Bóng đổ mềm mại để header nổi lên */
-  padding: 10px 20px; /* Tạo khoảng đệm bên trong */
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 5); 
+  padding: 10px 20px; 
   top: 0;
   width: 100%;
   z-index: 1000;
   height: 120px;
 }
-/* From Uiverse.io by felipesntr */ 
+/* From Uiverse.io by felipesntr */
 button {
   font-size: 16px;
   position: relative;
@@ -176,17 +139,17 @@ button {
   background: #fff;
   transition: all 0.1s linear;
   box-shadow: 0 0.4em 1em rgba(0, 0, 0, 0.1);
- }
- 
- button:active {
+}
+
+button:active {
   transform: scale(0.95);
- }
- 
- button span {
+}
+
+button span {
   color: #464646;
- }
- 
- button .border {
+}
+
+button .border {
   position: absolute;
   border: 0.15em solid #fff;
   transition: all 0.3s 0.08s linear;
@@ -195,14 +158,14 @@ button {
   width: 9em;
   height: 3em;
   transform: translate(-50%, -50%);
- }
- 
- button:hover .border {
+}
+
+button:hover .border {
   display: block;
   width: 9.9em;
   height: 3.7em;
- }
- 
- .full-rounded {
+}
+
+.full-rounded {
   border-radius: 2em;
- }
+}

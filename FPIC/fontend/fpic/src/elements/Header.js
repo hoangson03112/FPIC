@@ -52,8 +52,8 @@ const Header = ({ onToggleMenu }) => {
   }, []);
 
   return (
-    <Container fluid className="account-menu">
-      <Row className="align-items-center">
+    <Container fluid className="account-menu bg-dark">
+      <Row className="d-flex align-items-center mt-1 ">
         <Col xs={1}>
           <span onClick={onToggleMenu} className="text-white">
             <svg
@@ -72,7 +72,7 @@ const Header = ({ onToggleMenu }) => {
           </span>
         </Col>
 
-        <Col md={10} className="d-flex justify-content-end align-items-center">
+        <Col md={10} className="d-flex justify-content-end mt-2">
           <div
             style={{
               position: "relative",
@@ -84,21 +84,19 @@ const Header = ({ onToggleMenu }) => {
               <div>
                 <button
                   onClick={handleClick}
-                  className="avatar-button pb-1"
+                  className="avatar-button pb-1 m-0"
                   aria-controls={isOpen ? "account-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={isOpen ? "true" : undefined}
                 >
-                  <div className="avatar">M</div>
+                  <div className="avatar">
+                    {account?.firstName?.charAt(0).toUpperCase()}
+                  </div>
                 </button>
-                <div
-                  style={{
-                    marginLeft: "10px",
-                    textAlign: "left",
-                    color: "white",
-                  }}
-                >
-                  <div>{account?.lastName + " " + account?.firstName}</div>
+                <div className="text-center text-white">
+                  <span className="m-0">
+                    {account?.lastName + " " + account?.firstName}
+                  </span>
                 </div>
                 {isOpen && (
                   <div id="account-menu" className="menu" ref={menuRef}>

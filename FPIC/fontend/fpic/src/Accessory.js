@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
-import "./App.css";
+import "./Accessory.css";
 import CustomButtonGroup from "./ButtonColor";
 import Header from "./elements/Header";
-import { Col, Row, Card, Container, Nav } from "react-bootstrap";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { Col, Row, Card, Container } from "react-bootstrap";
+import { useParams, useNavigate } from "react-router-dom";
 import ScrollToTopButton from "./elements/ScrollToTopButton";
-import { Offcanvas } from "bootstrap/dist/js/bootstrap.bundle.min";
 
-function App() {
+function Accessory() {
   const { currentPage = 1 } = useParams();
   const navigate = useNavigate();
   const [images, setImages] = useState([]);
@@ -18,11 +17,7 @@ function App() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [resetKey, setResetKey] = useState(0);
   const [fileData, setFileData] = useState(null);
-  const [isMenuOpen, setMenuOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setMenuOpen(!isMenuOpen);
-  };
   const handlePreviousImage = () => {
     if (selectedImageIndex > 0) {
       handleImageClick(selectedImageIndex - 1);
@@ -59,7 +54,7 @@ function App() {
     if (page > 1) {
       const newPage = page - 1;
       setPage(newPage);
-      navigate(`/home/page/${newPage}`);
+      navigate(`/page/${newPage}`);
     }
   };
 
@@ -67,7 +62,7 @@ function App() {
     if (page < Math.ceil(images.length / imagesPerPage)) {
       const newPage = page + 1;
       setPage(newPage);
-      navigate(`/home/page/${newPage}`);
+      navigate(`/page/${newPage}`);
     }
   };
 
@@ -94,33 +89,9 @@ function App() {
 
   return (
     <div className="bg-image">
-      <Header onToggleMenu={toggleMenu} />
-      <div className={`side-menu ${isMenuOpen ? "open" : "closed"}`}>
-        <ul class="">
-          <li class="list-group-item active" aria-current="true">
-            <a href="#"> An active item</a>
-          </li>
-          <li class="list-group-item">
-            {" "}
-            <a href="/admin/manager-account"> An item</a>
-          </li>
-          <li class="list-group-item">
-            {" "}
-            <a href="#"> An active item</a>
-          </li>
-          <li class="list-group-item">
-            {" "}
-            <a href="#"> An active item</a>
-          </li>
-          <li class="list-group-item">
-            {" "}
-            <a href="#"> An active item</a>
-          </li>
-        </ul>
-      </div>
       <Container fluid>
         <Row>
-          <Col className={`main-content ${isMenuOpen ? "shrinked" : ""}`}>
+          <Col className="main-content">
             <div className="App">
               <div className="image-grid">
                 {currentImages.map((image, index) => (
@@ -370,4 +341,4 @@ function App() {
   );
 }
 
-export default App;
+export default Accessory;

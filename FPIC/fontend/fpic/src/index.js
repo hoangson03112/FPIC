@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
+import Accessory from "./Accessory";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -10,21 +10,27 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Register from "./components/Register";
 import ManageAccount from "./components/ManageAccount";
-import Layout from "./components/Layout";
+import Layout from "./Layout";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+import AdminHomePage from "./components/AdminHomePage";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App />}></Route>
-        <Route path="/home" element={<App />}></Route>
-        <Route path="/home/page/:currentPage" element={<App />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<AdminHomePage />}></Route>
+        </Route>{" "}
+        <Route element={<Layout />}>
+          <Route path="/page/:currentPage" element={<Accessory />} />
+        </Route>{" "}
         <Route path="/auth/login" element={<Login />}></Route>
         <Route path="/auth/signup" element={<Register />}></Route>
-        <Route path="/my-account" element={<Profile />}></Route>
+        <Route element={<Layout />}>
+          <Route path="/my-account" element={<Profile />}></Route>
+        </Route>{" "}
         <Route element={<Layout />}>
           <Route
             path="/admin/manager-account"

@@ -12,7 +12,6 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 
-
 app.use(cors());
 app.use(express.json());
 db.connect();
@@ -324,8 +323,6 @@ app.delete("/admin/delete-account", verifyToken, async (req, res) => {
 app.put("/admin/update-account/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const accountUpdated = req.body;
-  console.log(id);
-  console.log(accountUpdated);
 
   try {
     // Tìm tài khoản bằng ID và cập nhật thông tin
