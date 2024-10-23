@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Form,
-  Table,
-  Modal,
-} from "react-bootstrap";
+import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
 import AccountContext from "../http/AccountContext";
 import "./ManageAccount.css";
+import { useParams } from "react-router-dom";
 
 const ManageAccount = () => {
   const [accounts, setAccounts] = useState([]);
@@ -38,7 +31,8 @@ const ManageAccount = () => {
     status: "",
   });
 
-  // Fetch danh sách tài khoản từ API
+  const { type } = useParams();
+
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -49,9 +43,13 @@ const ManageAccount = () => {
         } else if (response.status === 403) {
           setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
         } else if (response.status === "success" && response.accounts) {
-          setAccounts(response.accounts);
-          setFilteredAccounts(response.accounts);
-          setErrorMessage(""); // Xóa thông báo lỗi trước đó
+          setAccounts(
+            response.accounts.filter((account) => account.role === type)
+          );
+          setFilteredAccounts(
+            response.accounts.filter((account) => account.role === type)
+          );
+          setErrorMessage("");
         } else {
           setErrorMessage(
             response.message || "Có lỗi xảy ra khi lấy danh sách tài khoản."
@@ -64,19 +62,21 @@ const ManageAccount = () => {
     };
 
     fetchAccounts();
-  }, []);
+  }, [type]);
 
   const handleCreateAccount = async () => {
     try {
-      const response = await AccountContext.createAccount(newAccount);
+      const response = await AccountContext.createAccount({
+        ...newAccount,
+        role: type,
+      });
 
       if (response.status === 201) {
-        // Thêm tài khoản mới vào danh sách và lọc
         const updatedAccounts = [...accounts, response.data.account];
         setAccounts(updatedAccounts);
         setFilteredAccounts(updatedAccounts);
         setShowModal(false);
-        // Reset form thêm tài khoản
+
         setNewAccount({
           username: "",
           password: "",
@@ -125,7 +125,6 @@ const ManageAccount = () => {
       const response = await AccountContext.deleteAccount(accountToDelete._id);
 
       if (response.status === 200) {
-        // Cập nhật danh sách tài khoản sau khi xóa
         const updatedAccounts = accounts.filter(
           (account) => account._id !== accountToDelete._id
         );
@@ -211,7 +210,7 @@ const ManageAccount = () => {
           <div className="card-body ">
             <div className="table-responsive">
               <table className="table align-middle mb-0 ">
-                <thead className="bg-light ">
+                <thead style={{ backgroundColor: "#4a90e2", color: "white" }}>
                   <tr className="text-center ">
                     <th>#</th>
                     <th>Tên</th>
@@ -262,7 +261,6 @@ const ManageAccount = () => {
         </Col>
       </Row>
 
-      {/* Modal thêm tài khoản mới */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header
           closeButton
@@ -281,7 +279,7 @@ const ManageAccount = () => {
                 type="text"
                 placeholder="Nhập tên tài khoản"
                 className="form-control-lg rounded-pill"
-                value={newAccount.username}
+                // value={newAccount.username}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, username: e.target.value })
                 }
@@ -293,7 +291,7 @@ const ManageAccount = () => {
                 type="password"
                 placeholder="Nhập mật khẩu"
                 className="form-control-lg rounded-pill"
-                value={newAccount.password}
+                // value={newAccount.password}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, password: e.target.value })
                 }
@@ -305,7 +303,7 @@ const ManageAccount = () => {
                 type="text"
                 placeholder="Nhập tên"
                 className="form-control-lg rounded-pill"
-                value={newAccount.firstName}
+                // value={newAccount.firstName}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, firstName: e.target.value })
                 }
@@ -317,7 +315,7 @@ const ManageAccount = () => {
                 type="text"
                 placeholder="Nhập họ"
                 className="form-control-lg rounded-pill"
-                value={newAccount.lastName}
+                // value={newAccount.lastName}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, lastName: e.target.value })
                 }
@@ -329,7 +327,7 @@ const ManageAccount = () => {
                 type="email"
                 placeholder="Nhập email"
                 className="form-control-lg rounded-pill"
-                value={newAccount.email}
+                // value={newAccount.email}
                 onChange={(e) =>
                   setNewAccount({ ...newAccount, email: e.target.value })
                 }
@@ -520,5 +518,4 @@ const ManageAccount = () => {
     </Container>
   );
 };
-
 export default ManageAccount;

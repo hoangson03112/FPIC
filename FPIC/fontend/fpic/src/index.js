@@ -11,9 +11,11 @@ import Profile from "./components/Profile";
 import Register from "./components/Register";
 import ManageAccount from "./components/ManageAccount";
 import Layout from "./Layout";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min";
 import AdminHomePage from "./components/AdminHomePage";
+import MicrochipList from "./components/Microchip";
+import WeakPoint from "./components/WeakPoint";
+import BlockDiagram from "./components/BlockDiagram";
+import MainBoard from "./components/MainBoard";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
@@ -33,9 +35,21 @@ root.render(
         </Route>{" "}
         <Route element={<Layout />}>
           <Route
-            path="/admin/manager-account"
+            path="/admin/manager-account/:type"
             element={<ManageAccount />}
           ></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/microchip" element={<MicrochipList />}></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/weak-point" element={<WeakPoint />}></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/block-diagram" element={<BlockDiagram />}></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/main-board" element={<MainBoard />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -60,7 +60,7 @@ const Profile = () => {
             </div>
             <div className="row mt-2">
               <div className="col-md-6">
-                <label className="labels">FistNAme</label>
+                <label className="labels">FistName</label>
                 <input
                   type="text"
                   className="form-control"

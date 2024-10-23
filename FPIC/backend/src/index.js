@@ -2,9 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const path = require("path");
-const IMAGES_DIR = path.join(__dirname, "img");
 const fs = require("fs");
-
 const db = require("./config/db/index");
 const Account = require("./Model/Account");
 const jwt = require("jsonwebtoken");
@@ -12,12 +10,18 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 
+const IMAGES_DIR = path.join(__dirname, "img");
+const IMAGES_MICROCHIP = path.join(__dirname, "microchip");
+const IMAGES_JTAG = path.join(__dirname, "jtag");
+const IMAGES_TESTPIN = path.join(__dirname, "testpin");
+const IMAGES_LPC = path.join(__dirname, "LPC");
+
+db.connect();
 app.use(cors());
 app.use(express.json());
-db.connect();
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ extended: true }));
 app.use(cookieParser());
+
 app.get("/images", (req, res) => {
   fs.readdir(IMAGES_DIR, (err, files) => {
     if (err) {
@@ -28,7 +32,83 @@ app.get("/images", (req, res) => {
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
         name: file,
-        img1: `/img/${file}`,
+        img: `/images/${file}`,
+      }));
+
+    res.json(images);
+  });
+});
+
+app.get("/images-microchip", (req, res) => {
+  fs.readdir(IMAGES_MICROCHIP, (err, files) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Error reading microchip directory", err });
+    }
+
+    const images = files
+      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
+      .map((file) => ({
+        name: file,
+        img: `/microchip/${file}`,
+      }));
+
+    res.json(images);
+  });
+});
+
+app.get("/images-jtag", (req, res) => {
+  fs.readdir(IMAGES_JTAG, (err, files) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Error reading microchip directory", err });
+    }
+
+    const images = files
+      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
+      .map((file) => ({
+        name: file,
+        img: `/jtag/${file}`,
+      }));
+
+    res.json(images);
+  });
+});
+
+app.get("/images-test-pin", (req, res) => {
+  fs.readdir(IMAGES_TESTPIN, (err, files) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Error reading microchip directory", err });
+    }
+
+    const images = files
+      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
+      .map((file) => ({
+        name: file,
+        img: `/testpin/${file}`,
+      }));
+
+    res.json(images);
+  });
+});
+
+app.get("/images-lpc", (req, res) => {
+  fs.readdir(IMAGES_LPC, (err, files) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Error reading microchip directory", err });
+    }
+
+    const images = files
+      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
+      .map((file) => ({
+        name: file,
+        img: `/LPC/${file}`,
       }));
 
     res.json(images);
@@ -89,16 +169,16 @@ app.post("/get-json-file", (req, res) => {
     });
   });
 });
-app.get("/get-classes", (req, res) => {
-  const filePath = path.join("D:\\Git\\FPIC\\FPIC\\backend\\src", "meta.json");
 
-  // Kiểm tra xem file có tồn tại không
+// Lấy danh sách lớp từ file meta.json
+app.get("/get-classes", (req, res) => {
+  const filePath = path.join(__dirname, "meta.json");
+
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
       return res.status(404).json({ error: "File not found" });
     }
 
-    // Đọc file JSON
     fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
         return res.status(500).json({ error: "Error reading file" });
@@ -117,10 +197,9 @@ app.get("/get-classes", (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     let data = req.body;
+    console.log(data);
 
-    const account = await Account.findOne({
-      email: data.email,
-    });
+    const account = await Account.findOne({ email: data.email });
 
     if (account) {
       const isMatch = await bcrypt.compare(data.password, account.password);
@@ -133,35 +212,28 @@ app.post("/login", async (req, res) => {
         const token = jwt.sign({ _id: account._id }, "sown", {
           expiresIn: "3h",
         });
-
         return res.json({
           status: "success",
           message: "Login successful",
           token,
         });
       }
-      if (account.status === "inactive") {
-        return res.json({
-          status: "inactive",
-          message: "Tài khoản chưa được kích hoạt",
-        });
-      }
+      return res
+        .status(403)
+        .json({ status: "inactive", message: "Tài khoản chưa được kích hoạt" });
     } else {
-      return res.status(401).json({
-        status: "login",
-        message: "Sai tên đăng nhập hoặc email",
-      });
+      return res.status(401).json({ message: "Sai tên đăng nhập hoặc email" });
     }
   } catch (error) {
-    return res.status(500).json({ status: "error", message: "Server error" });
+    return res.status(500).json({ message: "Server error", error });
   }
 });
+
+// Xác thực token
 app.get("/authentication", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
-    return res
-      .status(401)
-      .json({ status: "error", message: "No token provided" });
+    return res.status(401).json({ message: "No token provided" });
   }
 
   try {
@@ -169,68 +241,37 @@ app.get("/authentication", async (req, res) => {
     const account = await Account.findById(data._id);
 
     if (!account) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Account not found" });
+      return res.status(404).json({ message: "Account not found" });
     }
 
-    // Loại bỏ password khỏi đối tượng account bằng destructuring
     const { password, ...accountResponse } = account.toObject();
-
-    res.json({
-      status: "success",
-      account: accountResponse,
-    });
+    res.json({ status: "success", account: accountResponse });
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ status: "error", message: "Token expired" });
+      return res.status(401).json({ message: "Token expired" });
     }
-    return res.status(401).json({ status: "error", message: "Invalid token" });
+    return res.status(401).json({ message: "Invalid token" });
   }
 });
 
 const verifyAdmin = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
-
   if (!token) {
-    return res
-      .status(401)
-      .json({ status: "error", message: "No token provided" });
+    return res.status(401).json({ message: "No token provided" });
   }
 
   try {
     const data = jwt.verify(token, "sown");
     const account = await Account.findById(data._id);
-
-    if (!account) {
-      return res.status(404).json({
-        status: "error",
-        message: "Account not found.",
-      });
+    if (!account || account.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
     }
-
-    if (account.role !== "admin") {
-      return res.status(403).json({
-        status: "error",
-        message: "You do not have access to this resource.",
-      });
-    }
-
-    // Lưu trữ account trong res.locals
     res.locals.account = account;
     next();
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ status: "error", message: "Token expired" });
-    }
-    return res.status(401).json({ status: "error", message: "Invalid token" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
-
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
@@ -250,23 +291,11 @@ const verifyToken = (req, res, next) => {
 app.get("/admin/accounts", verifyAdmin, async (req, res) => {
   try {
     const accounts = await Account.find({}, "-password");
-
-    if (accounts.length === 0) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "No accounts found" });
-    }
-
-    res.json({
-      status: "success",
-      accounts,
-    });
+    res.json({ status: "success", accounts });
   } catch (error) {
-    console.error("Error fetching accounts:", error);
-    res.status(500).json({ status: "error", message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
-
 app.post("/admin/create-account", verifyToken, async (req, res) => {
   const account = req.body.account;
 
@@ -293,10 +322,8 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 });
-
 app.delete("/admin/delete-account", verifyToken, async (req, res) => {
   const id = req.body.id;
-
   try {
     // Kiểm tra nếu tài khoản tồn tại
     const account = await Account.findById(id);
@@ -324,18 +351,17 @@ app.put("/admin/update-account/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const accountUpdated = req.body;
 
+
   try {
-    // Tìm tài khoản bằng ID và cập nhật thông tin
     const account = await Account.findByIdAndUpdate(
       id,
       { $set: accountUpdated },
-      { new: true, runValidators: true } // Trả về tài khoản đã cập nhật và kiểm tra validation
+      { new: true, runValidators: true }
     );
 
     if (!account) {
       return res.status(404).json({ message: "Tài khoản không tồn tại" });
     }
-
     return res.status(200).json({
       message: "Cập nhật tài khoản thành công",
       account,
@@ -348,7 +374,5 @@ app.put("/admin/update-account/:id", verifyToken, async (req, res) => {
     });
   }
 });
-
-app.use("/images", express.static(IMAGES_DIR));
-
+// Server lắng nghe trên port
 app.listen(9999, () => console.log("Server is running on port 9999"));

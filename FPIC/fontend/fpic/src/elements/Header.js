@@ -31,9 +31,7 @@ const Header = ({ onToggleMenu }) => {
         const data = await AccountContext.Authentication();
 
         setAccount(data.account);
-      } catch (error) {
-        console.error("Error during authentication:", error);
-      }
+      } catch (error) {}
     };
 
     fetchData(); // Gọi hàm async
@@ -54,24 +52,6 @@ const Header = ({ onToggleMenu }) => {
   return (
     <Container fluid className="account-menu bg-dark">
       <Row className="d-flex align-items-center mt-1 ">
-        <Col xs={1}>
-          <span onClick={onToggleMenu} className="text-white">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="50"
-              height="50"
-              fill="currentColor"
-              className="bi bi-list mt-3 ms-5"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
-              />
-            </svg>
-          </span>
-        </Col>
-
         <Col md={10} className="d-flex justify-content-end mt-2">
           <div
             style={{
@@ -102,14 +82,8 @@ const Header = ({ onToggleMenu }) => {
                   <div id="account-menu" className="menu" ref={menuRef}>
                     <div className="menu-item">
                       <div className="menu-item-avatar" />
-                      <Link to="/profile" className="lik">
-                        Profile
-                      </Link>
-                    </div>
-                    <div className="menu-item">
-                      <div className="menu-item-avatar" />
                       <Link to="/my-account" className="lik">
-                        My Account
+                        Profile
                       </Link>
                     </div>
 

@@ -42,7 +42,7 @@ function CustomButtonGroup({ fileData }) {
         {filteredClasses.map((button) => (
           <button
             key={button.title}
-            className={`button ${
+            className={`button m-0 ${
               clickedButtons.includes(button.title) ? "faded" : ""
             }`}
             onClick={() => handleClick(button.title)}

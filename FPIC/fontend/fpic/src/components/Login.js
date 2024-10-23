@@ -71,10 +71,8 @@ function Login() {
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.token);
         navigate("/");
-      } else if (response.data.status === "inactive") {
-        alert(response.data.message); // Hiển thị thông báo tài khoản chưa được kích hoạt
-      } else {
-        alert("Login failed");
+      } else if (response.data.status !== "success") {
+        alert(response.data.c);
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -121,7 +119,6 @@ function Login() {
             {emailError && <p className="error-message">{emailError}</p>}
           </div>
 
-     
           <div className="flex-column">
             <label>Password</label>
             <div className="inputForm">
@@ -151,7 +148,6 @@ function Login() {
             {passwordError && <p className="error-message">{passwordError}</p>}
           </div>
 
-   
           <div className="flex-row">
             <div>
               <input type="checkbox" />

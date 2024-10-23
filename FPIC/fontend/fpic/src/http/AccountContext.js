@@ -10,7 +10,6 @@ class AccountContext {
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
-
       const response = await axios.get("http://localhost:9999/authentication", {
         headers: {
           Authorization: `Bearer ${token}`, // Thêm token vào header Authorization
@@ -19,7 +18,6 @@ class AccountContext {
 
       return response.data;
     } catch (error) {
-      console.error("Error fetching data:", error);
       return error;
     }
   }

@@ -3,10 +3,9 @@ import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./Accessory.css";
 import CustomButtonGroup from "./ButtonColor";
-import Header from "./elements/Header";
+
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import ScrollToTopButton from "./elements/ScrollToTopButton";
 
 function Accessory() {
   const { currentPage = 1 } = useParams();
@@ -70,11 +69,14 @@ function Accessory() {
 
   useEffect(() => {
     if (selectedImage) {
+      console.log(selectedImage);
+
       axios
         .post("http://localhost:9999/get-json-file", {
           fileName: selectedImage.name,
         })
         .then((response) => {
+          console.log(response);
           setFileData(response.data.jsonData);
         })
         .catch((error) => {
@@ -105,7 +107,7 @@ function Accessory() {
                   >
                     <Card.Img
                       variant="top"
-                      src={image?.img1}
+                      src={image.img}
                       alt={image?.name}
                       style={{
                         width: "100%",
@@ -194,7 +196,6 @@ function Accessory() {
                 </Col>
               </Row>
 
-              <ScrollToTopButton />
               <div
                 className="modal fade"
                 id="imageModal"
@@ -219,7 +220,7 @@ function Accessory() {
                       <Col xs={10}>
                         {selectedImage && (
                           <div className="d-flex flex-column">
-                            <div className="d-flex flex-row justify-content-between align-items-center mb-3">
+                            <div className="d-flex justify-content-between  mb-3">
                               <button
                                 className="btn btn-custom"
                                 onClick={handlePreviousImage}
@@ -296,31 +297,35 @@ function Accessory() {
                                     (img, index) => index !== selectedImageIndex
                                   )
                                   .slice(0, 19)
-                                  .map((image, index) => (
-                                    <Card
-                                      key={index}
-                                      className="m-2"
-                                      style={{
-                                        width: "100px",
-                                        cursor: "pointer",
-                                      }}
-                                      onClick={() =>
-                                        handleImageClick(images.indexOf(image))
-                                      }
-                                      data-bs-target="#imageModal"
-                                    >
-                                      <Card.Img
-                                        variant="top"
-                                        src={image?.img1}
-                                        alt={image?.name}
+                                  .map((image, index) => {
+                                    return (
+                                      <Card
+                                        key={index}
+                                        className="m-2"
                                         style={{
-                                          width: "100%",
-                                          height: "100px",
-                                          objectFit: "cover",
+                                          width: "100px",
+                                          cursor: "pointer",
                                         }}
-                                      />
-                                    </Card>
-                                  ))}
+                                        onClick={() =>
+                                          handleImageClick(
+                                            images.indexOf(image)
+                                          )
+                                        }
+                                        data-bs-target="#imageModal"
+                                      >
+                                        <Card.Img
+                                          variant="top"
+                                          src={image?.img}
+                                          alt={image?.name}
+                                          style={{
+                                            width: "100%",
+                                            height: "100px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      </Card>
+                                    );
+                                  })}
                               </div>
                             </div>
                           </div>

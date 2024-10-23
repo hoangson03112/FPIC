@@ -27,7 +27,7 @@ const ZoomableImage = ({ data }) => {
               contentClass="transform-content"
             >
               <img
-                src={data?.img1}
+                src={data?.img}
                 alt={data?.name}
                 className="zoomable-image"
                 width={"auto"}
