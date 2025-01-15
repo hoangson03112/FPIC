@@ -123,23 +123,6 @@ app.post("/get-json-file", (req, res) => {
       encoding: "base64",
     }
   );
-  axios({
-    method: "POST",
-    url: "https://detect.roboflow.com/smd-component-detection/12",
-    params: {
-      api_key: "QjtjIH4aUqUR86fVMcZJ",
-    },
-    data: image,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  })
-    .then(function (response) {
-      console.log(response.data);
-    })
-    .catch(function (error) {
-      console.log(error.message);
-    });
 
   const filePath = path.join(
     "D:\\Git\\FPIC\\FPIC\\backend\\src\\ann",
@@ -170,7 +153,6 @@ app.post("/get-json-file", (req, res) => {
   });
 });
 
-// Lấy danh sách lớp từ file meta.json
 app.get("/get-classes", (req, res) => {
   const filePath = path.join(__dirname, "meta.json");
 
@@ -197,7 +179,6 @@ app.get("/get-classes", (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     let data = req.body;
-    console.log(data);
 
     const account = await Account.findOne({ email: data.email });
 
@@ -218,6 +199,7 @@ app.post("/login", async (req, res) => {
           token,
         });
       }
+
       return res
         .status(403)
         .json({ status: "inactive", message: "Tài khoản chưa được kích hoạt" });
@@ -347,10 +329,9 @@ app.delete("/admin/delete-account", verifyToken, async (req, res) => {
       .json({ status: 500, message: "Có lỗi xảy ra khi xóa tài khoản." });
   }
 });
-app.put("/admin/update-account/:id", verifyToken, async (req, res) => {
+app.put("/admin/update-account/:id", async (req, res) => {
   const { id } = req.params;
   const accountUpdated = req.body;
-
 
   try {
     const account = await Account.findByIdAndUpdate(

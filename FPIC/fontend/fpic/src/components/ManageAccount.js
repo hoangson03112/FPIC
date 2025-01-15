@@ -37,9 +37,10 @@ const ManageAccount = () => {
     const fetchAccounts = async () => {
       try {
         const response = await AccountContext.getAllAccounts();
-
+        console.log(response);
+        
         if (response.status === 401) {
-          setErrorMessage("Chưa đăng nhập.");
+
         } else if (response.status === 403) {
           setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
         } else if (response.status === "success" && response.accounts) {
