@@ -38,7 +38,7 @@ function Login() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const navigate = useNavigate(); // Khai báo useNavigate
+  const navigate = useNavigate(); 
  
 
   const validateEmail = (email) => {

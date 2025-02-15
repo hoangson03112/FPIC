@@ -28,13 +28,12 @@
 }
 
 .image-grid .card img:hover {
-  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  transform: scale(1.05);
 }
 
-/* Modal chỉnh kích thước */
 .modal-dialog {
   max-width: 100%;
-  margin: 0; /* Loại bỏ khoảng cách ngoài cho modal */
+  margin: 0;
 }
 
 .main-content .card-body {
