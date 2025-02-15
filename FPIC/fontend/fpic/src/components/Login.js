@@ -39,7 +39,8 @@ function Login() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate(); // Khai báo useNavigate
-  // Validate email format
+ 
+
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -54,7 +55,6 @@ function Login() {
       setEmailError("");
     }
 
-    // Validate password length
     if (password.length < 6) {
       setPasswordError("Password must be at least 6 characters long.");
       return;
@@ -62,6 +62,9 @@ function Login() {
       setPasswordError("");
     }
 
+  
+    
+    
     try {
       const response = await axios.post("http://localhost:9999/login", {
         email,

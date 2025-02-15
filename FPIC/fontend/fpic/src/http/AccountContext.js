@@ -3,16 +3,16 @@ import axios from "axios";
 class AccountContext {
   async Authentication() {
     try {
-      // Lấy token từ cookie
+
       const token = localStorage.getItem("token");
 
-      // Kiểm tra nếu không có token
+
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
       const response = await axios.get("http://localhost:9999/authentication", {
         headers: {
-          Authorization: `Bearer ${token}`, // Thêm token vào header Authorization
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -63,7 +63,7 @@ class AccountContext {
 
       const response = await axios.post(
         "http://localhost:9999/admin/create-account",
-        { account }, // Truyền dữ liệu account trong body của request
+        { account },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ class AccountContext {
         }
       );
 
-      return response; // Trả về kết quả từ server
+      return response;
     } catch (error) {
       console.error("Error creating account:", error);
       return error.response || { message: "Có lỗi xảy ra khi tạo tài khoản" };
@@ -80,20 +80,17 @@ class AccountContext {
   async deleteAccount(id) {
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
-
       const response = await axios.delete(
         "http://localhost:9999/admin/delete-account",
-
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
           data: {
-            id, // Truyền id trong `data`
+            id
           },
         }
       );
@@ -113,7 +110,7 @@ class AccountContext {
         return { message: "Chưa đăng nhập", status: 401 };
       }
 
-      // Cấu hình header với token để xác thực
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
