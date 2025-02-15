@@ -3,6 +3,7 @@ import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
 import AccountContext from "../http/AccountContext";
 import "./ManageAccount.css";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const ManageAccount = () => {
   const [accounts, setAccounts] = useState([]);
@@ -37,10 +38,13 @@ const ManageAccount = () => {
     const fetchAccounts = async () => {
       try {
         const response = await AccountContext.getAllAccounts();
-        console.log(response);
-        
-        if (response.status === 401) {
 
+        if (response.status === 401) {
+          Swal.fire({
+            icon: "error",
+            title: "Bạn chưa đăng nhập...",
+            text: "Vui lòng đăng nhập!",
+          });
         } else if (response.status === 403) {
           setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
         } else if (response.status === "success" && response.accounts) {
@@ -57,6 +61,11 @@ const ManageAccount = () => {
           );
         }
       } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error server...",
+          text: "Có lỗi xảy ra khi lấy danh sách tài khoản.",
+        });
         console.error("Failed to fetch accounts:", error);
         setErrorMessage("Có lỗi xảy ra khi lấy danh sách tài khoản.");
       }
@@ -92,6 +101,11 @@ const ManageAccount = () => {
       }
     } catch (error) {
       console.error("Failed to create account:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error server...",
+        text: "Có lỗi xảy ra",
+      });
       setErrorMessage("Có lỗi xảy ra khi tạo tài khoản.");
     }
   };
@@ -108,6 +122,12 @@ const ManageAccount = () => {
         );
         setAccounts(updatedAccounts);
         setFilteredAccounts(updatedAccounts);
+        Swal.fire({
+          icon: "success",
+          title: "Thành Công!",
+          text: "Thành công!",
+          confirmButtonText: "OK",
+        });
         setShowUpdateModal(false);
         setErrorMessage("");
       } else {
@@ -115,6 +135,11 @@ const ManageAccount = () => {
       }
     } catch (error) {
       console.error("Failed to update account:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error server...",
+        text: "Có lỗi xảy ra",
+      });
       setErrorMessage("Có lỗi xảy ra khi cập nhật tài khoản.");
     }
   };
@@ -132,12 +157,23 @@ const ManageAccount = () => {
         setAccounts(updatedAccounts);
         setFilteredAccounts(updatedAccounts);
         setShowDeleteModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Thành Công!",
+          text: "Xóa Thành công!",
+          confirmButtonText: "OK",
+        });
         setErrorMessage("");
       } else {
         setErrorMessage("Có lỗi xảy ra khi xóa tài khoản.");
       }
     } catch (error) {
       console.error("Failed to delete account:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error server...",
+        text: "Có lỗi xảy ra",
+      });
       setErrorMessage("Có lỗi xảy ra khi xóa tài khoản.");
     }
   };

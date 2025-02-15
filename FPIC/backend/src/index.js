@@ -39,6 +39,18 @@ app.get("/images", (req, res) => {
   });
 });
 
+app.get("/images/count", (req, res) => {
+  fs.readdir(IMAGES_DIR, (err, files) => {
+    if (err) {
+      return res.status(500).json({ message: "Error reading directory", err });
+    }
+
+    const imageCount = files.filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file)).length;
+
+    res.json({ count: imageCount });
+  });
+});
+
 app.get("/images-microchip", (req, res) => {
   fs.readdir(IMAGES_MICROCHIP, (err, files) => {
     if (err) {
@@ -57,7 +69,17 @@ app.get("/images-microchip", (req, res) => {
     res.json(images);
   });
 });
+app.get("/images-microchip/count", (req, res) => {
+  fs.readdir(IMAGES_MICROCHIP, (err, files) => {
+    if (err) {
+      return res.status(500).json({ message: "Error reading directory", err });
+    }
 
+    const imageCount = files.filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file)).length;
+
+    res.json({ count: imageCount });
+  });
+});
 app.get("/images-jtag", (req, res) => {
   fs.readdir(IMAGES_JTAG, (err, files) => {
     if (err) {
@@ -180,6 +202,7 @@ app.post("/login", async (req, res) => {
   try {
     let data = req.body;
 
+
     const account = await Account.findOne({ email: data.email });
 
     if (account) {
@@ -263,7 +286,7 @@ const verifyToken = (req, res, next) => {
         return res.sendStatus(403);
       }
       req.user = user;
-      next();
+      next(); d
     });
   } else {
     res.sendStatus(401);
@@ -282,7 +305,7 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
   const account = req.body.account;
 
   try {
-    // Kiểm tra xem email đã tồn tại chưa
+
     const existingAccount = await Account.findOne({ email: account.email });
     if (existingAccount) {
       return res.status(400).json({ message: "Email đã tồn tại" });
@@ -307,7 +330,7 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
 app.delete("/admin/delete-account", verifyToken, async (req, res) => {
   const id = req.body.id;
   try {
-    // Kiểm tra nếu tài khoản tồn tại
+
     const account = await Account.findById(id);
     if (!account) {
       return res
@@ -315,10 +338,10 @@ app.delete("/admin/delete-account", verifyToken, async (req, res) => {
         .json({ status: 404, message: "Tài khoản không tồn tại." });
     }
 
-    // Xóa tài khoản
+
     await Account.findByIdAndDelete(id);
 
-    // Trả về kết quả thành công
+
     res
       .status(200)
       .json({ status: 200, message: "Tài khoản đã được xóa thành công." });
@@ -355,5 +378,12 @@ app.put("/admin/update-account/:id", async (req, res) => {
     });
   }
 });
-// Server lắng nghe trên port
+
+app.get('/admin/accounts/count', async (req, res) => {
+  const userCount = await Account.countDocuments();
+  res.json({ count: userCount });
+});
+
+
+
 app.listen(9999, () => console.log("Server is running on port 9999"));
