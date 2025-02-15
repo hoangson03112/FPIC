@@ -197,8 +197,6 @@ app.get("/get-classes", (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     let data = req.body;
-    console.log(data);
-
     const account = await Account.findOne({ email: data.email });
 
     if (account) {
@@ -350,7 +348,6 @@ app.delete("/admin/delete-account", verifyToken, async (req, res) => {
 app.put("/admin/update-account/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const accountUpdated = req.body;
-
 
   try {
     const account = await Account.findByIdAndUpdate(

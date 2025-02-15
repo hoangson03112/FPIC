@@ -48,20 +48,18 @@
   color: #ffffff; /* Màu văn bản trắng */
 }
 
-/* Background image for the entire app */
 .bg-image {
-  background-image: url("D:\Git\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg"); /* Sử dụng đường dẫn tương đối */
+  background-image: url("C:\Users\Admin\Downloads\FPIC\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg");
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Nền cố định khi cuộn */
-  min-height: 100vh; /* Chiều cao tối thiểu cho trang */
+  background-attachment: fixed;
+  min-height: 100vh;
   padding: 0;
 }
 
-/* Responsive adjustments */
 @media (max-width: 576px) {
   .image-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 cột cho màn hình nhỏ */
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .image-grid .card {
