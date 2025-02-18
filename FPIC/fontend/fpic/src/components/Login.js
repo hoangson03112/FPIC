@@ -9,8 +9,7 @@ const Login = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const navigate = useNavigate(); 
- 
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,12 +55,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-5"
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center py-5"
       style={{
         backgroundImage: "linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)",
         backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}>
+        backgroundPosition: "center",
+      }}
+    >
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
@@ -72,31 +73,43 @@ const Login = () => {
                   <div className="form-floating mb-4">
                     <input
                       type="email"
-                      className={`form-control ${emailError ? 'is-invalid' : ''}`}
+                      className={`form-control ${
+                        emailError ? "is-invalid" : ""
+                      }`}
                       id="email"
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
-                    <label htmlFor="email" className="d-flex align-items-center gap-2">
+                    <label
+                      htmlFor="email"
+                      className="d-flex align-items-center gap-2"
+                    >
                       <FaEnvelope className="text-muted" />
                       <span>Email</span>
                     </label>
-                    {emailError && <div className="invalid-feedback">{emailError}</div>}
+                    {emailError && (
+                      <div className="invalid-feedback">{emailError}</div>
+                    )}
                   </div>
 
                   <div className="form-floating mb-4">
                     <input
                       type={passwordVisible ? "text" : "password"}
-                      className={`form-control ${passwordError ? 'is-invalid' : ''}`}
+                      className={`form-control ${
+                        passwordError ? "is-invalid" : ""
+                      }`}
                       id="password"
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
-                    <label htmlFor="password" className="d-flex align-items-center gap-2">
+                    <label
+                      htmlFor="password"
+                      className="d-flex align-items-center gap-2"
+                    >
                       <FaLock className="text-muted" />
                       <span>Mật khẩu</span>
                     </label>
@@ -108,16 +121,18 @@ const Login = () => {
                     >
                       {passwordVisible ? <FaEyeSlash /> : <FaEye />}
                     </button>
-                    {passwordError && <div className="invalid-feedback">{passwordError}</div>}
+                    {passwordError && (
+                      <div className="invalid-feedback">{passwordError}</div>
+                    )}
                   </div>
 
                   <div className="d-grid gap-2  ">
-                    <button type="submit" className="w-75 mt-4 p-2 btn btn-outline-primary btn-lg">
+                    <button
+                      type="submit"
+                      className="w-75 mt-4 p-2 btn btn-outline-primary btn-lg"
+                    >
                       Đăng nhập
                     </button>
-
-
-
                   </div>
                 </form>
               </div>
