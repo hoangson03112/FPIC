@@ -1,9 +1,14 @@
-import React from 'react';
+import React from "react";
 
 const PDFViewer = () => {
   const pdfFiles = [
     { id: 1, url: "/j.pdf", name: "LS1043ARDB-PC-DDR" },
-    { id: 2, url: "/i.pdf", name: "Main Board FPGA " }
+    { id: 2, url: "/i.pdf", name: "Main Board FPGA " },
+    {
+      id: 3,
+      url: "/compal_la-7901p_r1.0_schematics.pdf",
+      name: "Korbel 14 UMA--Non vPRO ",
+    },
   ];
 
   return (
@@ -28,13 +33,12 @@ const PDFViewer = () => {
                 <div className="text-center mt-3">
                   <strong>{file.name}</strong>
                   <button
-                    className="btn btn-outline-primary btn-sm w-auto"
-                    onClick={() => window.open(file.url, '_blank')}
+                    className="btn btn-outline-primary btn-sm w-auto ms-2"
+                    onClick={() => window.open(file.url, "_blank")}
                   >
                     Xem
                   </button>
                 </div>
-
               </div>
             </div>
           </div>

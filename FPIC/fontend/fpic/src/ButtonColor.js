@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./ButtonColor.css";
 import axios from "axios";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 
 function CustomButtonGroup({ fileData }) {
   const [classes, setClasses] = useState([]);
@@ -9,7 +10,7 @@ function CustomButtonGroup({ fileData }) {
   useEffect(() => {
     setClickedButtons([]);
     axios
-      .get("http://localhost:9999/get-classes")
+      .get(`${REACT_APP_URL_BE}/get-classes`)
       .then((response) => {
         setClasses(response.data.jsonData.classes);
       })
@@ -28,7 +29,7 @@ function CustomButtonGroup({ fileData }) {
 
   const classIds = fileData?.objects?.map((object) => object.classId);
 
-  // Lọc các lớp dựa trên classIds
+
   const filteredClasses = classes?.filter((classItem) =>
     classIds?.includes(classItem.id)
   );

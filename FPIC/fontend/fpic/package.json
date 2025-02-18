@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "dotenv": "^16.4.7",
     "js-cookie": "^3.0.5",
     "pdfjs-dist": "^2.9.359",
     "react": "^18.3.1",

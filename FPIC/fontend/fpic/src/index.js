@@ -8,7 +8,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
-import Register from "./components/Register";
 import ManageAccount from "./components/ManageAccount";
 import Layout from "./Layout";
 import AdminHomePage from "./components/AdminHomePage";
@@ -29,7 +28,6 @@ root.render(
           <Route path="/page/:currentPage" element={<Accessory />} />
         </Route>{" "}
         <Route path="/auth/login" element={<Login />}></Route>
-        <Route path="/auth/signup" element={<Register />}></Route>
         <Route element={<Layout />}>
           <Route path="/my-account" element={<Profile />}></Route>
         </Route>{" "}

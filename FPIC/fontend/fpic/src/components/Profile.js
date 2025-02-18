@@ -25,7 +25,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await AccountContext.Authentication(); // Đảm bảo Authentication là một hàm async
+        const data = await AccountContext.Authentication(); 
         setAccount(data.account);
       } catch (error) {
         console.error("Error during authentication:", error);
@@ -33,7 +33,7 @@ const Profile = () => {
     };
 
     fetchData();
-  }, []); // Chạy effect chỉ một lần khi component mount
+  }, []); 
 
   return (
     <div className="container rounded bg-white mt-5 mb-5">

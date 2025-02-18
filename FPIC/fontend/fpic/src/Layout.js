@@ -5,6 +5,7 @@ import AccountContext from "./http/AccountContext";
 import { useState, useEffect } from "react";
 import "./Layout.css";
 import Loader from "./components/Loader";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 
 const Layout = () => {
   const location = useLocation();
@@ -26,7 +27,7 @@ const Layout = () => {
   };
 
   function navigateTo() {
-    window.location.href = "http://localhost:3000/auth/login";
+    window.location.href = `/auth/login`;
   }
 
   function toggleSubMenu(menu) {
@@ -117,8 +118,9 @@ const Layout = () => {
         <hr className="text-white" />
         <ul className="list-group list-group-flush fw-medium">
           <li
-            className={`list-group-item border-0  ps-5 text-light ${currentPath === "/" ? "active bg-dark" : "bg-custom"
-              }`}
+            className={`list-group-item border-0  ps-5 text-light ${
+              currentPath === "/" ? "active bg-dark" : "bg-custom"
+            }`}
             aria-current="true"
           >
             <Link to="/" className="text-decoration-none text-light fs-5">
@@ -126,12 +128,13 @@ const Layout = () => {
             </Link>
           </li>
           <li
-            className={`list-group-item border-0  px-0 bg-custom pb-0  ${(currentPath.includes("/page/") ||
-              currentPath.includes("/microchip") ||
-              currentPath.includes("/weak-point") ||
-              currentPath.includes("/block-diagram")) &&
+            className={`list-group-item border-0  px-0 bg-custom pb-0  ${
+              (currentPath.includes("/page/") ||
+                currentPath.includes("/microchip") ||
+                currentPath.includes("/weak-point") ||
+                currentPath.includes("/block-diagram")) &&
               "active bg-dark"
-              }`}
+            }`}
           >
             <div
               className="text-decoration-none text-light py-1 dropdown-toggle fs-5 ps-5"
@@ -143,40 +146,44 @@ const Layout = () => {
             {subMenus.menu1 && (
               <ul className="list-group list-group-flush fs-5 ps-2">
                 <li
-                  className={`list-group-item border-0 ps-5 ${currentPath.includes("/page/")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 ${
+                    currentPath.includes("/page/")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link to="/page/1" className="dropdown-item fw-medium">
                     Mẫu linh kiện, chủng loại
                   </Link>
                 </li>
                 <li
-                  className={`list-group-item border-0 ps-5 ${currentPath.includes("/weak-point")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 ${
+                    currentPath.includes("/weak-point")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link to="/weak-point" className="dropdown-item fw-medium">
                     Mẫu điểm yếu trên Bo mạch
                   </Link>
                 </li>
                 <li
-                  className={`list-group-item border-0 ps-5 ${currentPath.includes("/block-diagram")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 ${
+                    currentPath.includes("/block-diagram")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link to="/block-diagram" className="dropdown-item fw-medium">
                     Mẫu sơ đồ khối
                   </Link>
                 </li>
                 <li
-                  className={`list-group-item border-0 ps-5 fw-medium ${currentPath.includes("/microchip")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 fw-medium ${
+                    currentPath.includes("/microchip")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link to="/microchip" className="dropdown-item fw-medium">
                     Mẫu bản mạch
@@ -209,10 +216,11 @@ const Layout = () => {
             )}
           </li>
           <li
-            className={`list-group-item border-0 fs-5 px-0 text-light bg-custom pb-0 ${currentPath.includes("/admin/manager-account/")
-              ? "active bg-dark"
-              : ""
-              }`}
+            className={`list-group-item border-0 fs-5 px-0 text-light bg-custom pb-0 ${
+              currentPath.includes("/admin/manager-account/")
+                ? "active bg-dark"
+                : ""
+            }`}
           >
             <div
               className="text-decoration-none text-light dropdown-toggle py-2 ps-5"
@@ -224,10 +232,11 @@ const Layout = () => {
             {subMenus.menu3 && (
               <ul className="list-group list-group-flush bg-custom ps-2">
                 <li
-                  className={`list-group-item border-0 ps-5 ${currentPath.includes("/admin/manager-account/admin")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 ${
+                    currentPath.includes("/admin/manager-account/admin")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link
                     to="/admin/manager-account/admin"
@@ -237,10 +246,11 @@ const Layout = () => {
                   </Link>
                 </li>
                 <li
-                  className={`list-group-item border-0 ps-5 ${currentPath.includes("/admin/manager-account/assessor")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 ${
+                    currentPath.includes("/admin/manager-account/assessor")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link
                     to="/admin/manager-account/assessor"
@@ -250,10 +260,11 @@ const Layout = () => {
                   </Link>
                 </li>
                 <li
-                  className={`list-group-item border-0 ps-5 ${currentPath.includes("/admin/manager-account/user")
-                    ? "active bg-white text-primary"
-                    : "bg-custom text-white"
-                    }`}
+                  className={`list-group-item border-0 ps-5 ${
+                    currentPath.includes("/admin/manager-account/user")
+                      ? "active bg-white text-primary"
+                      : "bg-custom text-white"
+                  }`}
                 >
                   <Link
                     className="dropdown-item fw-medium"

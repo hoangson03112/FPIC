@@ -11,6 +11,8 @@ const ManageAccount = () => {
   const [filteredAccounts, setFilteredAccounts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAuthorizationModal, setShowAuthorizationModal] = useState(false);
+
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [accountToDelete, setAccountToDelete] = useState(null);
@@ -234,6 +236,13 @@ const ManageAccount = () => {
             />
           </div>
         </Col>
+        <Col md={6}>
+          <div class="group float-end">
+            <button type="button" className="btn btn-outline-primary">
+              Cấp quyền
+            </button>
+          </div>
+        </Col>
       </Row>
       {errorMessage && (
         <Row>
@@ -393,7 +402,6 @@ const ManageAccount = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal cập nhật tài khoản */}
       <Modal
         show={showUpdateModal}
         onHide={() => setShowUpdateModal(false)}
@@ -534,7 +542,6 @@ const ManageAccount = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal xác nhận xóa tài khoản */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Xóa tài khoản</Modal.Title>

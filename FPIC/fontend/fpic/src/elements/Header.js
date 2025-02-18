@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 import { Col, Container, Row, Image } from "react-bootstrap";
 import AccountContext from "../http/AccountContext";
 import { useNavigate } from "react-router-dom";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
+
+
+
 
 const Header = ({ onToggleMenu }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +27,7 @@ const Header = ({ onToggleMenu }) => {
     window.location.reload();
   };
   function navigateTo() {
-    window.location.href = "http://localhost:3000/auth/login";
+    window.location.href = "/auth/login";
   }
   useEffect(() => {
     const fetchData = async () => {

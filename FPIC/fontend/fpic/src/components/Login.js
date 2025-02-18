@@ -3,6 +3,8 @@ import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +36,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:9999/login", {
+      const response = await axios.post(`${REACT_APP_URL_BE}/login`, {
         email,
         password,
       });

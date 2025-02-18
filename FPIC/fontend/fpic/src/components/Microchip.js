@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import MicrochipItem from "./MicrochipItem";
 import axios from "axios";
 import "./Microchip.css";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
+
 const MicrochipList = () => {
   const [images, setImages] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(12); // Số lượng ảnh hiển thị ban đầu
+  const [visibleCount, setVisibleCount] = useState(12);
 
   useEffect(() => {
     axios
-      .get("http://localhost:9999/images-microchip")
+      .get(`${REACT_APP_URL_BE}/images-microchip`)
       .then((response) => {
         setImages(response.data);
       })
@@ -18,7 +20,7 @@ const MicrochipList = () => {
   }, []);
 
   const handleShowMore = () => {
-    setVisibleCount(images.length); // Hiển thị tất cả ảnh còn lại
+    setVisibleCount(images.length);
   };
 
   return (

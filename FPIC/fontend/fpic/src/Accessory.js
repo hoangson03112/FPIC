@@ -6,7 +6,7 @@ import CustomButtonGroup from "./ButtonColor";
 
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 function Accessory() {
   const { currentPage = 1 } = useParams();
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ function Accessory() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:9999/images")
+      .get(`${REACT_APP_URL_BE}/images`)
       .then((response) => {
         setImages(response.data);
       })
@@ -72,7 +72,7 @@ function Accessory() {
       console.log(selectedImage);
 
       axios
-        .post("http://localhost:9999/get-json-file", {
+        .post(`${REACT_APP_URL_SERVER}:9999/get-json-file`, {
           fileName: selectedImage.name,
         })
         .then((response) => {

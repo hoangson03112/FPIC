@@ -1,16 +1,15 @@
 import axios from "axios";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
 
 class AccountContext {
   async Authentication() {
     try {
-
       const token = localStorage.getItem("token");
-
 
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
-      const response = await axios.get("http://localhost:9999/authentication", {
+      const response = await axios.get(`${REACT_APP_URL_BE}/authentication`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -25,7 +24,7 @@ class AccountContext {
   async getAllAccounts() {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:9999/admin/accounts", {
+      const response = await axios.get(`${REACT_APP_URL_BE}/admin/accounts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -62,7 +61,7 @@ class AccountContext {
       }
 
       const response = await axios.post(
-        "http://localhost:9999/admin/create-account",
+        `${REACT_APP_URL_BE}/admin/create-account`,
         { account },
         {
           headers: {
@@ -70,13 +69,13 @@ class AccountContext {
           },
         }
       );
-
       return response;
     } catch (error) {
       console.error("Error creating account:", error);
       return error.response || { message: "Có lỗi xảy ra khi tạo tài khoản" };
     }
   }
+
   async deleteAccount(id) {
     try {
       const token = localStorage.getItem("token");
@@ -84,13 +83,13 @@ class AccountContext {
         return { message: "Chưa đăng nhập", status: 401 };
       }
       const response = await axios.delete(
-        "http://localhost:9999/admin/delete-account",
+        `${REACT_APP_URL_BE}/admin/delete-account`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
           data: {
-            id
+            id,
           },
         }
       );
@@ -110,7 +109,6 @@ class AccountContext {
         return { message: "Chưa đăng nhập", status: 401 };
       }
 
-
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -119,9 +117,9 @@ class AccountContext {
       };
 
       const response = await axios.put(
-        `http://localhost:9999/admin/update-account/${id}`,
-        accountUpdated, // Dữ liệu tài khoản cập nhật
-        config // Cấu hình header
+        `${REACT_APP_URL_BE}/admin/update-account/${id}`,
+        accountUpdated,
+        config
       );
 
       return {
@@ -139,11 +137,9 @@ class AccountContext {
   async getCountUser() {
     try {
       const response = await axios.get(
-        "http://localhost:9999/admin/accounts/count"
-
+        `${REACT_APP_URL_BE}/admin/accounts/count`
       );
- 
-      
+
       return {
         message: "Cập nhật thành công",
         status: response.status,
@@ -151,9 +147,7 @@ class AccountContext {
       };
     } catch (error) {
       console.error("Error updating account:", error);
-      return (
-        error.response || { message: "Có lỗi xảy ra " }
-      );
+      return error.response || { message: "Có lỗi xảy ra " };
     }
   }
 }

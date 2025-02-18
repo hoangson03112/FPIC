@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import Swal from "sweetalert2";
 import AccountContext from "../http/AccountContext";
 import axios from "axios";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
 
 const AdminDashboard = () => {
   const [countUser, setCountUser] = useState(0);
@@ -26,7 +27,7 @@ const AdminDashboard = () => {
 
     const fetchImages = async () => {
       try {
-        const response = await axios.get("http://localhost:9999/images/count");
+        const response = await axios.get(`${REACT_APP_URL_BE}/images/count`);
         setCountImages(response.data.count);
       } catch (error) {
         Swal.fire({
@@ -40,7 +41,9 @@ const AdminDashboard = () => {
 
     const fetchMicrochip = async () => {
       try {
-        const response = await axios.get("http://localhost:9999/images-microchip/count");
+        const response = await axios.get(
+          `${REACT_APP_URL_BE}/images-microchip/count`
+        );
         setCountMicrochip(response.data.count);
       } catch (error) {
         Swal.fire({
