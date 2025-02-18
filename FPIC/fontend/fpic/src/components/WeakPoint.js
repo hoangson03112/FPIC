@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import WeakPointItem from "./WeakPointItem";
 import axios from "axios";
 import "./WeakPoint.css";
+
+const itemsPerPage = 6
 const WeakPoint = () => {
   const [imagesJtag, setImagesJtag] = useState([]);
   const [imagesTestPin, setImagesTestPin] = useState([]);
   const [imagesLPC, setImagesLPC] = useState([]);
-
+  const [currentPage, setCurrentPage] = useState(1);
   useEffect(() => {
     axios
       .get("http://localhost:9999/images-jtag")
@@ -35,7 +37,17 @@ const WeakPoint = () => {
         console.error("Error fetching images:", error);
       });
   }, []);
+  const totalPages = Math.ceil(imagesTestPin.length / itemsPerPage);
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentImages = imagesTestPin.slice(startIndex, startIndex + itemsPerPage);
   return (
     <div className="container mt-4">
       <nav>

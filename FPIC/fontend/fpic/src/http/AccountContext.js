@@ -136,6 +136,26 @@ class AccountContext {
       );
     }
   }
+  async getCountUser() {
+    try {
+      const response = await axios.get(
+        "http://localhost:9999/admin/accounts/count"
+
+      );
+ 
+      
+      return {
+        message: "Cập nhật thành công",
+        status: response.status,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error("Error updating account:", error);
+      return (
+        error.response || { message: "Có lỗi xảy ra " }
+      );
+    }
+  }
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export
