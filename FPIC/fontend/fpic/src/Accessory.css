@@ -1,30 +1,26 @@
-/* Hover effect for image thumbnails */
-.m-2:hover {
-  transform: translateY(-5px);
-  transition: transform 0.3s ease;
-}
+
 
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr); /* 6 cột */
-  grid-gap: 10px; /* Khoảng cách giữa các ảnh */
-  justify-items: center; /* Căn giữa các ảnh */
+  grid-template-columns: repeat(6, 1fr); 
+  grid-gap: 10px; 
+  justify-items: center; 
   padding: 10px;
 }
 
 .image-grid .card {
   width: 100%;
-  background-color: transparent !important; /* Loại bỏ màu nền mặc định */
+  background-color: transparent !important; 
 }
 .image-grid .card:hover {
-  background-color: rgba(255, 255, 255, 0.2); /* Nền mờ với độ trong suốt */
+  background-color: rgba(255, 255, 255, 0.2); 
   backdrop-filter: blur(200px);
 }
 .image-grid .card img {
   object-fit: cover;
   height: 150px;
   width: 100%;
-  transition: transform 0.3s ease; /* Tạo hiệu ứng mượt cho hover */
+  transition: transform 0.3s ease; 
 }
 
 .image-grid .card img:hover {
@@ -41,14 +37,14 @@
   text-align: start;
 }
 
-/* Thay đổi màu văn bản trong card */
+
 .main-content .card-body .card-title,
 .main-content .card-body .card-text {
-  color: #ffffff; /* Màu văn bản trắng */
+  color: #ffffff; 
 }
 
 .bg-image {
-  background-image: url("C:\Nodejs\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg");
+  /* background-image: url("C:\Nodejs\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg"); */
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -66,15 +62,15 @@
   }
 }
 
-/* App container */
+
 .App {
   margin-top: 50px;
-  transition: margin-left 0.3s ease; /* Hiệu ứng thu nhỏ */
+  transition: margin-left 0.3s ease; 
 }
 .pagination {
   display: flex;
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; 
+  align-items: center; 
 }
 .pagination input {
   width: 50px;
@@ -89,44 +85,51 @@
 .account-menu {
   position: sticky;
   top: 0;
-  background-color: #fff; /* Màu nền cho header */
-  z-index: 1000; /* Đảm bảo header nằm trên các phần tử khác */
-  width: 100%; /* Header chiếm toàn bộ chiều rộng */
-  border-bottom: 1px solid #ddd; /* Đường viền dưới */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bóng cho hiệu ứng nổi */
-  transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu nền khi cuộn */
+  background-color: #fff; 
+  z-index: 1000;
+  width: 100%; 
+  border-bottom: 1px solid #ddd; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  transition: background-color 0.3s ease; 
 }
 
-/* Các lớp khác trong Header.css giữ nguyên */
 
-/* App.css */
+
 .side-menu {
   position: fixed;
   top: 120px;
   left: 0;
   height: 100%;
-  width: 300px; /* Chiều rộng của menu thanh trượt */
-  background-color: rgba(0, 0, 0, 0.425); /* Nền mờ với độ trong suốt */
+  width: 300px; 
+  background-color: rgba(0, 0, 0, 0.425); 
   backdrop-filter: blur(1000px);
   color: white;
   transform: translateX(-100%);
-  transition: transform 0.3s ease; /* Hiệu ứng chuyển động khi mở/đóng menu */
-  overflow-y: auto; /* Cuộn khi nội dung nhiều hơn chiều cao của menu */
-  z-index: 999; /* Đảm bảo menu nằm trên nội dung */
+  transition: transform 0.3s ease;
+  overflow-y: auto; 
+  z-index: 999;
 }
 
-/* Menu mở */
+
 .side-menu.open {
   transform: translateX(0);
 }
 
-/* Nội dung chính thu hẹp */
+
 .main-content {
-  transition: margin-left 0.3s ease; /* Hiệu ứng chuyển động khi nội dung thu hẹp */
-  margin-left: 0; /* Giá trị mặc định khi menu đóng */
+  transition: margin-left 0.3s ease;
+  margin-left: 0; 
 }
 
-/* Nội dung thu hẹp khi menu mở */
+
 .main-content.shrinked {
-  margin-left: 250px; /* Độ rộng của menu thanh trượt */
+  margin-left: 250px; 
+}
+.modal-90w {
+  width: 100%;
+  max-width: 100%;
+}
+
+.modal-90w .modal-content {
+  height: 85vh;
 }

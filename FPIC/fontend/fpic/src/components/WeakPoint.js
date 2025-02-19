@@ -3,7 +3,7 @@ import WeakPointItem from "./WeakPointItem";
 import axios from "axios";
 import "./WeakPoint.css";
 
-const itemsPerPage = 6
+const itemsPerPage = 6;
 const WeakPoint = () => {
   const [imagesJtag, setImagesJtag] = useState([]);
   const [imagesTestPin, setImagesTestPin] = useState([]);
@@ -47,7 +47,10 @@ const WeakPoint = () => {
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentImages = imagesTestPin.slice(startIndex, startIndex + itemsPerPage);
+  const currentImages = imagesTestPin.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
   return (
     <div className="container mt-4">
       <nav>

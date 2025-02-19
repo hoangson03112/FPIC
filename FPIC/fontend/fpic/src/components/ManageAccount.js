@@ -11,13 +11,10 @@ const ManageAccount = () => {
   const [filteredAccounts, setFilteredAccounts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showAuthorizationModal, setShowAuthorizationModal] = useState(false);
-
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [accountToUpdate, setAccountToUpdate] = useState(null);
-
   const [newAccount, setNewAccount] = useState({
     username: "",
     password: "",
