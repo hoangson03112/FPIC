@@ -9,7 +9,8 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
-
+const bodyParse = require('body-parser')
+const AccessoryRouter = require("./router/AccessoryRouter")
 const IMAGES_DIR = path.join(__dirname, "img");
 const IMAGES_MICROCHIP = path.join(__dirname, "microchip");
 const IMAGES_JTAG = path.join(__dirname, "jtag");
@@ -21,7 +22,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
+app.use(bodyParse.json())
+app.use('/', AccessoryRouter)
 app.get("/images", (req, res) => {
   fs.readdir(IMAGES_DIR, (err, files) => {
     if (err) {

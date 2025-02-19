@@ -10,7 +10,7 @@ import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 function Accessory() {
   const { currentPage = 1 } = useParams();
   const navigate = useNavigate();
-  const [images, setImages] = useState([]);
+  const [accessories, setAccessories] = useState([]);
   const [page, setPage] = useState(Number(currentPage));
   const [imagesPerPage] = useState(24);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
@@ -24,16 +24,17 @@ function Accessory() {
   };
 
   const handleNextImage = () => {
-    if (selectedImageIndex < images.length - 1) {
-      handleImageClick(selectedImageIndex + 1);
-    }
+    // if (selectedImageIndex < images.length - 1) {
+    //   handleImageClick(selectedImageIndex + 1);
+    // }
   };
 
   useEffect(() => {
     axios
-      .get(`${REACT_APP_URL_BE}/images`)
+      .get("http://localhost:9999/accessory")
       .then((response) => {
-        setImages(response.data);
+        console.log(response.data.data[0].image)
+        setAccessories(response.data.data);
       })
       .catch((error) => {
         console.error("Error fetching images:", error);
@@ -42,7 +43,7 @@ function Accessory() {
 
   const indexOfLastImage = page * imagesPerPage;
   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-  const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+  const currentImages = accessories.slice(indexOfFirstImage, indexOfLastImage);
 
   const handleImageClick = (index) => {
     setSelectedImageIndex(index);
@@ -58,14 +59,14 @@ function Accessory() {
   };
 
   const showNextPage = () => {
-    if (page < Math.ceil(images.length / imagesPerPage)) {
+    if (page < Math.ceil(accessories.length / imagesPerPage)) {
       const newPage = page + 1;
       setPage(newPage);
       navigate(`/page/${newPage}`);
     }
   };
 
-  const selectedImage = images[selectedImageIndex];
+  const selectedImage = accessories[selectedImageIndex];
 
   useEffect(() => {
     if (selectedImage) {
@@ -107,7 +108,7 @@ function Accessory() {
                   >
                     <Card.Img
                       variant="top"
-                      src={image.img}
+                      src={`data:image/png;base64,${image.image}`} 
                       alt={image?.name}
                       style={{
                         width: "100%",
@@ -160,18 +161,18 @@ function Accessory() {
                       onChange={(e) => setPage(Number(e.target.value))}
                       onBlur={() => {
                         if (page < 1) setPage(1);
-                        if (page > Math.ceil(images.length / imagesPerPage))
-                          setPage(Math.ceil(images.length / imagesPerPage));
+                        if (page > Math.ceil(accessories.length / imagesPerPage))
+                          setPage(Math.ceil(accessories.length / imagesPerPage));
                       }}
                       disabled
                     />
-                    / {Math.ceil(images.length / imagesPerPage)}
+                    / {Math.ceil(accessories.length / imagesPerPage)}
                   </span>
                 </Col>
                 <Col xs={3}>
                   <button
                     onClick={showNextPage}
-                    disabled={page === Math.ceil(images.length / imagesPerPage)}
+                    disabled={page === Math.ceil(accessories.length / imagesPerPage)}
                     className="btn btn-custom"
                     style={{ width: 50, backgroundColor: "white", height: 30 }}
                   >
@@ -261,7 +262,7 @@ function Accessory() {
                                 className="btn btn-custom"
                                 onClick={handleNextImage}
                                 disabled={
-                                  selectedImageIndex === images.length - 1
+                                  selectedImageIndex === accessories.length - 1
                                 }
                                 style={{
                                   width: 50,
@@ -292,7 +293,7 @@ function Accessory() {
                             <div className="w-100 mt-4">
                               <h6>More images:</h6>
                               <div className="d-flex flex-wrap justify-content-start">
-                                {images
+                                {accessories
                                   .filter(
                                     (img, index) => index !== selectedImageIndex
                                   )
@@ -308,7 +309,7 @@ function Accessory() {
                                         }}
                                         onClick={() =>
                                           handleImageClick(
-                                            images.indexOf(image)
+                                            accessories.indexOf(image)
                                           )
                                         }
                                         data-bs-target="#imageModal"
