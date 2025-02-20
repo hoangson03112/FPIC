@@ -1,9 +1,17 @@
 const Accessory = require('../Model/Accessory')
 const AccessoryModel = require("../Model/Accessory")
 
-exports.getAccessories = async (rew, res) =>{
+exports.getAccessories = async (req, res) =>{
     try{
+        let {page, limit} = req.query
+        page = parseInt(page) || 1
+        limit = parseInt(limit)|| 12
+        const skip = (page - 1) * limit
         const accessories = await AccessoryModel.find()
+        .sort({ createAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        const totalItem = await AccessoryModel.countDocuments()
         if(accessories){
             const accessoriesWithBase64 = accessories.map(accessory =>({
                 ...accessory._doc,
@@ -12,7 +20,12 @@ exports.getAccessories = async (rew, res) =>{
             return res.status(200).json({
                 status:200,
                 message:"get data successfully",
-                data:accessoriesWithBase64
+                data:accessoriesWithBase64.reverse(),
+                pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalItem / limit),
+                totalItem: totalItem
+                }
             })
         }else{
             return res.status(404).json({

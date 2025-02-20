@@ -40,11 +40,11 @@
 
 .main-content .card-body .card-title,
 .main-content .card-body .card-text {
-  color: #ffffff; 
+  color: 'black'; 
+  text-align:center;
 }
 
 .bg-image {
-  /* background-image: url("C:\Nodejs\FPIC\FPIC\fontend\fpic\public\imgconst\pexels-rostislav-5011647.jpg"); */
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -123,13 +123,37 @@
 
 
 .main-content.shrinked {
-  margin-left: 250px; 
+  margin-left: 250px; /* Độ rộng của menu thanh trượt */
 }
-.modal-90w {
-  width: 100%;
-  max-width: 100%;
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
 }
 
-.modal-90w .modal-content {
-  height: 85vh;
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border-left-color: #714B67;
+  animation: spin 1s ease infinite;
+}
+.spinner2 {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border-left-color: #714B67;
+  animation: spin 1s ease infinite;
+}
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
 }

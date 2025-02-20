@@ -16,6 +16,10 @@ const AccessorySchema = new mongoose.Schema({
     type: {
         type: String,
         require: false
+    },
+    createAt:{
+        type: Date,
+        default : Date.now()
     }
 })
 const AccessoryModel = mongoose.model('accessories', AccessorySchema)
