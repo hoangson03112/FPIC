@@ -2,200 +2,190 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./Accessory.css";
-import CustomButtonGroup from "./ButtonColor";
-
+import { Alert, Button, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Pagination, Snackbar, Stack, TextField } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close"
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 
 function Accessory() {
-  const { currentPage = 1 } = useParams();
-  const navigate = useNavigate();
   const [accessories, setAccessories] = useState([]);
-  const [page, setPage] = useState(Number(currentPage));
-  const [imagesPerPage] = useState(24);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
-  const [resetKey, setResetKey] = useState(0);
-  const [fileData, setFileData] = useState(null);
-
-  const handlePreviousImage = () => {
-    if (selectedImageIndex > 0) {
-      handleImageClick(selectedImageIndex - 1);
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(12)
+  const [showModal, setShowModal] = useState(false)
+  const [errors, setErrors] = useState({});
+  const [isLoadingButton, setIsLoadingButton] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [snackBar, setSnackBar] = useState({
+    open: false,
+    message: '',
+    severity: ''
+  })
+  const [dataReponse, setData] = useState({
+    status: '',
+    message: '',
+    data: [],
+    pagination: {
+      totalPages: '',
+      currentPage: '',
+      totalItem: ''
     }
-  };
-
-  const handleNextImage = () => {
-    // if (selectedImageIndex < images.length - 1) {
-    //   handleImageClick(selectedImageIndex + 1);
-    // }
-  };
-
+  })
+  const [formData, setFormData] = useState({
+    _id: '',
+    title: '',
+    description: '',
+    image: '',
+    type: ''
+  })
   useEffect(() => {
-    axios
-      .get("http://localhost:9999/accessory")
-      .then((response) => {
-        console.log(response.data.data[0].image)
-        setAccessories(response.data.data);
+
+    fetchData()
+
+  }, [page, limit]);
+  const fetchData = async () => {
+    setIsLoading(true)
+    try {
+      const response = await axios.get("http://localhost:9999/accessory", {
+        params: { page: page, limit: limit }
       })
-      .catch((error) => {
-        console.error("Error fetching images:", error);
-      });
-  }, []);
-
-  const indexOfLastImage = page * imagesPerPage;
-  const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-  const currentImages = accessories.slice(indexOfFirstImage, indexOfLastImage);
-
-  const handleImageClick = (index) => {
-    setSelectedImageIndex(index);
-    setResetKey((prevKey) => prevKey + 1);
-  };
-
-  const showPreviousPage = () => {
-    if (page > 1) {
-      const newPage = page - 1;
-      setPage(newPage);
-      navigate(`/page/${newPage}`);
+      if (response) {
+        setData(response.data)
+        setAccessories(response.data.data);
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.log(error)
     }
-  };
-
-  const showNextPage = () => {
-    if (page < Math.ceil(accessories.length / imagesPerPage)) {
-      const newPage = page + 1;
-      setPage(newPage);
-      navigate(`/page/${newPage}`);
-    }
-  };
-
-  const selectedImage = accessories[selectedImageIndex];
-
-  useEffect(() => {
-    if (selectedImage) {
-      console.log(selectedImage);
-
-      axios
-        .post("http://localhost:9999/get-json-file", {
-          fileName: selectedImage.name,
+  }
+  const handlePageChange = (newPage) => {
+    setPage(Math.max(1, Math.min(newPage, dataReponse.pagination.totalPages)))
+  }
+  const handleInputChange = (event) => {
+    const { name, type } = event.target
+    const value = type === "file" ? event.target.files[0] : event.target.value;
+    setFormData((prev) => ({
+      ...prev, [name]: value
+    }))
+  }
+  const handleClickItem = (index) => {
+    const item = accessories[index]
+    setFormData((prev) => ({
+      ...prev, ...item,
+    }))
+  }
+  const handleClickOnAnotherImage = (index) => {
+    setCurrentIndex(index);
+  }
+  const hanldeClickNextImage = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % accessories.length);
+  }
+  const hanldeClickPreviosImage = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? accessories.length - 1 : prevIndex - 1);
+  }
+  const handleSnackbarClose = () => {
+    setSnackBar({ open: false, message: '', severity: '' })
+  }
+  const handleCreateAccessory = async () => {
+    setIsLoadingButton(true)
+    let form = new FormData()
+    form.append("title", formData.title)
+    form.append("description", formData.description)
+    form.append("type", formData.type)
+    form.append("file", formData.image)
+    try {
+      const response = await axios.post("http://localhost:9999/accessory", form, {
+        headers: { "Content-Type": "multipart/form-data" }
+      })
+      if (response) {
+        setSnackBar({
+          open: true,
+          message: `${response.data.message}`,
+          severity: 'success'
         })
-        .then((response) => {
-          console.log(response);
-          setFileData(response.data.jsonData);
-        })
-        .catch((error) => {
-          console.error("Error fetching images:", error);
-        });
+        fetchData()
+        setShowModal(false)
+        setFormData((prev) => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" })))
+        setIsLoadingButton(false)
+      }
+    } catch (error) {
+      setSnackBar({
+        open: true,
+        message: `Server error: ${error}`,
+        severity: 'error'
+      })
     }
-  }, [selectedImage]);
 
-  useEffect(() => {
-    setPage(Number(currentPage));
-  }, [currentPage]);
 
+  }
   return (
     <div className="bg-image">
       <Container fluid>
         <Row>
           <Col className="main-content">
             <div className="App">
-              <div className="image-grid">
-                {currentImages.map((image, index) => (
-                  <Card
-                    key={index}
-                    className="m-2"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleImageClick(indexOfFirstImage + index)}
-                    data-bs-toggle="modal"
-                    data-bs-target="#imageModal"
+              <Col md={2} className="d-flex ms-auto justify-content-end">
+                <button class="animated-button" onClick={() => setShowModal(true)}>
+                  <svg
+                    viewBox="0 0 20 20"
+                    className="arr-2 mt-1 "
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <Card.Img
-                      variant="top"
-                      src={`data:image/png;base64,${image.image}`} 
-                      alt={image?.name}
-                      style={{
-                        width: "100%",
-                        height: "150px",
-                        objectFit: "cover",
-                      }}
-                    />
-                    <Card.Body>
-                      <Card.Title>{image?.name}</Card.Title>
-                      <Card.Text>
-                        Some quick example text to build on the card title.
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                ))}
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                  </svg>
+                  <span class="text"> Thêm</span>
+                  <span class="circle"></span>
+                  <svg
+                    viewBox="0 0 20 20"
+                    className="arr-1 mt-1"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                  </svg>
+                </button>
+              </Col>
+              <div className="table">
+                <div>
+                  {isLoading ? (
+                    <div className="loading-container">
+                      <div className="spinner"></div>
+                    </div>
+                  ) : (
+                    <div className="image-grid">
+                      {accessories.map((image, index) => (
+                        <Card
+                          key={index}
+                          className="m-2"
+                          style={{ cursor: "pointer" }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#imageModal"
+                          onClick={() => handleClickItem(index)}
+                        >
+                          <Card.Img
+                            variant="top"
+                            src={`data:image/png;base64,${image.image}`}
+                            alt={image?.title}
+                            style={{
+                              width: "100%",
+                              height: "200px",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <Card.Body>
+                            <Card.Title>{image?.title}</Card.Title>
+                            <Card.Text>{image?.description}</Card.Text >
+                          </Card.Body>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <Row className="pagination justify-content-center">
-                <Col xs={3}>
-                  <button
-                    onClick={showPreviousPage}
-                    disabled={page === 1}
-                    className="btn btn-custom"
-                    style={{ width: 50, backgroundColor: "white", height: 30 }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className="bi bi-chevron-double-left"
-                      viewBox="0 0 16 16"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                      />
-                      <path
-                        fillRule="evenodd"
-                        d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                      />
-                    </svg>
-                  </button>
-                </Col>
-                <Col xs={3}>
-                  <span>
-                    Trang
-                    <input
-                      type="text"
-                      value={page}
-                      onChange={(e) => setPage(Number(e.target.value))}
-                      onBlur={() => {
-                        if (page < 1) setPage(1);
-                        if (page > Math.ceil(accessories.length / imagesPerPage))
-                          setPage(Math.ceil(accessories.length / imagesPerPage));
-                      }}
-                      disabled
-                    />
-                    / {Math.ceil(accessories.length / imagesPerPage)}
-                  </span>
-                </Col>
-                <Col xs={3}>
-                  <button
-                    onClick={showNextPage}
-                    disabled={page === Math.ceil(accessories.length / imagesPerPage)}
-                    className="btn btn-custom"
-                    style={{ width: 50, backgroundColor: "white", height: 30 }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className="bi bi-chevron-double-right"
-                      viewBox="0 0 16 16"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"
-                      />
-                      <path
-                        fillRule="evenodd"
-                        d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"
-                      />
-                    </svg>
-                  </button>
-                </Col>
-              </Row>
+
 
               <div
                 className="modal fade"
@@ -208,7 +198,7 @@ function Accessory() {
                   <div className="modal-content">
                     <div className="modal-header">
                       <h5 className="modal-title" id="staticBackdropLabel">
-                        {selectedImage?.name}
+                        {accessories[currentIndex]?.title}
                       </h5>
                       <button
                         type="button"
@@ -219,85 +209,59 @@ function Accessory() {
                     </div>
                     <div className="modal-body row">
                       <Col xs={10}>
-                        {selectedImage && (
+                        {accessories[currentIndex] && (
                           <div className="d-flex flex-column">
                             <div className="d-flex justify-content-between  mb-3">
-                              <button
-                                className="btn btn-custom"
-                                onClick={handlePreviousImage}
-                                disabled={selectedImageIndex === 0}
-                                style={{
-                                  width: 50,
-                                  backgroundColor: "white",
-                                  height: 30,
-                                }}
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="16"
-                                  height="16"
-                                  fill="currentColor"
-                                  class="bi bi-chevron-double-left"
-                                  viewBox="0 0 16 16"
-                                >
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                                  />
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                                  />
-                                </svg>
-                              </button>
                               <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                                {selectedImage && (
+                                <IconButton
+                                  onClick={hanldeClickPreviosImage}
+                                  sx={{
+                                    border:'none',
+                                    boxShadow:'none',
+                                    "&:hover":{backgroundColor:'transparent'}
+                                  }}>
+                                  <ChevronLeft
+                                    style={{
+                                      width: 50,
+                                      backgroundColor: "white",
+                                      height: 30,
+                                      justifyContent: 'center'
+                                    }}
+                                  />
+                                </IconButton>
+
+                                {accessories[currentIndex] ? (
                                   <ZoomableImage
-                                    key={resetKey}
-                                    data={selectedImage}
+                                    // key={resetKey}
+                                    data={`data:image/jpg;base64,${accessories[currentIndex].image}`}
+                                    alt={accessories[currentIndex].title}
                                   />
+                                ) : (
+                                  <p>Không có ảnh</p>
                                 )}
+                                <IconButton
+                                  onClick={hanldeClickNextImage}
+                                  sx={{
+                                    border:'none',
+                                    boxShadow:'none',
+                                    "&:hover":{backgroundColor:'transparent'}
+                                  }}>
+                                  <ChevronRight
+                                    style={{
+                                      width: 50,
+                                      backgroundColor: "white",
+                                      height: 30,
+                                      justifyContent: 'center'
+                                    }}
+                                  />
+                                </IconButton>
                               </div>
-                              <button
-                                className="btn btn-custom"
-                                onClick={handleNextImage}
-                                disabled={
-                                  selectedImageIndex === accessories.length - 1
-                                }
-                                style={{
-                                  width: 50,
-                                  backgroundColor: "white",
-                                  height: 30,
-                                }}
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="16"
-                                  height="16"
-                                  fill="currentColor"
-                                  class="bi bi-chevron-double-right"
-                                  viewBox="0 0 16 16"
-                                >
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"
-                                  />
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"
-                                  />
-                                </svg>
-                              </button>
                             </div>
 
                             <div className="w-100 mt-4">
                               <h6>More images:</h6>
                               <div className="d-flex flex-wrap justify-content-start">
                                 {accessories
-                                  .filter(
-                                    (img, index) => index !== selectedImageIndex
-                                  )
-                                  .slice(0, 19)
                                   .map((image, index) => {
                                     return (
                                       <Card
@@ -306,18 +270,15 @@ function Accessory() {
                                         style={{
                                           width: "100px",
                                           cursor: "pointer",
+                                          border: accessories[currentIndex] && accessories[currentIndex]._id === image._id ? "3px solid orangered" : "none"
                                         }}
-                                        onClick={() =>
-                                          handleImageClick(
-                                            accessories.indexOf(image)
-                                          )
-                                        }
                                         data-bs-target="#imageModal"
+                                        onClick={() => handleClickOnAnotherImage(index)}
                                       >
                                         <Card.Img
                                           variant="top"
-                                          src={image?.img}
-                                          alt={image?.name}
+                                          src={`data:image/jpg;base64,${image.image}`}
+                                          alt={image?.title}
                                           style={{
                                             width: "100%",
                                             height: "100px",
@@ -333,16 +294,108 @@ function Accessory() {
                         )}
                       </Col>
                       <Col xs={2}>
-                        <CustomButtonGroup fileData={fileData} />
+                        {/* <CustomButtonGroup fileData={fileData} /> */}
                       </Col>
                     </div>
                   </div>
                 </div>
               </div>
+              <div className="pagination-footer" style={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+              >
+                <Pagination
+                  count={dataReponse.pagination.totalPages}
+                  page={dataReponse.pagination.currentPage}
+                  onChange={(_, newPage) => handlePageChange(newPage)}
+                  showFirstButton
+                  showLastButton
+                  shape="rounded"
+                  siblingCount={2}
+                  boundaryCount={1}
+
+                />
+              </div>
             </div>
           </Col>
         </Row>
       </Container>
+      <Dialog open={showModal} onClose={() => setShowModal(false)} maxWidth="lg">
+        <DialogTitle className="text-center bg-primary text-white">
+          Thêm linh kiện
+          <IconButton
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: 'white',
+              outline: "none",
+              boxShadow: "none",
+              border: "none",
+
+            }}
+            onClick={() => setShowModal(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ padding: '16px' }}>
+            <TextField
+              name="title"
+              label="Tiêu đề"
+              onChange={handleInputChange}
+              value={formData.title || ""}
+              sx={{ minWidth: "300px" }}
+              error={!!errors.title}
+              helperText={errors.title}
+            />
+
+            <TextField
+              name="description"
+              label="Mô tả"
+              onChange={handleInputChange}
+              value={formData.description || ""}
+              sx={{ minWidth: "300px" }}
+              error={!!errors.description}
+              helperText={errors.description}
+            />
+            <TextField
+              name="type"
+              label="Loại"
+              onChange={handleInputChange}
+              value={formData.type || ""}
+              sx={{ minWidth: "300px" }}
+              error={!!errors.type}
+              helperText={errors.type}
+            />
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={(event) => handleInputChange(event)}
+              style={{ minWidth: "300px" }}
+            />
+            <Button onClick={handleCreateAccessory}
+              disabled={isLoading}
+              startIcon={isLoadingButton
+                ? <CircularProgress size={20} color="inherit" />
+                : null}>
+              Thêm
+            </Button>
+
+          </Stack>
+        </DialogContent>
+      </Dialog>
+      <Snackbar
+        open={snackBar.open}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={snackBar.severity}>
+          {snackBar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
