@@ -2,22 +2,25 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./Accessory.css";
-import { Alert, Button, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Pagination, Snackbar, Stack, TextField } from "@mui/material";
+import {
+  Alert, Button, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Pagination, Snackbar,
+  Stack, TextField, Fade
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import { REACT_APP_URL_SERVER } from "./config";
-
+const Transition = React.forwardRef((props, ref) => <Fade ref={ref} {...props} timeout={1000} />)
 function Accessory() {
   const [accessories, setAccessories] = useState([]);
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(12)
   const [showModal, setShowModal] = useState(false)
+  const [showModalDesc, setShowModalDesc] = useState(false)
   const [errors, setErrors] = useState({});
   const [isLoadingButton, setIsLoadingButton] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState()
   const [snackBar, setSnackBar] = useState({
     open: false,
     message: '',
@@ -45,6 +48,15 @@ function Accessory() {
     fetchData()
 
   }, [page, limit]);
+  useEffect(() => {
+    const item = accessories[currentIndex]
+    setFormData({ ...item })
+  }, [currentIndex])
+  useEffect(() => {
+    if (showModal) {
+      setFormData((prev) => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" })))
+    }
+  }, [showModal])
   const fetchData = async () => {
     setIsLoading(true)
     try {
@@ -64,17 +76,14 @@ function Accessory() {
     setPage(Math.max(1, Math.min(newPage, dataReponse.pagination.totalPages)))
   }
   const handleInputChange = (event) => {
-    const { name, type } = event.target
-    const value = type === "file" ? event.target.files[0] : event.target.value;
+    const { name, type, value, files } = event.target
     setFormData((prev) => ({
-      ...prev, [name]: value
+      ...prev, [name]: type === 'file' ? files[0] : value
     }))
   }
   const handleClickItem = (index) => {
-    const item = accessories[index]
-    setFormData((prev) => ({
-      ...prev, ...item,
-    }))
+    setCurrentIndex(index)
+    handleClickModalDesc(true)
   }
   const handleClickOnAnotherImage = (index) => {
     setCurrentIndex(index);
@@ -83,11 +92,19 @@ function Accessory() {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % accessories.length);
   }
   const hanldeClickPreviosImage = () => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? accessories.length - 1 : prevIndex - 1);
   }
   const handleSnackbarClose = () => {
     setSnackBar({ open: false, message: '', severity: '' })
+  }
+  const handleClickModalDesc = (status) => {
+    if (status) {
+      setShowModalDesc(status)
+    } else {
+      setShowModalDesc(status)
+      setFormData({ ...accessories[currentIndex] })
+    }
   }
   const handleCreateAccessory = async () => {
     setIsLoadingButton(true)
@@ -121,34 +138,66 @@ function Accessory() {
 
 
   }
+  const handleUpdateAccessory = async () => {
+    const form = new FormData()
+    form.append("title", formData.title)
+    form.append("description", formData.description)
+    form.append("type", formData.type)
+    if (formData.image instanceof File) {
+      form.append("file", formData.image)
+    }
+    try {
+      const response = await axios.put(`http://localhost:9999/accessory/${formData._id}`,
+        form, { headers: { "Content-Type": "multipart/form-data" } })
+      if (response) {
+        setSnackBar({
+          open: true,
+          message: `${response.data.message}`,
+          severity: "success"
+        })
+        fetchData()
+      }
+    } catch (error) {
+      setSnackBar({
+        open: true,
+        message: `Server error: ${error}`,
+        severity: 'error'
+      })
+    }
+    console.log(formData)
+  }
   return (
     <div className="bg-image">
       <Container fluid>
         <Row>
           <Col className="main-content">
             <div className="App">
-              <Col md={2} className="d-flex ms-auto justify-content-end">
-                <button class="animated-button" onClick={() => setShowModal(true)}>
-                  <svg
-                    viewBox="0 0 20 20"
-                    className="arr-2 mt-1 "
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-                  </svg>
-                  <span class="text"> Thêm</span>
-                  <span class="circle"></span>
-                  <svg
-                    viewBox="0 0 20 20"
-                    className="arr-1 mt-1"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-                  </svg>
-                </button>
-              </Col>
+              <div className="flex-row">
+                {/* <Search /> */}
+                <Col md={2} className="d-flex ms-auto justify-content-end">
+                  <button class="animated-button" onClick={() => setShowModal(true)}>
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="arr-2 mt-1 "
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                    </svg>
+                    <span class="text"> Thêm</span>
+                    <span class="circle"></span>
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="arr-1 mt-1"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                    </svg>
+                  </button>
+                </Col>
+              </div>
+
               <div className="table">
                 <div>
                   {isLoading ? (
@@ -162,8 +211,6 @@ function Accessory() {
                           key={index}
                           className="m-2"
                           style={{ cursor: "pointer" }}
-                          data-bs-toggle="modal"
-                          data-bs-target="#imageModal"
                           onClick={() => handleClickItem(index)}
                         >
                           <Card.Img
@@ -184,121 +231,6 @@ function Accessory() {
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
-
-
-              <div
-                className="modal fade"
-                id="imageModal"
-                tabIndex="-1"
-                aria-labelledby="staticBackdropLabel"
-                aria-hidden="true"
-              >
-                <div className="modal-dialog modal-fullscreen">
-                  <div className="modal-content">
-                    <div className="modal-header">
-                      <h5 className="modal-title" id="staticBackdropLabel">
-                        {accessories[currentIndex]?.title}
-                      </h5>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      ></button>
-                    </div>
-                    <div className="modal-body row">
-                      <Col xs={10}>
-                        {accessories[currentIndex] && (
-                          <div className="d-flex flex-column">
-                            <div className="d-flex justify-content-between  mb-3">
-                              <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                                <IconButton
-                                  onClick={hanldeClickPreviosImage}
-                                  sx={{
-                                    border:'none',
-                                    boxShadow:'none',
-                                    "&:hover":{backgroundColor:'transparent'}
-                                  }}>
-                                  <ChevronLeft
-                                    style={{
-                                      width: 50,
-                                      backgroundColor: "white",
-                                      height: 30,
-                                      justifyContent: 'center'
-                                    }}
-                                  />
-                                </IconButton>
-
-                                {accessories[currentIndex] ? (
-                                  <ZoomableImage
-                                    // key={resetKey}
-                                    data={`data:image/jpg;base64,${accessories[currentIndex].image}`}
-                                    alt={accessories[currentIndex].title}
-                                  />
-                                ) : (
-                                  <p>Không có ảnh</p>
-                                )}
-                                <IconButton
-                                  onClick={hanldeClickNextImage}
-                                  sx={{
-                                    border:'none',
-                                    boxShadow:'none',
-                                    "&:hover":{backgroundColor:'transparent'}
-                                  }}>
-                                  <ChevronRight
-                                    style={{
-                                      width: 50,
-                                      backgroundColor: "white",
-                                      height: 30,
-                                      justifyContent: 'center'
-                                    }}
-                                  />
-                                </IconButton>
-                              </div>
-                            </div>
-
-                            <div className="w-100 mt-4">
-                              <h6>More images:</h6>
-                              <div className="d-flex flex-wrap justify-content-start">
-                                {accessories
-                                  .map((image, index) => {
-                                    return (
-                                      <Card
-                                        key={index}
-                                        className="m-2"
-                                        style={{
-                                          width: "100px",
-                                          cursor: "pointer",
-                                          border: accessories[currentIndex] && accessories[currentIndex]._id === image._id ? "3px solid orangered" : "none"
-                                        }}
-                                        data-bs-target="#imageModal"
-                                        onClick={() => handleClickOnAnotherImage(index)}
-                                      >
-                                        <Card.Img
-                                          variant="top"
-                                          src={`data:image/jpg;base64,${image.image}`}
-                                          alt={image?.title}
-                                          style={{
-                                            width: "100%",
-                                            height: "100px",
-                                            objectFit: "cover",
-                                          }}
-                                        />
-                                      </Card>
-                                    );
-                                  })}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </Col>
-                      <Col xs={2}>
-                        {/* <CustomButtonGroup fileData={fileData} /> */}
-                      </Col>
-                    </div>
-                  </div>
                 </div>
               </div>
               <div className="pagination-footer" style={{
@@ -322,7 +254,174 @@ function Accessory() {
           </Col>
         </Row>
       </Container>
-      <Dialog open={showModal} onClose={() => setShowModal(false)} maxWidth="lg">
+      <Dialog
+        open={showModalDesc}
+        onClose={() => handleClickModalDesc(false)}
+        fullScreen
+        TransitionComponent={Transition}>
+        <DialogTitle sx={{ paddingTop: '10px', paddingBottom: '0px', paddingLeft: '0px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <IconButton
+              sx={{
+                border: 'none',
+                boxShadow: 'none',
+                "&:hover": { backgroundColor: 'transparent' },
+              }}
+              onClick={() => handleClickModalDesc(false)}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          <Row xs={10}>
+            {formData && (
+              <div className="d-flex flex-column">
+                <div className="d-flex justify-content-between  mb-3">
+                  <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+                    <IconButton
+                      onClick={hanldeClickPreviosImage}
+                      sx={{
+                        border: 'none',
+                        boxShadow: 'none',
+                        "&:hover": { backgroundColor: 'transparent' }
+                      }}>
+                      <ChevronLeft
+                        style={{
+                          width: 50,
+                          backgroundColor: "white",
+                          height: 30,
+                          justifyContent: 'center'
+                        }}
+                      />
+                    </IconButton>
+
+                    {formData.image ? (
+                      <ZoomableImage
+                        // key={resetKey}
+                        data={`data:image/jpg;base64,${formData.image}`}
+                        alt={formData.title}
+                      />
+                    ) : (
+                      <p>Không có ảnh</p>
+                    )}
+                    <IconButton
+                      onClick={hanldeClickNextImage}
+                      sx={{
+                        border: 'none',
+                        boxShadow: 'none',
+                        "&:hover": { backgroundColor: 'transparent' }
+                      }}>
+                      <ChevronRight
+                        style={{
+                          width: 50,
+                          backgroundColor: "white",
+                          height: 30,
+                          justifyContent: 'center'
+                        }}
+                      />
+                    </IconButton>
+                  </div>
+                  <Stack
+                    spacing={4}
+                    sx={{ padding: '16px', marginTop: '50px' }}
+                  >
+                    <TextField
+                      name="title"
+                      label="Tiêu đề"
+                      onChange={handleInputChange}
+                      value={formData.title || ""}
+                      sx={{ minWidth: "300px" }}
+                      error={!!errors.title}
+                      helperText={errors.title}
+                    />
+
+                    <TextField
+                      name="description"
+                      label="Mô tả"
+                      onChange={handleInputChange}
+                      value={formData.description || ""}
+                      sx={{ minWidth: "300px" }}
+                      error={!!errors.description}
+                      helperText={errors.description}
+                    />
+                    <TextField
+                      name="type"
+                      label="Loại"
+                      onChange={handleInputChange}
+                      value={formData.type || ""}
+                      sx={{ minWidth: "300px" }}
+                      error={!!errors.type}
+                      helperText={errors.type}
+                    />
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      onChange={handleInputChange}
+                      style={{ minWidth: "300px" }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-evenly', }}>
+                      <Button onClick={handleUpdateAccessory}
+                        disabled={isLoading}
+                        startIcon={isLoadingButton
+                          ? <CircularProgress size={20} color="inherit" />
+                          : null}>
+                        Sửa
+                      </Button>
+                      <Button
+                        disabled={isLoading}
+                        color="warning"
+                        startIcon={isLoadingButton
+                          ? <CircularProgress size={20} color="inherit" />
+                          : null}>
+                        Xóa
+                      </Button>
+                    </div>
+                  </Stack>
+                </div>
+
+                <div className="w-100 mt-4">
+                  <h6>More images:</h6>
+                  <div className="d-flex flex-wrap justify-content-start">
+                    {accessories
+                      .map((image, index) => {
+                        return (
+                          <Card
+                            key={index}
+                            className="m-2"
+                            style={{
+                              width: "100px",
+                              cursor: "pointer",
+                              border: formData && formData._id === image._id ? "3px solid orangered" : "none"
+                            }}
+                            data-bs-target="#imageModal"
+                            onClick={() => handleClickOnAnotherImage(index)}
+                          >
+                            <Card.Img
+                              variant="top"
+                              src={`data:image/jpg;base64,${image.image}`}
+                              alt={image?.title}
+                              style={{
+                                width: "100%",
+                                height: "100px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </Card>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Row>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        maxWidth="lg"
+        TransitionComponent={Transition}>
         <DialogTitle className="text-center bg-primary text-white">
           Thêm linh kiện
           <IconButton
@@ -374,7 +473,7 @@ function Accessory() {
               type="file"
               name="image"
               accept="image/*"
-              onChange={(event) => handleInputChange(event)}
+              onChange={handleInputChange}
               style={{ minWidth: "300px" }}
             />
             <Button onClick={handleCreateAccessory}
@@ -392,7 +491,8 @@ function Accessory() {
         open={snackBar.open}
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        onClose={handleSnackbarClose}>
+        onClose={handleSnackbarClose}
+        TransitionComponent={Transition}>
         <Alert onClose={handleSnackbarClose} severity={snackBar.severity}>
           {snackBar.message}
         </Alert>
