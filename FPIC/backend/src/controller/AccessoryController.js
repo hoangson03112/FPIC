@@ -1,45 +1,50 @@
 const Accessory = require('../Model/Accessory')
 const AccessoryModel = require("../Model/Accessory")
 
-exports.getAccessories = async (req, res) =>{
-    try{
-        let {page, limit} = req.query
-        page = parseInt(page) || 1
-        limit = parseInt(limit)|| 12
-        const skip = (page - 1) * limit
+exports.getAccessories = async (req, res) => {
+    try {
+        let { page, limit } = req.query;
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 12;
+
+        const skip = (page - 1) * limit;
+
         const accessories = await AccessoryModel.find()
-        .sort({ createAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        const totalItem = await AccessoryModel.countDocuments()
-        if(accessories){
-            const accessoriesWithBase64 = accessories.map(accessory =>({
+            .sort({ _id: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalItem = await AccessoryModel.countDocuments();
+
+        if (accessories) {
+            const accessoriesWithBase64 = accessories.map(accessory => ({
                 ...accessory._doc,
-                image: accessory.image ? accessory.image.toString('base64'):  null
-            }))
+                image: accessory.image ? accessory.image.toString('base64') : null
+            }));
+
             return res.status(200).json({
-                status:200,
-                message:"get data successfully",
-                data:accessoriesWithBase64.reverse(),
+                status: 200,
+                message: "Get data successfully",
+                data: accessoriesWithBase64,
                 pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(totalItem / limit),
-                totalItem: totalItem
+                    currentPage: page,
+                    totalPages: Math.ceil(totalItem / limit),
+                    totalItem: totalItem
                 }
-            })
-        }else{
+            });
+        } else {
             return res.status(404).json({
-                status:404,
-                message: "accessories not found"
-            })
+                status: 404,
+                message: "Accessories not found"
+            });
         }
-    }catch(e){
+    } catch (e) {
         res.status(500).json({
-            status:500,
-            message:`Server error: ${e}`
-        })
+            status: 500,
+            message: `Server error: ${e}`
+        });
     }
-}
+};
 exports.getAccessory = async (req, res) =>{
     try {
         const {id} = req.params
