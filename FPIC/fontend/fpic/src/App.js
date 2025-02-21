@@ -36,7 +36,7 @@ function App() {
 
   const handleImageClick = (index) => {
     setSelectedImageIndex(index);
-    setResetKey((prevKey) => prevKey + 1); // Tăng giá trị key khi ảnh thay đổi
+    setResetKey((prevKey) => prevKey + 1);
   };
 
   const toggleShowAll = () => {
@@ -47,14 +47,14 @@ function App() {
     setSelectedImageIndex((prevIndex) =>
       prevIndex > 0 ? prevIndex - 1 : images.length - 1
     );
-    setResetKey((prevKey) => prevKey + 1); // Reset ảnh khi chuyển ảnh
+    setResetKey((prevKey) => prevKey + 1);
   };
 
   const showNextImage = () => {
     setSelectedImageIndex((prevIndex) =>
       prevIndex < images.length - 1 ? prevIndex + 1 : 0
     );
-    setResetKey((prevKey) => prevKey + 1); // Reset ảnh khi chuyển ảnh
+    setResetKey((prevKey) => prevKey + 1);
   };
 
   const selectedImage = images[selectedImageIndex];
@@ -75,7 +75,7 @@ function App() {
   }, [selectedImage]);
 
   return (
-    <div className="App">
+    <div className="app">
       <div className="d-flex flex-wrap justify-content-center">
         {!showAll &&
           images.slice(0, 30).map((image, index) => (
@@ -212,7 +212,6 @@ function App() {
                 <CustomButtonGroup />
                 <CustomButtonGroup />
                 <CustomButtonGroup />
-
               </div>
             </div>
           </div>
