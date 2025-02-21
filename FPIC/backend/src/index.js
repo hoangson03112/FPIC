@@ -9,8 +9,8 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
-const bodyParse = require('body-parser')
-const AccessoryRouter = require("./router/AccessoryRouter")
+const bodyParse = require("body-parser");
+const AccessoryRouter = require("./router/AccessoryRouter");
 const IMAGES_DIR = path.join(__dirname, "img");
 const IMAGES_MICROCHIP = path.join(__dirname, "microchip");
 const IMAGES_JTAG = path.join(__dirname, "jtag");
@@ -22,8 +22,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(bodyParse.json())
-app.use('/', AccessoryRouter)
+app.use(bodyParse.json());
+app.use("/", AccessoryRouter);
 app.get("/images", (req, res) => {
   fs.readdir(IMAGES_DIR, (err, files) => {
     if (err) {
@@ -47,7 +47,9 @@ app.get("/images/count", (req, res) => {
       return res.status(500).json({ message: "Error reading directory", err });
     }
 
-    const imageCount = files.filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file)).length;
+    const imageCount = files.filter((file) =>
+      /\.(jpg|jpeg|png|gif)$/i.test(file)
+    ).length;
 
     res.json({ count: imageCount });
   });
@@ -77,7 +79,9 @@ app.get("/images-microchip/count", (req, res) => {
       return res.status(500).json({ message: "Error reading directory", err });
     }
 
-    const imageCount = files.filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file)).length;
+    const imageCount = files.filter((file) =>
+      /\.(jpg|jpeg|png|gif)$/i.test(file)
+    ).length;
 
     res.json({ count: imageCount });
   });
@@ -157,7 +161,6 @@ app.post("/get-json-file", (req, res) => {
       return res.status(404).json({ message: "File not found" });
     }
 
-    // Đọc nội dung file JSON
     fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
         return res
@@ -204,7 +207,6 @@ app.post("/login", async (req, res) => {
   try {
     let data = req.body;
 
-
     const account = await Account.findOne({ email: data.email });
 
     if (account) {
@@ -236,7 +238,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Xác thực token
 app.get("/authentication", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -288,7 +289,8 @@ const verifyToken = (req, res, next) => {
         return res.sendStatus(403);
       }
       req.user = user;
-      next(); d
+      next();
+      d;
     });
   } else {
     res.sendStatus(401);
@@ -307,7 +309,6 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
   const account = req.body.account;
 
   try {
-
     const existingAccount = await Account.findOne({ email: account.email });
     if (existingAccount) {
       return res.status(400).json({ message: "Email đã tồn tại" });
@@ -332,7 +333,6 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
 app.delete("/admin/delete-account", verifyToken, async (req, res) => {
   const id = req.body.id;
   try {
-
     const account = await Account.findById(id);
     if (!account) {
       return res
@@ -340,10 +340,7 @@ app.delete("/admin/delete-account", verifyToken, async (req, res) => {
         .json({ status: 404, message: "Tài khoản không tồn tại." });
     }
 
-
     await Account.findByIdAndDelete(id);
-
-
     res
       .status(200)
       .json({ status: 200, message: "Tài khoản đã được xóa thành công." });
@@ -381,11 +378,9 @@ app.put("/admin/update-account/:id", async (req, res) => {
   }
 });
 
-app.get('/admin/accounts/count', async (req, res) => {
+app.get("/admin/accounts/count", async (req, res) => {
   const userCount = await Account.countDocuments();
   res.json({ count: userCount });
 });
-
-
 
 app.listen(9999, () => console.log("Server is running on port 9999"));

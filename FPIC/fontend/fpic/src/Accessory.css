@@ -1,26 +1,24 @@
-
-
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr); 
-  grid-gap: 10px; 
-  justify-items: center; 
+  grid-template-columns: repeat(6, 1fr);
+  grid-gap: 10px;
+  justify-items: center;
   padding: 10px;
 }
 
 .image-grid .card {
   width: 100%;
-  background-color: transparent !important; 
+  background-color: transparent !important;
 }
 .image-grid .card:hover {
-  background-color: rgba(255, 255, 255, 0.2); 
+  background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(200px);
 }
 .image-grid .card img {
   object-fit: cover;
   height: 150px;
   width: 100%;
-  transition: transform 0.3s ease; 
+  transition: transform 0.3s ease;
 }
 
 .image-grid .card img:hover {
@@ -37,10 +35,9 @@
   text-align: start;
 }
 
-
 .main-content .card-body .card-title,
 .main-content .card-body .card-text {
-  color: #ffffff; 
+  color: #ffffff;
 }
 
 .bg-image {
@@ -62,15 +59,14 @@
   }
 }
 
-
 .App {
   margin-top: 50px;
-  transition: margin-left 0.3s ease; 
+  transition: margin-left 0.3s ease;
 }
 .pagination {
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
 }
 .pagination input {
   width: 50px;
@@ -85,45 +81,40 @@
 .account-menu {
   position: sticky;
   top: 0;
-  background-color: #fff; 
+  background-color: #fff;
   z-index: 1000;
-  width: 100%; 
-  border-bottom: 1px solid #ddd; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-  transition: background-color 0.3s ease; 
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
 }
-
-
 
 .side-menu {
   position: fixed;
   top: 120px;
   left: 0;
   height: 100%;
-  width: 300px; 
-  background-color: rgba(0, 0, 0, 0.425); 
+  width: 300px;
+  background-color: rgba(0, 0, 0, 0.425);
   backdrop-filter: blur(1000px);
   color: white;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
-  overflow-y: auto; 
+  overflow-y: auto;
   z-index: 999;
 }
-
 
 .side-menu.open {
   transform: translateX(0);
 }
 
-
 .main-content {
   transition: margin-left 0.3s ease;
-  margin-left: 0; 
+  margin-left: 0;
 }
 
-
 .main-content.shrinked {
-  margin-left: 250px; 
+  margin-left: 250px;
 }
 .modal-90w {
   width: 100%;
