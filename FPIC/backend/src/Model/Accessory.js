@@ -16,7 +16,7 @@ const AccessorySchema = new mongoose.Schema({
     type: {
         type: String,
         require: false
-    }
+    },
 })
 const AccessoryModel = mongoose.model('accessories', AccessorySchema)
 module.exports = AccessoryModel
