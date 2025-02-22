@@ -7,7 +7,7 @@ const AccessorySchema = new mongoose.Schema({
     },
     description:{
         type: String,
-        require: true,
+        require: false,
     },
     image: {
         type: Buffer,
