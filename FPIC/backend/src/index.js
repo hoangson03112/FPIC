@@ -215,7 +215,7 @@ app.post("/login", async (req, res) => {
           .json({ message: "Tên người dùng hoặc mật khẩu không đúng" });
       }
       if (account.status === "active") {
-        const token = jwt.sign({ _id: account._id }, "sown", {
+        const token = jwt.sign({ _id: account._id, role: account.role }, "sown", {
           expiresIn: "3h",
         });
         return res.json({
@@ -387,5 +387,8 @@ app.get('/admin/accounts/count', async (req, res) => {
 });
 
 
-
+const IMAGE_DIR = "C:/Users/nguye/Documents/gui/gui/BTN";
+const type = require('./router/TypeAccessoryRouter')
+app.use("/images", express.static(IMAGE_DIR));
+app.use("/", type)
 app.listen(9999, () => console.log("Server is running on port 9999"));

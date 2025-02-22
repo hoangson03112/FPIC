@@ -7,12 +7,15 @@ import {
   Stack, TextField, Fade
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"
+import Add from '@mui/icons-material/Add';
 import { ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
+import SearchBox from "./components/SearchBox";
 const Transition = React.forwardRef((props, ref) => <Fade ref={ref} {...props} timeout={1000} />)
 function Accessory() {
-  const [accessories, setAccessories] = useState([]);
+  const [typesAccessories, setTypeAccessories] = useState([]);
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(12)
   const [showModal, setShowModal] = useState(false)
@@ -21,6 +24,7 @@ function Accessory() {
   const [isLoadingButton, setIsLoadingButton] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState()
+  const [search, setSearch] = useState("")
   const [snackBar, setSnackBar] = useState({
     open: false,
     message: '',
@@ -37,35 +41,38 @@ function Accessory() {
     }
   })
   const [formData, setFormData] = useState({
-    _id: '',
-    title: '',
-    description: '',
-    image: '',
-    type: ''
+    _id: "",
+    tilte: "",
+    description: "",
+    image: "",
+    type: "",
   })
   useEffect(() => {
 
     fetchData()
 
-  }, [page, limit]);
+  }, [page, limit, search]);
   useEffect(() => {
-    const item = accessories[currentIndex]
+    const item = typesAccessories[currentIndex]
     setFormData({ ...item })
   }, [currentIndex])
   useEffect(() => {
     if (showModal) {
-      setFormData((prev) => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" })))
+      setFormData((prev) => {
+        if (!prev || Object.keys(prev).length === 0) return {}
+        Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" }))
+      })
     }
   }, [showModal])
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const response = await axios.get("http://localhost:9999/accessory", {
-        params: { page: page, limit: limit }
+      const response = await axios.get(`${REACT_APP_URL_BE}/get-types-accessory`, {
+        params: { page: page, limit: limit, query: search }
       })
       if (response) {
         setData(response.data)
-        setAccessories(response.data.data);
+        setTypeAccessories(response.data.data);
         setIsLoading(false)
       }
     } catch (error) {
@@ -89,11 +96,11 @@ function Accessory() {
     setCurrentIndex(index);
   }
   const hanldeClickNextImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % accessories.length);
+    //setCurrentIndex((prevIndex) => (prevIndex + 1) % typesAccessories.length);
   }
   const hanldeClickPreviosImage = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? accessories.length - 1 : prevIndex - 1);
+    // setCurrentIndex((prevIndex) =>
+    //   prevIndex === 0 ? accessories.length - 1 : prevIndex - 1);
   }
   const handleSnackbarClose = () => {
     setSnackBar({ open: false, message: '', severity: '' })
@@ -103,18 +110,18 @@ function Accessory() {
       setShowModalDesc(status)
     } else {
       setShowModalDesc(status)
-      setFormData({ ...accessories[currentIndex] })
+      //setFormData({ ...accessories[currentIndex] })
     }
   }
   const handleCreateAccessory = async () => {
     setIsLoadingButton(true)
     let form = new FormData()
     form.append("title", formData.title)
-    form.append("description", formData.description)
+    form.append("description", formData.description ?? "")
     form.append("type", formData.type)
     form.append("file", formData.image)
     try {
-      const response = await axios.post("http://localhost:9999/accessory", form, {
+      const response = await axios.post(`${REACT_APP_URL_BE}/accessory`, form, {
         headers: { "Content-Type": "multipart/form-data" }
       })
       if (response) {
@@ -147,7 +154,7 @@ function Accessory() {
       form.append("file", formData.image)
     }
     try {
-      const response = await axios.put(`http://localhost:9999/accessory/${formData._id}`,
+      const response = await axios.put(`${REACT_APP_URL_BE}/accessory/${formData._id}`,
         form, { headers: { "Content-Type": "multipart/form-data" } })
       if (response) {
         setSnackBar({
@@ -166,14 +173,19 @@ function Accessory() {
     }
     console.log(formData)
   }
+  const handleResultSearch = (result) => {
+    setSearch(result)
+  }
   return (
     <div className="bg-image">
       <Container fluid>
         <Row>
           <Col className="main-content">
             <div className="App">
-              <div className="flex-row">
-                {/* <Search /> */}
+              <div className="d-flex ms-auto justify-content-center">
+                <SearchBox
+                  className="justify-content-center"
+                  onSearchChange={handleResultSearch} />
                 <Col md={2} className="d-flex ms-auto justify-content-end">
                   <button class="animated-button" onClick={() => setShowModal(true)}>
                     <svg
@@ -206,7 +218,7 @@ function Accessory() {
                     </div>
                   ) : (
                     <div className="image-grid">
-                      {accessories.map((image, index) => (
+                      {typesAccessories.map((image, index) => (
                         <Card
                           key={index}
                           className="m-2"
@@ -383,7 +395,7 @@ function Accessory() {
                 <div className="w-100 mt-4">
                   <h6>More images:</h6>
                   <div className="d-flex flex-wrap justify-content-start">
-                    {accessories
+                    {typesAccessories
                       .map((image, index) => {
                         return (
                           <Card
@@ -445,7 +457,6 @@ function Accessory() {
               name="title"
               label="Tiêu đề"
               onChange={handleInputChange}
-              value={formData.title || ""}
               sx={{ minWidth: "300px" }}
               error={!!errors.title}
               helperText={errors.title}
@@ -455,7 +466,6 @@ function Accessory() {
               name="description"
               label="Mô tả"
               onChange={handleInputChange}
-              value={formData.description || ""}
               sx={{ minWidth: "300px" }}
               error={!!errors.description}
               helperText={errors.description}
@@ -464,7 +474,6 @@ function Accessory() {
               name="type"
               label="Loại"
               onChange={handleInputChange}
-              value={formData.type || ""}
               sx={{ minWidth: "300px" }}
               error={!!errors.type}
               helperText={errors.type}
