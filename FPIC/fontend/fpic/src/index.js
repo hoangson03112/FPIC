@@ -1,15 +1,56 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
+import Accessory from "./Accessory";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./components/Login";
+import Profile from "./components/Profile";
+import ManageAccount from "./components/ManageAccount";
+import Layout from "./Layout";
+import AdminHomePage from "./components/AdminHomePage";
+import MicrochipList from "./components/Microchip";
+import WeakPoint from "./components/WeakPoint";
+import BlockDiagram from "./components/BlockDiagram";
+import MainBoard from "./components/MainBoard";
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<AdminHomePage />}></Route>
+        </Route>{" "}
+        <Route element={<Layout />}>
+          <Route path="/page/:currentPage" element={<Accessory />} />
+        </Route>{" "}
+        <Route path="/auth/login" element={<Login />}></Route>
+        <Route element={<Layout />}>
+          <Route path="/my-account" element={<Profile />}></Route>
+        </Route>{" "}
+        <Route element={<Layout />}>
+          <Route
+            path="/admin/manager-account/:type"
+            element={<ManageAccount />}
+          ></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/microchip" element={<MicrochipList />}></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/weak-point" element={<WeakPoint />}></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/block-diagram" element={<BlockDiagram />}></Route>
+        </Route>
+        <Route element={<Layout />}>
+          <Route path="/main-board" element={<MainBoard />}></Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
