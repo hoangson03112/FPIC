@@ -2,7 +2,7 @@ import React from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "./ZoomableImage.css";
 
-const ZoomableImage = ({ data }) => {
+const ZoomableImage = ({ data, alt }) => {
   return (
     <div className="zoomable-container">
       <TransformWrapper
@@ -27,8 +27,8 @@ const ZoomableImage = ({ data }) => {
               contentClass="transform-content"
             >
               <img
-                src={data?.img}
-                alt={data?.name}
+                src={data}
+                alt={alt}
                 className="zoomable-image"
                 width={"auto"}
                 height={"80%"}
