@@ -32,44 +32,42 @@ const ManageAccount = () => {
   });
 
   const { type } = useParams();
+  const fetchAccounts = async () => {
+    try {
+      const response = await AccountContext.getAllAccounts();
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await AccountContext.getAllAccounts();
-
-        if (response.status === 401) {
-          Swal.fire({
-            icon: "error",
-            title: "Bạn chưa đăng nhập...",
-            text: "Vui lòng đăng nhập!",
-          });
-        } else if (response.status === 403) {
-          setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
-        } else if (response.status === "success" && response.accounts) {
-          setAccounts(
-            response.accounts.filter((account) => account.role === type)
-          );
-          setFilteredAccounts(
-            response.accounts.filter((account) => account.role === type)
-          );
-          setErrorMessage("");
-        } else {
-          setErrorMessage(
-            response.message || "Có lỗi xảy ra khi lấy danh sách tài khoản."
-          );
-        }
-      } catch (error) {
+      if (response.status === 401) {
         Swal.fire({
           icon: "error",
-          title: "Error server...",
-          text: "Có lỗi xảy ra khi lấy danh sách tài khoản.",
+          title: "Bạn chưa đăng nhập...",
+          text: "Vui lòng đăng nhập!",
         });
-        console.error("Failed to fetch accounts:", error);
-        setErrorMessage("Có lỗi xảy ra khi lấy danh sách tài khoản.");
+      } else if (response.status === 403) {
+        setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
+      } else if (response.status === "success" && response.accounts) {
+        setAccounts(
+          response.accounts.filter((account) => account.role === type)
+        );
+        setFilteredAccounts(
+          response.accounts.filter((account) => account.role === type)
+        );
+        setErrorMessage("");
+      } else {
+        setErrorMessage(
+          response.message || "Có lỗi xảy ra khi lấy danh sách tài khoản."
+        );
       }
-    };
-
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error server...",
+        text: "Có lỗi xảy ra khi lấy danh sách tài khoản.",
+      });
+      console.error("Failed to fetch accounts:", error);
+      setErrorMessage("Có lỗi xảy ra khi lấy danh sách tài khoản.");
+    }
+  };
+  useEffect(() => {
     fetchAccounts();
   }, [type]);
 
@@ -120,6 +118,7 @@ const ManageAccount = () => {
           account._id === accountUpdated._id ? accountUpdated : account
         );
         setAccounts(updatedAccounts);
+        fetchAccounts();
         setFilteredAccounts(updatedAccounts);
         Swal.fire({
           icon: "success",
@@ -272,7 +271,11 @@ const ManageAccount = () => {
                       <td>{account?.lastName}</td>
                       <td>{account?.email}</td>
                       <td>{account?.role}</td>
-                      <td>{account?.status}</td>
+                      <td>
+                        {account?.status === "active"
+                          ? "Đang hoạt đông"
+                          : "Không hoạt động"}
+                      </td>
                       <td>
                         <Button
                           variant="btn btn-outline-warning"
@@ -492,8 +495,8 @@ const ManageAccount = () => {
                       })
                     }
                   />
-                  <span className="radio-tile">
-                    <span className="radio-label">Inactive</span>
+                  <span className="radio-tile ">
+                    <span className="radio-label">Không hoạt động</span>
                   </span>
                 </label>
                 <label className="radio-tile-container">
@@ -511,10 +514,27 @@ const ManageAccount = () => {
                     }
                   />
                   <span className="radio-tile">
-                    <span className="radio-label">Active</span>
+                    <span className="radio-label">Hoạt động</span>
                   </span>
                 </label>
               </div>
+            </Form.Group>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Vai trò</Form.Label>
+              <Form.Select
+                className="form-control-lg rounded-pill"
+                value={accountUpdated.role}
+                onChange={(e) =>
+                  setAccountUpdated({
+                    ...accountUpdated,
+                    role: e.target.value,
+                  })
+                }
+              >
+                <option value="user">Người dùng</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="assessor">Đánh giá viên</option>
+              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>

@@ -1,41 +1,77 @@
 import * as React from "react";
-import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
-import { Container } from "react-bootstrap";
-import AccountContext from "./http/AccountContext";
 import { useState, useEffect } from "react";
-import "./Layout.css";
-import Loader from "./components/Loader";
-import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
+import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Drawer,
+  AppBar,
+  Toolbar,
+  List,
+  Typography,
+  Divider,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Avatar,
+  Collapse,
+  Button,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  ExpandLess,
+  ExpandMore,
+  Home,
+  Assessment,
+  AdminPanelSettings,
+  BarChart,
+  Logout,
+  Login,
+} from "@mui/icons-material";
+import AccountContext from "./http/AccountContext";
+import StorageIcon from "@mui/icons-material/Storage";
+
+const drawerWidth = 280;
 
 const Layout = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const [account, setAccount] = useState({});
   const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [subMenus, setSubMenus] = useState({
     menu1: false,
     menu2: false,
     menu3: false,
   });
 
-  const navigate = useNavigate();
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
     window.location.reload();
   };
 
-  function navigateTo() {
+  const navigateTo = () => {
     window.location.href = `/auth/login`;
-  }
+  };
 
-  function toggleSubMenu(menu) {
+  const toggleSubMenu = (menu) => {
     setSubMenus((prev) => ({
       ...prev,
       [menu]: !prev[menu],
     }));
-  }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,228 +101,258 @@ const Layout = () => {
       setSubMenus((prev) => ({ ...prev, menu3: true }));
     }
   }, [currentPath]);
+
+  const drawer = (
+    <Box sx={{ bgcolor: "primary.main", color: "white", height: "100%" }}>
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        <Avatar
+          sx={{
+            width: 56,
+            height: 56,
+            bgcolor: "white",
+            color: "primary.main",
+          }}
+        >
+          <AdminPanelSettings />
+        </Avatar>
+        <Box>
+          {account?.firstName && account?.lastName ? (
+            <Box>
+              <Typography variant="subtitle1">
+                {account.lastName + " " + account.firstName}
+              </Typography>
+              <Button
+                startIcon={<Logout />}
+                onClick={handleLogout}
+                sx={{ color: "white", p: 0, justifyContent: "flex-start" }}
+              >
+                Đăng xuất
+              </Button>
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={navigateTo}
+              startIcon={<Login />}
+            >
+              Đăng Nhập
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      <Divider sx={{ bgcolor: "white", opacity: 0.2 }} />
+
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/"
+            selected={currentPath === "/"}
+            sx={{
+              "&.Mui-selected": {
+                bgcolor: "rgba(255, 255, 255, 0.1)",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: "white" }}>
+              <Home />
+            </ListItemIcon>
+            <ListItemText primary="Trang chủ" />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => toggleSubMenu("menu1")}>
+            <ListItemIcon sx={{ color: "white" }}>
+              <StorageIcon />
+            </ListItemIcon>
+            <ListItemText primary="Xây dựng dữ liệu" />
+            {subMenus.menu1 ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+        </ListItem>
+        <Collapse in={subMenus.menu1} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {[
+              { text: "Mẫu linh kiện, chủng loại", path: "/page/1" },
+              { text: "Mẫu điểm yếu trên Bo mạch", path: "/weak-point" },
+              { text: "Mẫu sơ đồ khối", path: "/block-diagram" },
+              { text: "Mẫu bản mạch", path: "/microchip" },
+            ].map((item) => (
+              <ListItemButton
+                key={item.path}
+                component={Link}
+                to={item.path}
+                selected={currentPath.includes(item.path)}
+                sx={{
+                  pl: 4,
+                  "&.Mui-selected": {
+                    bgcolor: "white",
+                    color: "primary.main",
+                    "&:hover": {
+                      bgcolor: "white",
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Collapse>
+
+        {/* Assessment Management */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => toggleSubMenu("menu2")}>
+            <ListItemIcon sx={{ color: "white" }}>
+              <Assessment />
+            </ListItemIcon>
+            <ListItemText primary="Quản lý đánh giá" />
+            {subMenus.menu2 ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+        </ListItem>
+        <Collapse in={subMenus.menu2} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton sx={{ pl: 4 }}>
+              <ListItemText primary="Danh mục sản phẩm đã đánh giá" />
+            </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }}>
+              <ListItemText primary="Kết quả đánh giá" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/* Administration */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => toggleSubMenu("menu3")}>
+            <ListItemIcon sx={{ color: "white" }}>
+              <AdminPanelSettings />
+            </ListItemIcon>
+            <ListItemText primary="Quản trị" />
+            {subMenus.menu3 ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+        </ListItem>
+        <Collapse in={subMenus.menu3} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {[
+              { text: "Admin", path: "/admin/manager-account/admin" },
+              {
+                text: "Đánh giá viên",
+                path: "/admin/manager-account/assessor",
+              },
+              { text: "Khách hàng", path: "/admin/manager-account/user" },
+            ].map((item) => (
+              <ListItemButton
+                key={item.path}
+                component={Link}
+                to={item.path}
+                selected={currentPath.includes(item.path)}
+                sx={{
+                  pl: 4,
+                  "&.Mui-selected": {
+                    bgcolor: "white",
+                    color: "primary.main",
+                    "&:hover": {
+                      bgcolor: "white",
+                    },
+                  },
+                }}
+              >
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Collapse>
+
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemIcon sx={{ color: "white" }}>
+              <BarChart />
+            </ListItemIcon>
+            <ListItemText primary="Biểu đồ" />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Box>
+  );
+
   return (
-    <div className="row">
-      {loading && <Loader />}
-      <div className="col-2 bg-custom p-0" style={{ minHeight: "100vh" }}>
-        <div className="row mt-2">
-          <div className="col-4 p-0">
-            <div
-              className="avatar bg-white border border-primary text-primary rounded-circle float-end"
-              style={{ width: "80px", height: "80px" }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="45"
-                height="45"
-                fill="currentColor"
-                className="bi bi-shield-lock-fill m-0"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.8 11.8 0 0 0 2.517 2.453c.386.273.744.482 1.048.625.28.132.581.24.829.24s.548-.108.829-.24a7 7 0 0 0 1.048-.625 11.8 11.8 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.54 1.54 0 0 0-1.044-1.263 63 63 0 0 0-2.887-.87C9.843.266 8.69 0 8 0m0 5a1.5 1.5 0 0 1 .5 2.915l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99A1.5 1.5 0 0 1 8 5"
-                />
-              </svg>
-            </div>
-          </div>
+    <Box sx={{ display: "flex" }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          display: { md: "none" },
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { md: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-          <div className="text-white fs-4 col-8">
-            {account?.firstName && account?.lastName ? (
-              <div className="m-0 d-flex flex-column">
-                <div className="">
-                  {account.lastName + " " + account.firstName}
-                </div>
+      <Box
+        component="nav"
+        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+      >
+        {/* Mobile drawer */}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              bgcolor: "primary.main",
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
 
-                <button
-                  className="fs-5 text-white m-0 text-start"
-                  onClick={handleLogout}
-                >
-                  Đăng xuất
-                </button>
-              </div>
-            ) : (
-              <button
-                className="btn btn-custom full-rounded w-50 mt-4"
-                onClick={navigateTo}
-              >
-                <span className="text-white">Đăng Nhập</span>
-              </button>
-            )}
-          </div>
-        </div>
-        <hr className="text-white" />
-        <ul className="list-group list-group-flush fw-medium">
-          <li
-            className={`list-group-item border-0  ps-5 text-light ${
-              currentPath === "/" ? "active bg-dark" : "bg-custom"
-            }`}
-            aria-current="true"
-          >
-            <Link to="/" className="text-decoration-none text-light fs-5">
-              Trang chủ
-            </Link>
-          </li>
-          <li
-            className={`list-group-item border-0  px-0 bg-custom pb-0  ${
-              (currentPath.includes("/page/") ||
-                currentPath.includes("/microchip") ||
-                currentPath.includes("/weak-point") ||
-                currentPath.includes("/block-diagram")) &&
-              "active bg-dark"
-            }`}
-          >
-            <div
-              className="text-decoration-none text-light py-1 dropdown-toggle fs-5 ps-5"
-              onClick={() => toggleSubMenu("menu1")}
-              style={{ cursor: "pointer" }}
-            >
-              Xây dựng dữ liệu
-            </div>
-            {subMenus.menu1 && (
-              <ul className="list-group list-group-flush fs-5 ps-2">
-                <li
-                  className={`list-group-item border-0 ps-5 ${
-                    currentPath.includes("/page/")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link to="/page/1" className="dropdown-item fw-medium">
-                    Mẫu linh kiện, chủng loại
-                  </Link>
-                </li>
-                <li
-                  className={`list-group-item border-0 ps-5 ${
-                    currentPath.includes("/weak-point")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link to="/weak-point" className="dropdown-item fw-medium">
-                    Mẫu điểm yếu trên Bo mạch
-                  </Link>
-                </li>
-                <li
-                  className={`list-group-item border-0 ps-5 ${
-                    currentPath.includes("/block-diagram")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link to="/block-diagram" className="dropdown-item fw-medium">
-                    Mẫu sơ đồ khối
-                  </Link>
-                </li>
-                <li
-                  className={`list-group-item border-0 ps-5 fw-medium ${
-                    currentPath.includes("/microchip")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link to="/microchip" className="dropdown-item fw-medium">
-                    Mẫu bản mạch
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
-          <li className="list-group-item border-0 p-3 fs-5 px-0 text-light bg-custom pb-0">
-            <div
-              className="text-decoration-none text-light dropdown-toggle ps-5"
-              onClick={() => toggleSubMenu("menu2")}
-              style={{ cursor: "pointer" }}
-            >
-              Quản lý đánh giá
-            </div>
-            {subMenus.menu2 && (
-              <ul className="list-group list-group-flush ps-2">
-                <li className="list-group-item border-0 bg-custom ps-5">
-                  <Link to="#" className="dropdown-item text-light fw-medium">
-                    Danh mục sản phẩm đã đánh giá
-                  </Link>
-                </li>
-                <li className="list-group-item border-0 bg-custom ps-5">
-                  <Link to="#" className="dropdown-item text-light">
-                    Kết quả đánh giá
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
-          <li
-            className={`list-group-item border-0 fs-5 px-0 text-light bg-custom pb-0 ${
-              currentPath.includes("/admin/manager-account/")
-                ? "active bg-dark"
-                : ""
-            }`}
-          >
-            <div
-              className="text-decoration-none text-light dropdown-toggle py-2 ps-5"
-              onClick={() => toggleSubMenu("menu3")}
-              style={{ cursor: "pointer" }}
-            >
-              Quản trị
-            </div>
-            {subMenus.menu3 && (
-              <ul className="list-group list-group-flush bg-custom ps-2">
-                <li
-                  className={`list-group-item border-0 ps-5 ${
-                    currentPath.includes("/admin/manager-account/admin")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link
-                    to="/admin/manager-account/admin"
-                    className="dropdown-item "
-                  >
-                    Admin
-                  </Link>
-                </li>
-                <li
-                  className={`list-group-item border-0 ps-5 ${
-                    currentPath.includes("/admin/manager-account/assessor")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link
-                    to="/admin/manager-account/assessor"
-                    className="dropdown-item"
-                  >
-                    Đánh giá viên
-                  </Link>
-                </li>
-                <li
-                  className={`list-group-item border-0 ps-5 ${
-                    currentPath.includes("/admin/manager-account/user")
-                      ? "active bg-white text-primary"
-                      : "bg-custom text-white"
-                  }`}
-                >
-                  <Link
-                    className="dropdown-item fw-medium"
-                    to="/admin/manager-account/user"
-                  >
-                    Khách hàng
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
-          <li className="list-group-item border-0 p-3 px-0 fs-5 text-light bg-custom">
-            <div className="text-decoration-none text-light ps-5">Biểu đồ</div>
-          </li>
-        </ul>
-      </div>
-      <div className="col-10 transition ps-1" style={{ height: "100%" }}>
-        <Container fluid className="p-0 ">
-          <Outlet />
-        </Container>
-      </div>
-    </div>
+        {/* Desktop drawer */}
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: "none", md: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              bgcolor: "primary.main",
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          mt: { xs: 7, md: 0 },
+        }}
+      >
+        <Outlet />
+      </Box>
+    </Box>
   );
 };
 
