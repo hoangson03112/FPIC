@@ -478,6 +478,24 @@ const ManageAccount = () => {
                 }
               />
             </Form.Group>
+            <Form.Group className="mb-4">
+              <Form.Label className="font-weight-bold">Quyền</Form.Label>
+              <Form.Select
+                className="form-control-lg rounded-pill"
+                value={accountUpdated.role}
+                onChange={(e) =>
+                  setAccountUpdated({
+                    ...accountUpdated,
+                    role: e.target.value,
+                  })
+                }
+              >
+                <option value="">Chọn quyền</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="editor">Đánh giá viên</option>
+                <option value="viewer">Khách hàng</option>
+              </Form.Select>
+            </Form.Group>
             <Form.Group className="">
               <Form.Label className="font-weight-bold">Tình trạng</Form.Label>
               <div className="radio-inputs d-flex  mt-3">
