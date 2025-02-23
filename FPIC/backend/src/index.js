@@ -21,6 +21,7 @@ db.connect();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
@@ -383,9 +384,40 @@ app.get("/admin/accounts/count", async (req, res) => {
   res.json({ count: userCount });
 });
 
-
-const IMAGE_DIR = "C:/Users/nguye/Documents/gui/gui/BTN";
-const type = require('./router/TypeAccessoryRouter')
-app.use("/images", express.static(IMAGE_DIR));
+const type = require('./router/TypeAccessoryRouter');
+const TypeModel = require("./Model/TypeAccessory");
 app.use("/", type)
+
+const DIR_TYPE = path.join(__dirname,"public/images")
+app.get("/import-types", async(req,res) =>{
+  try {
+    const subfolders = fs.readdirSync(DIR_TYPE).filter(folder =>
+      fs.statSync(path.join(DIR_TYPE,folder)).isDirectory()
+    )
+    const savePromises = subfolders.map(async folder =>{
+      const files = fs.readdirSync(path.join(DIR_TYPE, folder))
+          .filter(file => file.endsWith(".png") || file.endsWith("jpg") || file.endsWith("jpeg"))
+  
+        if(files.length === 0) return null
+  
+        const firstImagePath = `/public/images/${folder}/${files[0]}`
+        const imageBase64 = Buffer.from(firstImagePath).toString("base64")
+  
+        const newType = new TypeModel({
+          title:folder,
+          contentType:"image/png",
+          image: imageBase64
+        })
+  
+      return await newType.save()
+    })
+  
+    const results = await Promise.all(savePromises)
+    res.json({message: `Lưu thành công ${results.filter(Boolean).length} Loại`})
+  } catch (error) {
+    console.log(`Luwu thất bại: ${error}`)
+    res.json({message: "Lưu thất bại"})
+  }
+  
+})
 app.listen(9999, () => console.log("Server is running on port 9999"));

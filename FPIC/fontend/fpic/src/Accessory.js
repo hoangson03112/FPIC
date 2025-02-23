@@ -227,7 +227,7 @@ function Accessory() {
                         >
                           <Card.Img
                             variant="top"
-                            src={`data:image/png;base64,${image.image}`}
+                            src={`${REACT_APP_URL_BE}${atob(image.image)}`}
                             alt={image?.title}
                             style={{
                               width: "100%",
