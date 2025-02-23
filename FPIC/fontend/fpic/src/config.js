@@ -1,4 +1,4 @@
-const REACT_APP_URL_SERVER = "http://172.20.10.2:3000";
-const REACT_APP_URL_BE = "http://192.168.1.2:9999";
+const REACT_APP_URL_SERVER = "http://172.20.10.13:3000";
+const REACT_APP_URL_BE = "http://192.168.1.13:9999";
 
 export { REACT_APP_URL_SERVER, REACT_APP_URL_BE };
