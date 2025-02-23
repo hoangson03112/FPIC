@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import WeakPointItem from "./WeakPointItem";
 import axios from "axios";
 import "./WeakPoint.css";
+import { Col } from "react-bootstrap";
 
 const itemsPerPage = 6;
 const WeakPoint = () => {
@@ -61,6 +62,12 @@ const WeakPoint = () => {
       img: "/unused_port/image copy 2.png",
     },
   ]);
+  const [imagesSPI, setImagesSPI] = useState([
+    {
+      name: "image.png",
+      img: "/SPI/image.png",
+    },
+  ]);
   const [imagesVias, setImagesVias] = useState([
     {
       name: "Unknown_0.png",
@@ -89,6 +96,12 @@ const WeakPoint = () => {
     {
       name: "Unknown_6.png",
       img: "/vias/Unknown_6.png",
+    },
+  ]);
+  const [imagesSMB, setImagesSMB] = useState([
+    {
+      name: "image.png",
+      img: "/SMB/image.png",
     },
   ]);
   useEffect(() => {
@@ -129,11 +142,32 @@ const WeakPoint = () => {
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  console.log(imagesJtag);
 
   return (
     <div className="container mt-4">
       <nav>
+        <Col md={2} className="d-flex ms-auto justify-content-end my-3">
+          <button class="animated-button">
+            <svg
+              viewBox="0 0 20 20"
+              className="arr-2 mt-1 "
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+            <span class="text"> Thêm</span>
+            <span class="circle"></span>
+            <svg
+              viewBox="0 0 20 20"
+              className="arr-1 mt-1"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+          </button>
+        </Col>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
           <button
             class="nav-link active p-3 fs-4 m-0"
@@ -233,6 +267,7 @@ const WeakPoint = () => {
           </button>
         </div>
       </nav>
+
       <div className="tab-content mt-4" id="nav-tabContent">
         <div
           class="tab-pane fade show active"
@@ -320,7 +355,7 @@ const WeakPoint = () => {
           tabindex="0"
         >
           <div className="row">
-            {imagesLPC.map((chip, index) => (
+            {imagesSPI.map((chip, index) => (
               <WeakPointItem key={index} imageURL={chip.img} />
             ))}
           </div>
@@ -333,7 +368,7 @@ const WeakPoint = () => {
           tabindex="0"
         >
           <div className="row">
-            {imagesTestPin.map((chip, index) => (
+            {imagesSMB.map((chip, index) => (
               <WeakPointItem key={index} imageURL={chip.img} />
             ))}
           </div>

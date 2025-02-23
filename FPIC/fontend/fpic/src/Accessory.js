@@ -310,7 +310,7 @@ function Accessory() {
                     {formData.image ? (
                       <ZoomableImage
                         // key={resetKey}
-                        data={`data:image/jpg;base64,${formData.image}`}
+                        data={"/jtag/image.png"}
                         alt={formData.title}
                       />
                     ) : (
