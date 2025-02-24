@@ -3,23 +3,25 @@ const AccessoryModel = require("../Model/Accessory")
 
 exports.getAccessories = async (req, res) => {
     try {
-        let { page, limit } = req.query;
+        let { page, limit, type } = req.query;
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 12;
-
         const skip = (page - 1) * limit;
 
-        const accessories = await AccessoryModel.find()
-            .sort({ _id: -1 })
+        let accessories = []
+        if(type){
+            accessories = await AccessoryModel.find({type:type})
+            .sort({_id:-1})
             .skip(skip)
             .limit(limit);
+        }
 
-        const totalItem = await AccessoryModel.countDocuments();
+        const totalItem = type != null ? accessories.length : await AccessoryModel.countDocuments();
 
         if (accessories) {
             const accessoriesWithBase64 = accessories.map(accessory => ({
                 ...accessory._doc,
-                image: accessory.image ? accessory.image.toString('base64') : null
+                image: accessory.image ? Buffer.from(accessory.image, "base64").toString("utf-8") : null
             }));
 
             return res.status(200).json({

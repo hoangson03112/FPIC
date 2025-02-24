@@ -17,10 +17,14 @@ exports.getTypesAccessory = async (req, res) =>{
         const totalItem = query != null ? types.length : await TypeModel.countDocuments()
         
         if(types){
+            const typesWithBase64 = types.map(type =>({
+                ...type._doc,
+                image: type.image ? Buffer.from(type.image, "base64").toString("utf-8") : null
+            }))
             res.status(200).json({
                 status:200,
                 message:"get types successfully",
-                data:types,
+                data:typesWithBase64,
                 pagination: {
                     currentPage: page,
                     totalPages: Math.ceil(totalItem / limit),
