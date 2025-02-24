@@ -392,13 +392,13 @@ function Accessory() {
                       error={!!errors.description}
                       helperText={errors.description}
                     />
-                    {/* <Autocomplete
-                      options={typesAccessories}
-                      value={typesAccessories.find((item) => item._id === formAccessory.type) || "underfine"}
+                    <Autocomplete
+                      options={data.typesAccessories}
+                      value={data.typesAccessories.find((item) => item._id === formAccessory.type) || "underfine"}
                       getOptionLabel={(option) =>option.title}
                       renderInput={(params) => <TextField {...params} label="Loại"/>}
                       isOptionEqualToValue={(option, value) => option.id === value?.id}
-                      disableClearable/> */}
+                      disableClearable/>
 
                     <div style={{ display: 'flex', justifyContent: 'space-evenly', }}>
                       <Button onClick={handleUpdateAccessory}

@@ -1,5 +1,6 @@
 const TypeModel = require("../Model/TypeAccessory")
-
+const fs = require("fs")
+const path = require("path")
 exports.getTypesAccessory = async (req, res) =>{
     try {
         let {page, limit, query} = req.query
@@ -44,5 +45,62 @@ exports.getTypesAccessory = async (req, res) =>{
             message: "get types accessory failed"
         })
         console.log(error)
+    }
+}
+exports.createTypeAccessory = async (req,res)=>{
+    try {
+        const {title,contentType} = req.body
+        console.log(title)
+        if(!req.file){
+            return res.status(400).json({
+                status:400,
+                message:"No file uploaded"
+            })
+        }
+        const existsFolder = await TypeModel.findOne({title:title})
+
+        if (existsFolder) {
+            return res.status(400).json({
+                status: 400,
+                message: "Type already exists, cannot create a duplicate entry",
+            });
+        }
+        const folderPath = path.join(__dirname, "../public/images", title)
+        if(!fs.existsSync(folderPath)){
+            fs.mkdirSync(folderPath, {recursive: true})
+        }
+
+        const filename = "image_" + Date.now() + path.extname(req.file.originalname) 
+        const filePath = path.join(folderPath, filename)
+
+        fs.writeFileSync(filePath, req.file.buffer)
+
+        const imagePath = `/public/images/${title}/${req.file.filename}`
+        const imageBase64 = Buffer.from(imagePath).toString("base64")
+    
+            const newType = new TypeModel({
+                title: title,
+                contentType:contentType,
+                image: imageBase64
+            })
+            await newType.save()
+    
+            return res.status(201).json({
+                status:201,
+                message:"Create new type accessory successfully",
+                data: {
+                    _id: newType._id,
+                    title: newType.title,
+                    contentType: newType.contentType,
+                    image: Buffer.from(newType.image, 'base64').toString("utf-8"),
+                    __v : newType.__v
+                }
+            })
+        
+    } catch (error) {
+        res.status(500).json({
+            status:500,
+            message:`Server error: ${error}`
+        })
     }
 }
