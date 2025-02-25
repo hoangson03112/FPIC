@@ -8,7 +8,8 @@ import {
   Autocomplete
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"
-import Add from '@mui/icons-material/Add';
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
@@ -40,10 +41,10 @@ function Accessory() {
     error: null,
   });
   const [formType, setFormType] = useState({
-    _id:"",
-    tilte:"",
-    image:"",
-    contentType:""
+    _id:'',
+    title:'',
+    image:'',
+    contentType:''
   }) 
   const [formAccessory, setFormAccessory] = useState({
     _id: "",
@@ -57,10 +58,15 @@ function Accessory() {
     fetchData()
 
   }, [page, limit, search]);
+
   useEffect(() => {
     const item = data.accessories[currentIndex]
     setFormAccessory({ ...item })
   }, [currentIndex])
+
+  useEffect(()=>{
+    fetchAccessories()
+  },[limitAccessory, formType])
 
   const fetchData = async () => {
     setData((prev) =>({...prev, isLoading: true}))
@@ -89,11 +95,11 @@ function Accessory() {
     }
     return () => controller.abort();
   }
-  const fetchAccessories = async (type) => {
+  const fetchAccessories = async () => {
     const controller = new AbortController()
     try {
       const response = await axios.get(`${REACT_APP_URL_BE}/accessory`, {
-        params: { page: pageAccessory, limit: limitAccessory, type: type },
+        params: { page: pageAccessory, limit: limitAccessory, type: formType._id },
         signal: controller.signal
       })
       if (response) {
@@ -120,12 +126,12 @@ function Accessory() {
   }
   const handleInputChange = (event) => {
     const { name, type, value, files } = event.target
-    // setFormData((prev) => ({
-    //   ...prev, [name]: type === 'file' ? files[0] : value
-    // }))
+    setFormType((prev) => ({
+      ...prev, [name]: type === 'file' ? files[0] : value
+    }))
   }
   const handleClickItem = (type, index) => {
-    fetchAccessories(type._id)
+    setFormType({...type})
     handleClickModalDesc(true)
   }
   const handleClickOnAnotherImage = (index) => {
@@ -211,6 +217,52 @@ function Accessory() {
    }
   const handleResultSearch = (result) => {
     setSearch(result)
+  }
+  const handleCreateType = async () =>{
+    setIsLoadingButton(true)
+    console.log(formType)
+    try {
+      if(formType.title.length === 0) {
+        setErrors(error => ({...error, title:"Chưa nhập tên loại"}))
+        return
+      }
+      if(formType.image.length === 0) {
+        setErrors(error => ({...error, title:"Chưa chọn ảnh"}))
+        return
+      }
+      let form = new FormData()
+        form.append("title",formType.title)
+        form.append("contentType", formType.contentType)
+        form.append("file",formType.image)
+      
+      const response = await axios.post(`${REACT_APP_URL_BE}/types-accessory`,form,{
+        headers: { "Content-Type": "multipart/form-data" }
+      })
+      if(response){
+        setSnackBar({
+          open: true,
+          message:"Tạo thành công",
+          severity:"success"
+        })
+        fetchData()
+        setShowModal(false)
+      }
+    } catch (error) {
+      console.log(error)
+      setSnackBar({
+        open: true,
+        message:"Thêm thất bại - Loại đã tồn tại",
+        severity:"error"
+      })
+    }finally{
+      setIsLoadingButton(false)
+    }
+  }
+  const handleDownMoreImage =() =>{
+    setLimitAccessory((prev) => prev + 12)
+  } 
+  const handleUpMoreImage =() =>{
+    setLimitAccessory((prev) => prev - 12)
   }
   return (
     <div className="bg-image">
@@ -394,7 +446,7 @@ function Accessory() {
                     />
                     <Autocomplete
                       options={data.typesAccessories}
-                      value={data.typesAccessories.find((item) => item._id === formAccessory.type) || "underfine"}
+                      value={data.typesAccessories.find((item) => item._id === formAccessory.type) || null}
                       getOptionLabel={(option) =>option.title}
                       renderInput={(params) => <TextField {...params} label="Loại"/>}
                       isOptionEqualToValue={(option, value) => option.id === value?.id}
@@ -421,8 +473,19 @@ function Accessory() {
                 </div>
 
                 <div className="w-100 mt-4">
-                  <h6>More images:</h6>
-                  <div className="d-flex flex-wrap justify-content-start">
+                  <div style={{display:"flex"}}>
+                    <h6 style={{marginRight:"10px", marginBottom:"0px", alignContent:'center'}}>More images:</h6>
+                    <IconButton style={{width:"30px", height:"30px", boxShadow:"none"}}
+                        onClick={handleUpMoreImage}>
+                      <ArrowUpwardIcon/>
+                    </IconButton>
+                    <IconButton style={{width:"30px", height:"30px", boxShadow:"none"}}
+                        onClick={handleDownMoreImage}>
+                      <ArrowDownwardIcon/>
+                    </IconButton>
+                    
+                  </div>
+                  <div className="more-image">
                     {data.accessories
                       .map((image, index) => {
                         return (
@@ -463,7 +526,7 @@ function Accessory() {
         maxWidth="lg"
         TransitionComponent={Transition}>
         <DialogTitle className="text-center bg-primary text-white">
-          Thêm linh kiện
+          Thêm loại linh kiện
           <IconButton
             sx={{
               position: "absolute",
@@ -489,23 +552,6 @@ function Accessory() {
               error={!!errors.title}
               helperText={errors.title}
             />
-
-            <TextField
-              name="description"
-              label="Mô tả"
-              onChange={handleInputChange}
-              sx={{ minWidth: "300px" }}
-              error={!!errors.description}
-              helperText={errors.description}
-            />
-            <TextField
-              name="type"
-              label="Loại"
-              onChange={handleInputChange}
-              sx={{ minWidth: "300px" }}
-              error={!!errors.type}
-              helperText={errors.type}
-            />
             <input
               type="file"
               name="image"
@@ -513,7 +559,7 @@ function Accessory() {
               onChange={handleInputChange}
               style={{ minWidth: "300px" }}
             />
-            <Button onClick={handleCreateAccessory}
+            <Button onClick={handleCreateType}
               disabled={isLoadingButton}
               startIcon={isLoadingButton
                 ? <CircularProgress size={20} color="inherit" />

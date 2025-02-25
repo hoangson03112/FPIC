@@ -1,6 +1,7 @@
 const Accessory = require('../Model/Accessory')
 const AccessoryModel = require("../Model/Accessory")
-
+const path = require("path")
+const fs = require("fs")
 exports.getAccessories = async (req, res) => {
     try {
         let { page, limit, type } = req.query;
@@ -157,4 +158,32 @@ exports.deleteAccessory = async(req, res) =>{
             message:`Server error: ${error}`
         })
     }
+}
+const DIR_IMAGE = path.join(__dirname, "../public/images/V")
+exports.importAccessories = async (req, res) => {
+  try {
+    const images = fs.readdirSync(DIR_IMAGE).filter(image =>
+      image.endsWith(".png") || image.endsWith("jpg") || image.endsWith("jpeg"))
+
+    if (images.length === 0) return null
+
+    const saveAccessories = images.map(async image => {
+      const accessoryPath = `/public/images/V/${image}`
+      const imageBase64 = Buffer.from(accessoryPath).toString("base64")
+
+      const newAccessory = new AccessoryModel({
+        title: image,
+        description: "",
+        image: imageBase64,
+        type: "67bb2d4a9e8b6d1860f8dd66"
+      })
+      return await newAccessory.save()
+    })
+
+    const results = await Promise.all(saveAccessories)
+    res.json({ message: `Luwu thành công ${results.filter(Boolean).length} file` })
+  } catch (error) {
+    console.log("Lưu thất bại", error)
+    res.json({ message: `Luwu thất bại` })
+  }
 }

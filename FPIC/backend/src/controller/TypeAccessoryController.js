@@ -1,6 +1,38 @@
 const TypeModel = require("../Model/TypeAccessory")
 const fs = require("fs")
 const path = require("path")
+const DIR_TYPE = path.join(__dirname, "../public/images")
+exports.importType = async (req, res) => {
+  try {
+    const subfolders = fs.readdirSync(DIR_TYPE).filter(folder =>
+      fs.statSync(path.join(DIR_TYPE, folder)).isDirectory()
+    )
+    const savePromises = subfolders.map(async folder => {
+      const files = fs.readdirSync(path.join(DIR_TYPE, folder))
+        .filter(file => file.endsWith(".png") || file.endsWith("jpg") || file.endsWith("jpeg"))
+
+      if (files.length === 0) return null
+
+      const firstImagePath = `/public/images/${folder}/${files[0]}`
+      const imageBase64 = Buffer.from(firstImagePath).toString("base64")
+
+      const newType = new TypeModel({
+        title: folder,
+        contentType: "image/png",
+        image: imageBase64
+      })
+
+      return await newType.save()
+    })
+
+    const results = await Promise.all(savePromises)
+    res.json({ message: `Lưu thành công ${results.filter(Boolean).length} Loại` })
+  } catch (error) {
+    console.log(`Luwu thất bại: ${error}`)
+    res.json({ message: "Lưu thất bại" })
+  }
+
+}
 exports.getTypesAccessory = async (req, res) =>{
     try {
         let {page, limit, query} = req.query
@@ -75,7 +107,7 @@ exports.createTypeAccessory = async (req,res)=>{
 
         fs.writeFileSync(filePath, req.file.buffer)
 
-        const imagePath = `/public/images/${title}/${req.file.filename}`
+        const imagePath = `/public/images/${title}/${filename}`
         const imageBase64 = Buffer.from(imagePath).toString("base64")
     
             const newType = new TypeModel({

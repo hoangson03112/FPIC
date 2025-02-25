@@ -148,3 +148,7 @@
       transform: rotate(360deg);
   }
 }
+.more-image{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+}
