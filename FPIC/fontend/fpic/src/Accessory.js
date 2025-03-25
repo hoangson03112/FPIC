@@ -3,179 +3,196 @@ import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./Accessory.css";
 import {
-  Alert, Button, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Pagination, Snackbar,
-  Stack, TextField, Fade
+  Alert,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Pagination,
+  Snackbar,
+  Stack,
+  TextField,
+  Fade,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close"
-import Add from '@mui/icons-material/Add';
+import CloseIcon from "@mui/icons-material/Close";
+import Add from "@mui/icons-material/Add";
 import { ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 import SearchBox from "./components/SearchBox";
-const Transition = React.forwardRef((props, ref) => <Fade ref={ref} {...props} timeout={1000} />)
+const Transition = React.forwardRef((props, ref) => (
+  <Fade ref={ref} {...props} timeout={1000} />
+));
 function Accessory() {
   const [typesAccessories, setTypeAccessories] = useState([]);
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(12)
-  const [showModal, setShowModal] = useState(false)
-  const [showModalDesc, setShowModalDesc] = useState(false)
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(12);
+  const [showModal, setShowModal] = useState(false);
+  const [showModalDesc, setShowModalDesc] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isLoadingButton, setIsLoadingButton] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState()
-  const [search, setSearch] = useState("")
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState();
+  const [search, setSearch] = useState("");
   const [snackBar, setSnackBar] = useState({
     open: false,
-    message: '',
-    severity: ''
-  })
+    message: "",
+    severity: "",
+  });
   const [dataReponse, setData] = useState({
-    status: '',
-    message: '',
+    status: "",
+    message: "",
     data: [],
     pagination: {
-      totalPages: '',
-      currentPage: '',
-      totalItem: ''
-    }
-  })
+      totalPages: "",
+      currentPage: "",
+      totalItem: "",
+    },
+  });
   const [formData, setFormData] = useState({
     _id: "",
     tilte: "",
     description: "",
     image: "",
     type: "",
-  })
+  });
   useEffect(() => {
-
-    fetchData()
-
+    fetchData();
   }, [page, limit, search]);
   useEffect(() => {
-    const item = typesAccessories[currentIndex]
-    setFormData({ ...item })
-  }, [currentIndex])
+    const item = typesAccessories[currentIndex];
+    setFormData({ ...item });
+  }, [currentIndex]);
   useEffect(() => {
     if (showModal) {
       setFormData((prev) => {
-        if (!prev || Object.keys(prev).length === 0) return {}
-        Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" }))
-      })
+        if (!prev || Object.keys(prev).length === 0) return {};
+        Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" }));
+      });
     }
-  }, [showModal])
+  }, [showModal]);
   const fetchData = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await axios.get(`${REACT_APP_URL_BE}/get-types-accessory`, {
-        params: { page: page, limit: limit, query: search }
-      })
+      const response = await axios.get(
+        `${REACT_APP_URL_BE}/get-types-accessory`,
+        {
+          params: { page: page, limit: limit, query: search },
+        }
+      );
       if (response) {
-        setData(response.data)
+        setData(response.data);
         setTypeAccessories(response.data.data);
-        setIsLoading(false)
+        setIsLoading(false);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   const handlePageChange = (newPage) => {
-    setPage(Math.max(1, Math.min(newPage, dataReponse.pagination.totalPages)))
-  }
+    setPage(Math.max(1, Math.min(newPage, dataReponse.pagination.totalPages)));
+  };
   const handleInputChange = (event) => {
-    const { name, type, value, files } = event.target
+    const { name, type, value, files } = event.target;
     setFormData((prev) => ({
-      ...prev, [name]: type === 'file' ? files[0] : value
-    }))
-  }
+      ...prev,
+      [name]: type === "file" ? files[0] : value,
+    }));
+  };
   const handleClickItem = (index) => {
-    setCurrentIndex(index)
-    handleClickModalDesc(true)
-  }
+    setCurrentIndex(index);
+    handleClickModalDesc(true);
+  };
   const handleClickOnAnotherImage = (index) => {
     setCurrentIndex(index);
-  }
+  };
   const hanldeClickNextImage = () => {
     //setCurrentIndex((prevIndex) => (prevIndex + 1) % typesAccessories.length);
-  }
+  };
   const hanldeClickPreviosImage = () => {
     // setCurrentIndex((prevIndex) =>
     //   prevIndex === 0 ? accessories.length - 1 : prevIndex - 1);
-  }
+  };
   const handleSnackbarClose = () => {
-    setSnackBar({ open: false, message: '', severity: '' })
-  }
+    setSnackBar({ open: false, message: "", severity: "" });
+  };
   const handleClickModalDesc = (status) => {
     if (status) {
-      setShowModalDesc(status)
+      setShowModalDesc(status);
     } else {
-      setShowModalDesc(status)
+      setShowModalDesc(status);
       //setFormData({ ...accessories[currentIndex] })
     }
-  }
+  };
   const handleCreateAccessory = async () => {
-    setIsLoadingButton(true)
-    let form = new FormData()
-    form.append("title", formData.title)
-    form.append("description", formData.description ?? "")
-    form.append("type", formData.type)
-    form.append("file", formData.image)
+    setIsLoadingButton(true);
+    let form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description ?? "");
+    form.append("type", formData.type);
+    form.append("file", formData.image);
     try {
       const response = await axios.post(`${REACT_APP_URL_BE}/accessory`, form, {
-        headers: { "Content-Type": "multipart/form-data" }
-      })
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       if (response) {
         setSnackBar({
           open: true,
           message: `${response.data.message}`,
-          severity: 'success'
-        })
-        fetchData()
-        setShowModal(false)
-        setFormData((prev) => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" })))
-        setIsLoadingButton(false)
+          severity: "success",
+        });
+        fetchData();
+        setShowModal(false);
+        setFormData((prev) =>
+          Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" }))
+        );
+        setIsLoadingButton(false);
       }
     } catch (error) {
       setSnackBar({
         open: true,
         message: `Server error: ${error}`,
-        severity: 'error'
-      })
+        severity: "error",
+      });
     }
-
-
-  }
+  };
   const handleUpdateAccessory = async () => {
-    const form = new FormData()
-    form.append("title", formData.title)
-    form.append("description", formData.description)
-    form.append("type", formData.type)
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description);
+    form.append("type", formData.type);
     if (formData.image instanceof File) {
-      form.append("file", formData.image)
+      form.append("file", formData.image);
     }
     try {
-      const response = await axios.put(`${REACT_APP_URL_BE}/accessory/${formData._id}`,
-        form, { headers: { "Content-Type": "multipart/form-data" } })
+      const response = await axios.put(
+        `${REACT_APP_URL_BE}/accessory/${formData._id}`,
+        form,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
       if (response) {
         setSnackBar({
           open: true,
           message: `${response.data.message}`,
-          severity: "success"
-        })
-        fetchData()
+          severity: "success",
+        });
+        fetchData();
       }
     } catch (error) {
       setSnackBar({
         open: true,
         message: `Server error: ${error}`,
-        severity: 'error'
-      })
+        severity: "error",
+      });
     }
-    console.log(formData)
-  }
+    console.log(formData);
+  };
   const handleResultSearch = (result) => {
-    setSearch(result)
-  }
+    setSearch(result);
+  };
   return (
     <div className="bg-image">
       <Container fluid>
@@ -185,9 +202,13 @@ function Accessory() {
               <div className="d-flex ms-auto justify-content-center">
                 <SearchBox
                   className="justify-content-center"
-                  onSearchChange={handleResultSearch} />
+                  onSearchChange={handleResultSearch}
+                />
                 <Col md={2} className="d-flex ms-auto justify-content-end">
-                  <button class="animated-button" onClick={() => setShowModal(true)}>
+                  <button
+                    class="animated-button"
+                    onClick={() => setShowModal(true)}
+                  >
                     <svg
                       viewBox="0 0 20 20"
                       className="arr-2 mt-1 "
@@ -237,7 +258,7 @@ function Accessory() {
                           />
                           <Card.Body>
                             <Card.Title>{image?.title}</Card.Title>
-                            <Card.Text>{image?.description}</Card.Text >
+                            <Card.Text>{image?.description}</Card.Text>
                           </Card.Body>
                         </Card>
                       ))}
@@ -245,10 +266,12 @@ function Accessory() {
                   )}
                 </div>
               </div>
-              <div className="pagination-footer" style={{
-                display: 'flex',
-                justifyContent: 'center'
-              }}
+              <div
+                className="pagination-footer"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
               >
                 <Pagination
                   count={dataReponse.pagination.totalPages}
@@ -259,7 +282,6 @@ function Accessory() {
                   shape="rounded"
                   siblingCount={2}
                   boundaryCount={1}
-
                 />
               </div>
             </div>
@@ -270,16 +292,20 @@ function Accessory() {
         open={showModalDesc}
         onClose={() => handleClickModalDesc(false)}
         fullScreen
-        TransitionComponent={Transition}>
-        <DialogTitle sx={{ paddingTop: '10px', paddingBottom: '0px', paddingLeft: '0px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        TransitionComponent={Transition}
+      >
+        <DialogTitle
+          sx={{ paddingTop: "10px", paddingBottom: "0px", paddingLeft: "0px" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <IconButton
               sx={{
-                border: 'none',
-                boxShadow: 'none',
-                "&:hover": { backgroundColor: 'transparent' },
+                border: "none",
+                boxShadow: "none",
+                "&:hover": { backgroundColor: "transparent" },
               }}
-              onClick={() => handleClickModalDesc(false)}>
+              onClick={() => handleClickModalDesc(false)}
+            >
               <CloseIcon />
             </IconButton>
           </div>
@@ -293,16 +319,17 @@ function Accessory() {
                     <IconButton
                       onClick={hanldeClickPreviosImage}
                       sx={{
-                        border: 'none',
-                        boxShadow: 'none',
-                        "&:hover": { backgroundColor: 'transparent' }
-                      }}>
+                        border: "none",
+                        boxShadow: "none",
+                        "&:hover": { backgroundColor: "transparent" },
+                      }}
+                    >
                       <ChevronLeft
                         style={{
                           width: 50,
                           backgroundColor: "white",
                           height: 30,
-                          justifyContent: 'center'
+                          justifyContent: "center",
                         }}
                       />
                     </IconButton>
@@ -319,23 +346,24 @@ function Accessory() {
                     <IconButton
                       onClick={hanldeClickNextImage}
                       sx={{
-                        border: 'none',
-                        boxShadow: 'none',
-                        "&:hover": { backgroundColor: 'transparent' }
-                      }}>
+                        border: "none",
+                        boxShadow: "none",
+                        "&:hover": { backgroundColor: "transparent" },
+                      }}
+                    >
                       <ChevronRight
                         style={{
                           width: 50,
                           backgroundColor: "white",
                           height: 30,
-                          justifyContent: 'center'
+                          justifyContent: "center",
                         }}
                       />
                     </IconButton>
                   </div>
                   <Stack
                     spacing={4}
-                    sx={{ padding: '16px', marginTop: '50px' }}
+                    sx={{ padding: "16px", marginTop: "50px" }}
                   >
                     <TextField
                       name="title"
@@ -372,20 +400,32 @@ function Accessory() {
                       onChange={handleInputChange}
                       style={{ minWidth: "300px" }}
                     />
-                    <div style={{ display: 'flex', justifyContent: 'space-evenly', }}>
-                      <Button onClick={handleUpdateAccessory}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                      }}
+                    >
+                      <Button
+                        onClick={handleUpdateAccessory}
                         disabled={isLoading}
-                        startIcon={isLoadingButton
-                          ? <CircularProgress size={20} color="inherit" />
-                          : null}>
+                        startIcon={
+                          isLoadingButton ? (
+                            <CircularProgress size={20} color="inherit" />
+                          ) : null
+                        }
+                      >
                         Sửa
                       </Button>
                       <Button
                         disabled={isLoading}
                         color="warning"
-                        startIcon={isLoadingButton
-                          ? <CircularProgress size={20} color="inherit" />
-                          : null}>
+                        startIcon={
+                          isLoadingButton ? (
+                            <CircularProgress size={20} color="inherit" />
+                          ) : null
+                        }
+                      >
                         Xóa
                       </Button>
                     </div>
@@ -395,33 +435,35 @@ function Accessory() {
                 <div className="w-100 mt-4">
                   <h6>More images:</h6>
                   <div className="d-flex flex-wrap justify-content-start">
-                    {typesAccessories
-                      .map((image, index) => {
-                        return (
-                          <Card
-                            key={index}
-                            className="m-2"
+                    {typesAccessories.map((image, index) => {
+                      return (
+                        <Card
+                          key={index}
+                          className="m-2"
+                          style={{
+                            width: "100px",
+                            cursor: "pointer",
+                            border:
+                              formData && formData._id === image._id
+                                ? "3px solid orangered"
+                                : "none",
+                          }}
+                          data-bs-target="#imageModal"
+                          onClick={() => handleClickOnAnotherImage(index)}
+                        >
+                          <Card.Img
+                            variant="top"
+                            src={`data:image/jpg;base64,${image.image}`}
+                            alt={image?.title}
                             style={{
-                              width: "100px",
-                              cursor: "pointer",
-                              border: formData && formData._id === image._id ? "3px solid orangered" : "none"
+                              width: "100%",
+                              height: "100px",
+                              objectFit: "cover",
                             }}
-                            data-bs-target="#imageModal"
-                            onClick={() => handleClickOnAnotherImage(index)}
-                          >
-                            <Card.Img
-                              variant="top"
-                              src={`data:image/jpg;base64,${image.image}`}
-                              alt={image?.title}
-                              style={{
-                                width: "100%",
-                                height: "100px",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </Card>
-                        );
-                      })}
+                          />
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -433,7 +475,8 @@ function Accessory() {
         open={showModal}
         onClose={() => setShowModal(false)}
         maxWidth="lg"
-        TransitionComponent={Transition}>
+        TransitionComponent={Transition}
+      >
         <DialogTitle className="text-center bg-primary text-white">
           Thêm linh kiện
           <IconButton
@@ -441,18 +484,18 @@ function Accessory() {
               position: "absolute",
               right: 8,
               top: 8,
-              color: 'white',
+              color: "white",
               outline: "none",
               boxShadow: "none",
               border: "none",
-
             }}
-            onClick={() => setShowModal(false)}>
+            onClick={() => setShowModal(false)}
+          >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ padding: '16px' }}>
+          <Stack spacing={2} sx={{ padding: "16px" }}>
             <TextField
               name="title"
               label="Tiêu đề"
@@ -485,23 +528,27 @@ function Accessory() {
               onChange={handleInputChange}
               style={{ minWidth: "300px" }}
             />
-            <Button onClick={handleCreateAccessory}
+            <Button
+              onClick={handleCreateAccessory}
               disabled={isLoading}
-              startIcon={isLoadingButton
-                ? <CircularProgress size={20} color="inherit" />
-                : null}>
+              startIcon={
+                isLoadingButton ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : null
+              }
+            >
               Thêm
             </Button>
-
           </Stack>
         </DialogContent>
       </Dialog>
       <Snackbar
         open={snackBar.open}
         autoHideDuration={3000}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         onClose={handleSnackbarClose}
-        TransitionComponent={Transition}>
+        TransitionComponent={Transition}
+      >
         <Alert onClose={handleSnackbarClose} severity={snackBar.severity}>
           {snackBar.message}
         </Alert>
