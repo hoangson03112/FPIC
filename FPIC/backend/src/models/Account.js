@@ -3,15 +3,12 @@ const Schema = mongoose.Schema;
 
 const AccountSchema = new Schema(
   {
-    username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    phoneNumber: { type: String, required: false, default: "none" },
+    fullName: { type: String, required: true },
+    phoneNumber: { type: String, default: "" },
     role: { type: String },
     status: { type: String, enum: ["active", "inactive"], default: "inactive" },
-    avatar: { type: String, required: false },
     lastLogin: { type: Date },
   },
   { timestamps: true, collection: "account" }

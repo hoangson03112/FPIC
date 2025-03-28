@@ -1,9 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Form,
+  Modal,
+  Badge,
+} from "react-bootstrap";
 import AccountContext from "../http/AccountContext";
 import "./ManageAccount.css";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiUserPlus,
+  FiSearch,
+  FiShield,
+  FiSave,
+  FiAlertTriangle,
+  FiAlertCircle,
+  FiUser,
+  FiLock,
+  FiInfo,
+  FiMail,
+} from "react-icons/fi";
 
 const ManageAccount = () => {
   const [accounts, setAccounts] = useState([]);
@@ -16,22 +38,27 @@ const ManageAccount = () => {
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [accountToUpdate, setAccountToUpdate] = useState(null);
   const [newAccount, setNewAccount] = useState({
-    username: "",
     password: "",
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
   });
   const [accountUpdated, setAccountUpdated] = useState({
-    username: "",
     password: "",
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
     status: "",
   });
 
   const { type } = useParams();
+
+  const roleTranslations = {
+    admin: "Quản trị viên",
+    editor: "Đánh giá viên",
+    viewer: "Khách hàng",
+    assessor: "Đánh giá viên",
+    user: "Người dùng",
+  };
+
   const fetchAccounts = async () => {
     try {
       const response = await AccountContext.getAllAccounts();
@@ -45,6 +72,8 @@ const ManageAccount = () => {
       } else if (response.status === 403) {
         setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
       } else if (response.status === "success" && response.accounts) {
+        console.log(response.accounts);
+
         setAccounts(
           response.accounts.filter((account) => account.role === type)
         );
@@ -60,13 +89,14 @@ const ManageAccount = () => {
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Error server...",
+        title: "Lỗi server...",
         text: "Có lỗi xảy ra khi lấy danh sách tài khoản.",
       });
       console.error("Failed to fetch accounts:", error);
       setErrorMessage("Có lỗi xảy ra khi lấy danh sách tài khoản.");
     }
   };
+
   useEffect(() => {
     fetchAccounts();
   }, [type]);
@@ -85,11 +115,15 @@ const ManageAccount = () => {
         setShowModal(false);
 
         setNewAccount({
-          username: "",
           password: "",
-          firstName: "",
-          lastName: "",
+          fullName: "",
           email: "",
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "Thành công!",
+          text: "Tài khoản đã được tạo thành công.",
         });
         setErrorMessage("");
       } else {
@@ -100,8 +134,8 @@ const ManageAccount = () => {
       console.error("Failed to create account:", error);
       Swal.fire({
         icon: "error",
-        title: "Error server...",
-        text: "Có lỗi xảy ra",
+        title: "Lỗi server...",
+        text: "Có lỗi xảy ra khi tạo tài khoản",
       });
       setErrorMessage("Có lỗi xảy ra khi tạo tài khoản.");
     }
@@ -122,8 +156,8 @@ const ManageAccount = () => {
         setFilteredAccounts(updatedAccounts);
         Swal.fire({
           icon: "success",
-          title: "Thành Công!",
-          text: "Thành công!",
+          title: "Thành công!",
+          text: "Cập nhật tài khoản thành công!",
           confirmButtonText: "OK",
         });
         setShowUpdateModal(false);
@@ -135,8 +169,8 @@ const ManageAccount = () => {
       console.error("Failed to update account:", error);
       Swal.fire({
         icon: "error",
-        title: "Error server...",
-        text: "Có lỗi xảy ra",
+        title: "Lỗi server...",
+        text: "Có lỗi xảy ra khi cập nhật tài khoản",
       });
       setErrorMessage("Có lỗi xảy ra khi cập nhật tài khoản.");
     }
@@ -157,8 +191,8 @@ const ManageAccount = () => {
         setShowDeleteModal(false);
         Swal.fire({
           icon: "success",
-          title: "Thành Công!",
-          text: "Xóa Thành công!",
+          title: "Thành công!",
+          text: "Xóa tài khoản thành công!",
           confirmButtonText: "OK",
         });
         setErrorMessage("");
@@ -169,358 +203,454 @@ const ManageAccount = () => {
       console.error("Failed to delete account:", error);
       Swal.fire({
         icon: "error",
-        title: "Error server...",
-        text: "Có lỗi xảy ra",
+        title: "Lỗi server...",
+        text: "Có lỗi xảy ra khi xóa tài khoản",
       });
       setErrorMessage("Có lỗi xảy ra khi xóa tài khoản.");
     }
   };
 
   useEffect(() => {
-    const results = accounts.filter((account) =>
-      account.email.toLowerCase().includes(search.toLowerCase())
+    const results = accounts.filter(
+      (account) =>
+        account.email.toLowerCase().includes(search.toLowerCase()) ||
+        account.fullName.toLowerCase().includes(search.toLowerCase())
     );
     setFilteredAccounts(results);
   }, [search, accounts]);
 
   return (
-    <Container>
-      <Row className="my-4">
+    <Container fluid className="px-4 py-3">
+      <Row className="mb-4 align-items-center">
         <Col>
-          <h2 className="text-white">Quản lý tài khoản</h2>
+          <h2 className="text-dark fw-bold mb-0">
+            <FiShield className="me-2" />
+            Quản lý tài khoản {type && `(${roleTranslations[type] || type})`}
+          </h2>
         </Col>
-        <Col md={2} className="text-end">
-          <button class="animated-button" onClick={() => setShowModal(true)}>
-            <svg
-              viewBox="0 0 20 20"
-              className="arr-2 mt-1 "
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-            </svg>
-            <span class="text"> Thêm tài khoản</span>
-            <span class="circle"></span>
-            <svg
-              viewBox="0 0 20 20"
-              className="arr-1 mt-1"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-            </svg>
-          </button>
+        <Col md="auto">
+          <Button
+            variant="primary"
+            className="rounded-pill px-4"
+            onClick={() => setShowModal(true)}
+          >
+            <FiUserPlus className="me-2" />
+            Thêm tài khoản
+          </Button>
         </Col>
       </Row>
-      <Row className="mb-3">
-        <Col md={4}>
-          <div class="group">
-            <svg viewBox="0 0 24 24" aria-hidden="true" class="search-icon">
-              <g>
-                <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
-              </g>
-            </svg>
 
+      <Row className="mb-4">
+        <Col md={6}>
+          <div className="search-box">
+            <FiSearch className="search-icon" />
             <input
-              id="query"
-              class="input"
               type="search"
-              placeholder="Tìm kiếm theo email..."
-              name="searchbar"
+              className="form-control search-input"
+              placeholder="Tìm kiếm theo email hoặc tên..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </Col>
-        <Col md={6}>
-          <div class="group float-end">
-            <button type="button" className="btn btn-outline-primary">
-              Cấp quyền
-            </button>
-          </div>
-        </Col>
       </Row>
+
       {errorMessage && (
-        <Row>
+        <Row className="mb-3">
           <Col>
-            <div className="alert alert-danger">{errorMessage}</div>
+            <div className="alert alert-danger alert-dismissible fade show">
+              {errorMessage}
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setErrorMessage("")}
+              />
+            </div>
           </Col>
         </Row>
       )}
+
       <Row>
-        <Col className="card p-0">
-          <div className="card-body ">
-            <div className="table-responsive">
-              <table className="table align-middle mb-0 ">
-                <thead style={{ backgroundColor: "#4a90e2", color: "white" }}>
-                  <tr className="text-center ">
-                    <th>#</th>
-                    <th>Tên</th>
-                    <th>Họ</th>
-                    <th>Email</th>
-                    <th>Vai trò</th>
-                    <th>Tình trạng</th>
-                    <th>Hành động</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAccounts.map((account, index) => (
-                    <tr key={account?._id} className="text-center align-middle">
-                      <td>{index + 1}</td>
-                      <td>{account?.firstName}</td>
-                      <td>{account?.lastName}</td>
-                      <td>{account?.email}</td>
-                      <td>{account?.role}</td>
-                      <td>
-                        {account?.status === "active"
-                          ? "Đang hoạt đông"
-                          : "Không hoạt động"}
-                      </td>
-                      <td>
-                        <Button
-                          variant="btn btn-outline-warning"
-                          className="me-2"
-                          onClick={() => {
-                            setAccountToUpdate(account);
-                            setAccountUpdated({ ...account });
-                            setShowUpdateModal(true);
-                          }}
-                        >
-                          Chỉnh sửa
-                        </Button>
-                        <Button
-                          variant="btn btn-outline-danger"
-                          onClick={() => {
-                            setAccountToDelete(account);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          Xóa
-                        </Button>
-                      </td>
+        <Col>
+          <div className="card border-0 shadow-sm">
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th className="text-center" style={{ width: "5%" }}>
+                        #
+                      </th>
+                      <th style={{ width: "25%" }}>Họ và tên</th>
+                      <th style={{ width: "30%" }}>Email</th>
+                      <th className="text-center" style={{ width: "15%" }}>
+                        Vai trò
+                      </th>
+                      <th className="text-center" style={{ width: "15%" }}>
+                        Tình trạng
+                      </th>
+                      <th className="text-center" style={{ width: "15%" }}>
+                        Hành động
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredAccounts.length > 0 ? (
+                      filteredAccounts.map((account, index) => (
+                        <tr key={account?._id}>
+                          <td className="text-center">{index + 1}</td>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <div className="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                <span className="text-dark">
+                                  {account?.fullName}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="text-muted">{account?.email}</span>
+                          </td>
+                          <td className="text-center">
+                            <Badge
+                              bg={
+                                account?.role === "admin"
+                                  ? "danger"
+                                  : account?.role === "assessor"
+                                  ? "warning"
+                                  : "primary"
+                              }
+                              className="px-3 py-2 rounded-pill"
+                            >
+                              {roleTranslations[account?.role] || account?.role}
+                            </Badge>
+                          </td>
+                          <td className="text-center">
+                            <Badge
+                              bg={
+                                account?.status === "active"
+                                  ? "success"
+                                  : "secondary"
+                              }
+                              className="px-3 py-2 rounded-pill"
+                            >
+                              {account?.status === "active"
+                                ? "Đang hoạt động"
+                                : "Không hoạt động"}
+                            </Badge>
+                          </td>
+                          <td className="text-center">
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => {
+                                setAccountToUpdate(account);
+                                setAccountUpdated({ ...account });
+                                setShowUpdateModal(true);
+                              }}
+                            >
+                              <FiEdit2 className="me-1" />
+                              Sửa
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => {
+                                setAccountToDelete(account);
+                                setShowDeleteModal(true);
+                              }}
+                            >
+                              <FiTrash2 className="me-1" />
+                              Xóa
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center py-4">
+                          <div className="text-muted">
+                            {search
+                              ? "Không tìm thấy tài khoản phù hợp"
+                              : "Không có tài khoản nào"}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </Col>
       </Row>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      {/* Create Account Modal */}
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+        backdrop="static"
+        className="modal-fade-transform"
+      >
         <Modal.Header
           closeButton
-          className="bg-primary text-white py-3"
-          style={{ borderRadius: "0.5rem 0.5rem 0 0" }}
+          className="border-0 pb-3 pt-4 px-4"
+          style={{
+            background: "linear-gradient(to right, #4361ee, #3a0ca3)",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+          }}
         >
-          <Modal.Title className="mx-auto">Tạo tài khoản mới</Modal.Title>
+          <Modal.Title className="d-flex align-items-center text-white">
+            <div
+              className="d-flex align-items-center justify-content-center me-3"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                background: "rgba(255,255,255,0.2)",
+              }}
+            >
+              <FiUserPlus size={20} />
+            </div>
+            <div>
+              <h5 className="mb-0 fw-semibold">Tạo tài khoản mới</h5>
+              <small className="opacity-85">Thêm người dùng vào hệ thống</small>
+            </div>
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="px-4 py-5">
+        <Modal.Body className="py-4 px-4">
           <Form>
             <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">
-                Tên tài khoản
+              <Form.Label className="fw-medium text-dark mb-2">
+                Họ và tên
               </Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập tên tài khoản"
-                className="form-control-lg rounded-pill"
-                // value={newAccount.username}
-                onChange={(e) =>
-                  setNewAccount({ ...newAccount, username: e.target.value })
-                }
-              />
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiUser className="text-muted" />
+                </span>
+                <Form.Control
+                  type="text"
+                  placeholder="Nhập họ và tên đầy đủ"
+                  value={newAccount.fullName}
+                  onChange={(e) =>
+                    setNewAccount({ ...newAccount, fullName: e.target.value })
+                  }
+                  className="py-2 border-start-0"
+                />
+              </div>
             </Form.Group>
+
             <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Mật khẩu</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Nhập mật khẩu"
-                className="form-control-lg rounded-pill"
-                // value={newAccount.password}
-                onChange={(e) =>
-                  setNewAccount({ ...newAccount, password: e.target.value })
-                }
-              />
+              <Form.Label className="fw-medium text-dark mb-2">
+                Mật khẩu
+              </Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiLock className="text-muted" />
+                </span>
+                <Form.Control
+                  type="password"
+                  placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)"
+                  value={newAccount.password}
+                  onChange={(e) =>
+                    setNewAccount({ ...newAccount, password: e.target.value })
+                  }
+                  className="py-2 border-start-0"
+                />
+              </div>
+              <div className="d-flex justify-content-between mt-2">
+                <small className="text-muted">
+                  <FiInfo className="me-1" />
+                  Mật khẩu phải có ít nhất 8 ký tự
+                </small>
+              </div>
             </Form.Group>
+
             <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Tên</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập tên"
-                className="form-control-lg rounded-pill"
-                // value={newAccount.firstName}
-                onChange={(e) =>
-                  setNewAccount({ ...newAccount, firstName: e.target.value })
-                }
-              />
+              <Form.Label className="fw-medium text-dark mb-2">
+                Email
+              </Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiMail className="text-muted" />
+                </span>
+                <Form.Control
+                  type="email"
+                  placeholder="Nhập email hợp lệ"
+                  value={newAccount.email}
+                  onChange={(e) =>
+                    setNewAccount({ ...newAccount, email: e.target.value })
+                  }
+                  className="py-2 border-start-0"
+                />
+              </div>
             </Form.Group>
-            <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Họ</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập họ"
-                className="form-control-lg rounded-pill"
-                // value={newAccount.lastName}
-                onChange={(e) =>
-                  setNewAccount({ ...newAccount, lastName: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Nhập email"
-                className="form-control-lg rounded-pill"
-                // value={newAccount.email}
-                onChange={(e) =>
-                  setNewAccount({ ...newAccount, email: e.target.value })
-                }
-              />
+
+            <Form.Group>
+              <Form.Label className="fw-medium text-dark mb-2">
+                Vai trò
+              </Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiShield className="text-muted" />
+                </span>
+                <Form.Control
+                  type="text"
+                  value={roleTranslations[type] || type}
+                  readOnly
+                  disabled
+                  className="py-2 bg-light border-start-0"
+                />
+              </div>
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer
-          className="d-flex justify-content-center py-3"
-          style={{ borderRadius: "0 0 0.5rem 0.5rem" }}
-        >
+        <Modal.Footer className="border-0 pt-0 px-4 pb-4">
           <Button
             variant="outline-secondary"
-            className="rounded-pill px-4 py-2"
             onClick={() => setShowModal(false)}
+            className="px-4 rounded-2 fw-medium"
+            style={{ minWidth: "120px" }}
           >
-            Hủy
+            Hủy bỏ
           </Button>
           <Button
             variant="primary"
-            className="rounded-pill px-4 py-2 ml-2"
             onClick={handleCreateAccount}
+            className="px-4 rounded-2 fw-medium shadow-sm"
+            style={{
+              minWidth: "120px",
+              background: "linear-gradient(135deg, #4e73df 0%, #224abe 100%)",
+              border: "none",
+            }}
           >
-            Tạo
+            <FiUserPlus className="me-2" />
+            Tạo tài khoản
           </Button>
         </Modal.Footer>
       </Modal>
 
+      {/* Update Account Modal */}
       <Modal
         show={showUpdateModal}
         onHide={() => setShowUpdateModal(false)}
         centered
+        backdrop="static"
+        className="modal-fade-transform"
       >
         <Modal.Header
           closeButton
-          className="bg-info text-white py-3"
-          style={{ borderRadius: "0.5rem 0.5rem 0 0" }}
+          className="border-0 pb-3 pt-4 px-4"
+          style={{
+            background: "linear-gradient(to right, #4895ef, #4361ee)",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+          }}
         >
-          <Modal.Title className="mx-auto">Cập nhật tài khoản</Modal.Title>
+          <Modal.Title className="d-flex align-items-center text-white">
+            <div
+              className="d-flex align-items-center justify-content-center me-3"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                background: "rgba(255,255,255,0.2)",
+              }}
+            >
+              <FiEdit2 size={20} />
+            </div>
+            <div>
+              <h5 className="mb-0 fw-semibold">Cập nhật tài khoản</h5>
+              <small className="opacity-85">
+                Chỉnh sửa thông tin người dùng
+              </small>
+            </div>
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="px-4 py-5">
+        <Modal.Body className="py-4 px-4">
           <Form>
             <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">
-                Tên tài khoản
+              <Form.Label className="fw-medium text-dark mb-2">
+                Họ và tên
               </Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập tên tài khoản"
-                className="form-control-lg rounded-pill"
-                value={accountUpdated.username}
-                onChange={(e) =>
-                  setAccountUpdated({
-                    ...accountUpdated,
-                    username: e.target.value,
-                  })
-                }
-              />
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiUser className="text-muted" />
+                </span>
+                <Form.Control
+                  type="text"
+                  placeholder="Nhập họ và tên đầy đủ"
+                  value={accountUpdated.fullName}
+                  onChange={(e) =>
+                    setAccountUpdated({
+                      ...accountUpdated,
+                      fullName: e.target.value,
+                    })
+                  }
+                  className="py-2 border-start-0"
+                />
+              </div>
             </Form.Group>
+
             <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Tên</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập tên"
-                className="form-control-lg rounded-pill"
-                value={accountUpdated.firstName}
-                onChange={(e) =>
-                  setAccountUpdated({
-                    ...accountUpdated,
-                    firstName: e.target.value,
-                  })
-                }
-              />
+              <Form.Label className="fw-medium text-dark mb-2">
+                Email
+              </Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiMail className="text-muted" />
+                </span>
+                <Form.Control
+                  type="email"
+                  placeholder="Nhập email"
+                  value={accountUpdated.email}
+                  onChange={(e) =>
+                    setAccountUpdated({
+                      ...accountUpdated,
+                      email: e.target.value,
+                    })
+                  }
+                  className="py-2 border-start-0"
+                />
+              </div>
             </Form.Group>
+
             <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Họ</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập họ"
-                className="form-control-lg rounded-pill"
-                value={accountUpdated.lastName}
-                onChange={(e) =>
-                  setAccountUpdated({
-                    ...accountUpdated,
-                    lastName: e.target.value,
-                  })
-                }
-              />
+              <Form.Label className="fw-medium text-dark mb-2">
+                Vai trò
+              </Form.Label>
+              <div className="input-group">
+                <span className="input-group-text bg-light border-end-0">
+                  <FiShield className="text-muted" />
+                </span>
+                <Form.Select
+                  value={accountUpdated.role}
+                  onChange={(e) =>
+                    setAccountUpdated({
+                      ...accountUpdated,
+                      role: e.target.value,
+                    })
+                  }
+                  className="py-2 border-start-0"
+                >
+                  <option value="user">Người dùng</option>
+                  <option value="admin">Quản trị viên</option>
+                  <option value="assessor">Đánh giá viên</option>
+                </Form.Select>
+              </div>
             </Form.Group>
-            <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Nhập email"
-                className="form-control-lg rounded-pill"
-                value={accountUpdated.email}
-                onChange={(e) =>
-                  setAccountUpdated({
-                    ...accountUpdated,
-                    email: e.target.value,
-                  })
-                }
-              />
-            </Form.Group>
-            <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Quyền</Form.Label>
-              <Form.Select
-                className="form-control-lg rounded-pill"
-                value={accountUpdated.role}
-                onChange={(e) =>
-                  setAccountUpdated({
-                    ...accountUpdated,
-                    role: e.target.value,
-                  })
-                }
-              >
-                <option value="">Chọn quyền</option>
-                <option value="admin">Quản trị viên</option>
-                <option value="editor">Đánh giá viên</option>
-                <option value="viewer">Khách hàng</option>
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="">
-              <Form.Label className="font-weight-bold">Tình trạng</Form.Label>
-              <div className="radio-inputs d-flex  mt-3">
-                <label className="radio-tile-container">
+
+            <Form.Group>
+              <Form.Label className="fw-medium text-dark mb-2 d-block">
+                Tình trạng
+              </Form.Label>
+              <div className="d-flex gap-4">
+                <div className="form-check form-check-inline">
                   <input
-                    className="radio-input"
+                    className="form-check-input"
                     type="radio"
-                    name="status"
-                    value="inactive"
-                    checked={accountUpdated.status === "inactive"}
-                    onChange={(e) =>
-                      setAccountUpdated({
-                        ...accountUpdated,
-                        status: e.target.value,
-                      })
-                    }
-                  />
-                  <span className="radio-tile ">
-                    <span className="radio-label">Không hoạt động</span>
-                  </span>
-                </label>
-                <label className="radio-tile-container">
-                  <input
-                    className="radio-input"
-                    type="radio"
+                    id="active-status"
                     name="status"
                     value="active"
                     checked={accountUpdated.status === "active"}
@@ -531,70 +661,125 @@ const ManageAccount = () => {
                       })
                     }
                   />
-                  <span className="radio-tile">
-                    <span className="radio-label">Hoạt động</span>
-                  </span>
-                </label>
+                  <label className="form-check-label" htmlFor="active-status">
+                    <div className="d-flex align-items-center">
+                      <div
+                        className="bg-success rounded-circle me-2"
+                        style={{ width: "10px", height: "10px" }}
+                      ></div>
+                      <span>Hoạt động</span>
+                    </div>
+                  </label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    id="inactive-status"
+                    name="status"
+                    value="inactive"
+                    checked={accountUpdated.status === "inactive"}
+                    onChange={(e) =>
+                      setAccountUpdated({
+                        ...accountUpdated,
+                        status: e.target.value,
+                      })
+                    }
+                  />
+                  <label className="form-check-label" htmlFor="inactive-status">
+                    <div className="d-flex align-items-center">
+                      <div
+                        className="bg-secondary rounded-circle me-2"
+                        style={{ width: "10px", height: "10px" }}
+                      ></div>
+                      <span>Không hoạt động</span>
+                    </div>
+                  </label>
+                </div>
               </div>
-            </Form.Group>
-            <Form.Group className="mb-4">
-              <Form.Label className="font-weight-bold">Vai trò</Form.Label>
-              <Form.Select
-                className="form-control-lg rounded-pill"
-                value={accountUpdated.role}
-                onChange={(e) =>
-                  setAccountUpdated({
-                    ...accountUpdated,
-                    role: e.target.value,
-                  })
-                }
-              >
-                <option value="user">Người dùng</option>
-                <option value="admin">Quản trị viên</option>
-                <option value="assessor">Đánh giá viên</option>
-              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer
-          className="d-flex justify-content-center py-3"
-          style={{ borderRadius: "0 0 0.5rem 0.5rem" }}
-        >
+        <Modal.Footer className="border-0 pt-0 px-4 pb-4">
           <Button
             variant="outline-secondary"
-            className="rounded-pill px-4 py-2"
             onClick={() => setShowUpdateModal(false)}
+            className="px-4 rounded-2 fw-medium"
+            style={{ minWidth: "120px" }}
           >
-            Hủy
+            Hủy bỏ
           </Button>
           <Button
             variant="info"
-            className="rounded-pill px-4 py-2 ml-2 text-white"
+            className="text-white px-4 rounded-2 fw-medium shadow-sm"
             onClick={handleUpdateAccount}
+            style={{
+              minWidth: "120px",
+              background: "linear-gradient(135deg, #36b9cc 0%, #1a7a8c 100%)",
+              border: "none",
+            }}
           >
+            <FiSave className="me-2" />
             Lưu thay đổi
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Xóa tài khoản</Modal.Title>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+      >
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="text-danger">
+            <FiAlertTriangle className="me-2" size={24} />
+            Xác nhận xóa tài khoản
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Bạn có chắc chắn muốn xóa tài khoản này không? Hành động này không thể
-          hoàn tác.
+          <div className="alert alert-danger bg-soft-danger border-0">
+            <div className="d-flex">
+              <FiAlertCircle className="me-2 mt-1 flex-shrink-0" size={20} />
+              <div>
+                <h5 className="alert-heading mb-2">
+                  Bạn có chắc chắn muốn xóa?
+                </h5>
+                <p className="mb-2">
+                  Tài khoản{" "}
+                  <strong className="text-dark">
+                    {accountToDelete?.fullName}
+                  </strong>{" "}
+                  sẽ bị xóa vĩnh viễn.
+                </p>
+                <p className="mb-0 small text-muted">
+                  Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ
+                  bị mất.
+                </p>
+              </div>
+            </div>
+          </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Hủy
+        <Modal.Footer className="border-0">
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowDeleteModal(false)}
+            className="px-4 rounded-pill"
+          >
+            Quay lại
           </Button>
-          <Button variant="danger" onClick={handleDeleteAccount}>
-            Xóa
+          <Button
+            variant="danger"
+            onClick={handleDeleteAccount}
+            className="px-4 rounded-pill shadow-sm"
+          >
+            <FiTrash2 className="me-1" />
+            Xác nhận xóa
           </Button>
         </Modal.Footer>
       </Modal>
     </Container>
   );
 };
+
 export default ManageAccount;

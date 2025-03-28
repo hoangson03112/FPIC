@@ -1,4 +1,4 @@
-const TypeModel = require("../Model/TypeAccessory")
+const TypeModel = require("../models/TypeAccessory")
 
 exports.getTypesAccessory = async (req, res) =>{
     try {
