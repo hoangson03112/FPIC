@@ -10,30 +10,39 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col } from "react-bootstrap";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
-const PDFViewer = () => {
+const BlockDiagram = () => {
   const [showModal, setShowModal] = useState(false);
+  const [pdfFiles, setPdfFiles] = useState([]);
   const [newPdf, setNewPdf] = useState({
     name: "",
     file: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [editingId, setEditingId] = useState(null);
 
-  const pdfFiles = [
-    { id: 1, url: "/j.pdf", name: "LS1043ARDB-PC-DDR" },
-    { id: 2, url: "/i.pdf", name: "Main Board FPGA " },
-    {
-      id: 3,
-      url: "/compal_la-7901p_r1.0_schematics.pdf",
-      name: "Korbel 14 UMA--Non vPRO ",
-    },
-  ];
+  // Fetch PDFs từ backend
+  useEffect(() => {
+    const fetchPdfs = async () => {
+      try {
+        const response = await fetch("http://localhost:9999/fpic/sodokhoi");
+        const data = await response.json();
+        setPdfFiles(data);
+      } catch (error) {
+        console.error("Error fetching PDFs:", error);
+      }
+    };
+
+    fetchPdfs();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,11 +59,10 @@ const PDFViewer = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    // Validate form
+  const handleSubmit = async () => {
     const newErrors = {};
     if (!newPdf.name.trim()) newErrors.name = "Vui lòng nhập tên tài liệu";
-    if (!newPdf.file) newErrors.file = "Vui lòng chọn file PDF";
+    if (!newPdf.file && !editingId) newErrors.file = "Vui lòng chọn file PDF"; // Nếu tạo mới mà không có file
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -62,18 +70,80 @@ const PDFViewer = () => {
     }
 
     setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append("name", newPdf.name);
 
-    // Here you would typically upload to server
-    console.log("Submitting:", newPdf);
+    if (newPdf.file) {
+      formData.append("pdf", newPdf.file);
+    }
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      let response;
+      let data;
+
+      if (editingId) {
+        response = await fetch(
+          `http://localhost:9999/fpic/sodokhoi/${editingId}`,
+          {
+            method: "PUT",
+            body: formData,
+          }
+        );
+        data = await response.json();
+
+        setPdfFiles(
+          pdfFiles.map((pdf) =>
+            pdf._id === editingId
+              ? { ...pdf, name: data.name, filePath: data.filePath }
+              : pdf
+          )
+        );
+      } else {
+        response = await fetch("http://localhost:9999/fpic/sodokhoi", {
+          method: "POST",
+          body: formData,
+        });
+        data = await response.json();
+        setPdfFiles([data, ...pdfFiles]);
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       setShowModal(false);
-      setNewPdf({ name: "", file: null });
-      setErrors({});
-      // In a real app, you would update the pdfFiles state here
-    }, 1500);
+      setNewPdf({ name: "", file: null, filePath: "" });
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error:", error);
+      alert(`Có lỗi xảy ra: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) {
+      try {
+        await fetch(`http://localhost:9999/fpic/sodokhoi/${id}`, {
+          method: "DELETE",
+        });
+
+        setPdfFiles(pdfFiles.filter((pdf) => pdf._id !== id));
+      } catch (error) {
+        console.error("Error deleting PDF:", error);
+      }
+    }
+  };
+
+  const handleEdit = (pdf) => {
+    setNewPdf({
+      name: pdf.name,
+      file: null,
+      filePath: pdf.filePath,
+    });
+    setEditingId(pdf._id);
+    setShowModal(true);
   };
 
   return (
@@ -82,7 +152,11 @@ const PDFViewer = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setNewPdf({ name: "", file: null });
+            setEditingId(null);
+            setShowModal(true);
+          }}
           sx={{
             borderRadius: "28px",
             textTransform: "none",
@@ -94,7 +168,7 @@ const PDFViewer = () => {
         </Button>
       </Col>
 
-      {/* Add PDF Modal */}
+      {/* Add/Edit PDF Modal */}
       <Dialog
         open={showModal}
         onClose={() => setShowModal(false)}
@@ -110,11 +184,16 @@ const PDFViewer = () => {
             alignItems: "center",
           }}
         >
-          <span>Thêm tài liệu PDF mới</span>
+          <span>
+            {editingId ? "Chỉnh sửa tài liệu" : "Thêm tài liệu PDF mới"}
+          </span>
           <IconButton
             edge="end"
             color="inherit"
-            onClick={() => setShowModal(false)}
+            onClick={() => {
+              setShowModal(false);
+              setErrors({});
+            }}
           >
             <CloseIcon />
           </IconButton>
@@ -158,6 +237,11 @@ const PDFViewer = () => {
               </Button>
             </label>
 
+            {editingId && !newPdf.file && (
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Đã chọn: {newPdf.filePath.split("\\").pop().split("/").pop()}
+              </Typography>
+            )}
             {newPdf.file && (
               <Typography variant="body2" sx={{ mb: 2 }}>
                 Đã chọn: {newPdf.file.name}
@@ -173,7 +257,13 @@ const PDFViewer = () => {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setShowModal(false)} sx={{ mr: 2 }}>
+          <Button
+            onClick={() => {
+              setShowModal(false);
+              setErrors({});
+            }}
+            sx={{ mr: 2 }}
+          >
             Hủy
           </Button>
           <Button
@@ -182,7 +272,11 @@ const PDFViewer = () => {
             disabled={isSubmitting}
             startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
           >
-            {isSubmitting ? "Đang tải lên..." : "Lưu tài liệu"}
+            {isSubmitting
+              ? "Đang tải lên..."
+              : editingId
+              ? "Cập nhật tài liệu"
+              : "Lưu tài liệu"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -190,12 +284,12 @@ const PDFViewer = () => {
       {/* PDF List */}
       <div className="row">
         {pdfFiles.map((file) => (
-          <div key={file.id} className="col-md-6 mb-4 mt-4">
+          <div key={file._id} className="col-md-6 mb-4 mt-4">
             <div className="card">
               <div className="card-body">
                 <div style={{ height: "600px" }}>
                   <object
-                    data={file.url}
+                    data={`http://localhost:9999/${file.filePath}`}
                     type="application/pdf"
                     className="w-100 h-100"
                   >
@@ -206,13 +300,41 @@ const PDFViewer = () => {
                   </object>
                 </div>
                 <div className="text-center mt-3">
-                  <strong>{file.name}</strong>
-                  <button
-                    className="btn btn-outline-primary btn-sm w-auto ms-2"
-                    onClick={() => window.open(file.url, "_blank")}
+                  <div className="mb-2">
+                    <strong>{file.name}</strong>
+                  </div>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleEdit(file)}
+                    sx={{ ml: 1 }}
+                  >
+                    Sửa
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => handleDelete(file._id)}
+                    sx={{ ml: 1 }}
+                    color="error"
+                  >
+                    Xóa
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() =>
+                      window.open(
+                        `http://localhost:9999/${file.filePath}`,
+                        "_blank"
+                      )
+                    }
+                    sx={{ ml: 1 }}
                   >
                     Xem
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -223,4 +345,4 @@ const PDFViewer = () => {
   );
 };
 
-export default PDFViewer;
+export default BlockDiagram;

@@ -185,35 +185,38 @@ function Accessory() {
       setFormAccessory({ ...data.accessories[currentIndex] });
     }
   };
+
   const handleCreateAccessory = async () => {
-    //   setIsLoadingButton(true)
-    //   let form = new FormData()
-    //   form.append("title", formData.title)
-    //   form.append("description", formData.description ?? "")
-    //   form.append("type", formData.type)
-    //   form.append("file", formData.image)
-    //   try {
-    //     const response = await axios.post(`${REACT_APP_URL_BE}/accessory`, form, {
-    //       headers: { "Content-Type": "multipart/form-data" }
-    //     })
-    //     if (response) {
-    //       setSnackBar({
-    //         open: true,
-    //         message: `${response.data.message}`,
-    //         severity: 'success'
-    //       })
-    //       fetchData()
-    //       setShowModal(false)
-    //       setFormData((prev) => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" })))
-    //       setIsLoadingButton(false)
-    //     }
-    //   } catch (error) {
-    //     setSnackBar({
-    //       open: true,
-    //       message: `Server error: ${error}`,
-    //       severity: 'error'
-    //     })
-    //   }
+    setIsLoadingButton(true);
+    let form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description ?? "");
+    form.append("type", formData.type);
+    form.append("file", formData.image);
+    try {
+      const response = await axios.post(`${REACT_APP_URL_BE}/accessory`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response) {
+        setSnackBar({
+          open: true,
+          message: `${response.data.message}`,
+          severity: "success",
+        });
+        fetchData();
+        setShowModal(false);
+        setFormData((prev) =>
+          Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: "" }))
+        );
+        setIsLoadingButton(false);
+      }
+    } catch (error) {
+      setSnackBar({
+        open: true,
+        message: `Server error: ${error}`,
+        severity: "error",
+      });
+    }
   };
   const handleUpdateAccessory = async () => {
     //   const form = new FormData()
@@ -246,6 +249,14 @@ function Accessory() {
   const handleResultSearch = (result) => {
     setSearch(result);
   };
+
+  function isBase64(str) {
+    try {
+      return btoa(atob(str)) === str;
+    } catch (err) {
+      return false;
+    }
+  }
   return (
     <div className="bg-image">
       <Container fluid>
@@ -506,9 +517,14 @@ function Accessory() {
 
                     {formAccessory.image ? (
                       <ZoomableImage
-                        // key={resetKey}
-                        data={`${REACT_APP_URL_BE}${atob(formAccessory.image)}`}
-                        alt={formAccessory.title}
+                        data={
+                          isBase64(formAccessory?.image)
+                            ? `${REACT_APP_URL_BE}${decodeURIComponent(
+                                escape(atob(formAccessory?.image))
+                              )}`
+                            : `${REACT_APP_URL_BE}${formAccessory?.image}`
+                        }
+                        alt={formAccessory?.title}
                       />
                     ) : (
                       <p>Không có ảnh</p>
@@ -598,8 +614,6 @@ function Accessory() {
                   <h6>More images:</h6>
                   <div className="d-flex flex-wrap justify-content-start">
                     {data.accessories.map((image, index) => {
-                      console.log(image);
-
                       return (
                         <Card
                           key={index}
@@ -617,9 +631,13 @@ function Accessory() {
                         >
                           <Card.Img
                             variant="top"
-                            src={`${REACT_APP_URL_BE}${
-                              image ? atob(image.image) : ""
-                            }`}
+                            src={
+                              isBase64(image?.image)
+                                ? `${REACT_APP_URL_BE}${decodeURIComponent(
+                                    escape(atob(image?.image))
+                                  )}`
+                                : `${REACT_APP_URL_BE}${image?.image}`
+                            }
                             alt={image?.title}
                             style={{
                               width: "100%",
@@ -679,10 +697,10 @@ function Accessory() {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ py: 3, px: 4 }}>
+        <DialogContent sx={{ py: 3 }}>
           <Stack spacing={3}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+            <Grid container spacing={0} sx={{ py: 3 }}>
+              <Grid item xs={12} md={6} sx={{ paddingRight: 1 }}>
                 <TextField
                   fullWidth
                   name="title"
@@ -699,7 +717,7 @@ function Accessory() {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ paddingLeft: 1 }}>
                 <Autocomplete
                   options={data.typesAccessories || []}
                   getOptionLabel={(option) => option.title}
