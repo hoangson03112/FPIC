@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ZoomableImage from "./ZoomableImage";
+
 import "./Accessory.css";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -25,15 +25,28 @@ import {
   ListItemText,
   Grid,
   Typography,
+  AppBar,
+  Toolbar,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
-import { ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
+
+import {
+  Close as CloseIcon,
+  ChevronLeft,
+  ChevronRight,
+  Save as SaveIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  ImageNotSupported as ImageNotSupportedIcon,
+  Collections as CollectionsIcon,
+  Info as InfoIcon,
+} from "@mui/icons-material";
+
 import { Col, Row, Card, Container } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import SaveIcon from "@mui/icons-material/Save";
+import { AccessoryDetailDialog } from "./components/AccessoryDetailDialog";
 
 const Transition = React.forwardRef((props, ref) => (
   <Fade ref={ref} {...props} timeout={700} />
@@ -54,7 +67,7 @@ function Accessory() {
     message: "",
     severity: "",
   });
-
+  const [formDataUpdate, setFormDataUpdate] = useState({});
   const [formData, setFormData] = useState({
     _id: "",
     title: "",
@@ -88,10 +101,12 @@ function Accessory() {
   }, [page, limit, search]);
   useEffect(() => {
     const item = data.accessories[currentIndex];
+
     if (item) {
       setFormAccessory({ ...item });
+      setFormDataUpdate({ ...item });
     }
-  }, [currentIndex, data.accessories]); // Thêm data.accessories vào dependency
+  }, [currentIndex, data.accessories]);
 
   const fetchData = async () => {
     try {
@@ -135,6 +150,7 @@ function Accessory() {
           pagination_access: response.data.pagination,
         }));
         setFormAccessory({ ...response.data.data[0] });
+        setFormDataUpdate({ ...response.data.data[0] });
       }
     } catch (error) {
       console.log(error);
@@ -218,34 +234,7 @@ function Accessory() {
       });
     }
   };
-  const handleUpdateAccessory = async () => {
-    //   const form = new FormData()
-    //   form.append("title", formData.title)
-    //   form.append("description", formData.description)
-    //   form.append("type", formData.type)
-    //   if (formData.image instanceof File) {
-    //     form.append("file", formData.image)
-    //   }
-    //   try {
-    //     const response = await axios.put(`${REACT_APP_URL_BE}/accessory/${formData._id}`,
-    //       form, { headers: { "Content-Type": "multipart/form-data" } })
-    //     if (response) {
-    //       setSnackBar({
-    //         open: true,
-    //         message: `${response.data.message}`,
-    //         severity: "success"
-    //       })
-    //       fetchData()
-    //     }
-    //   } catch (error) {
-    //     setSnackBar({
-    //       open: true,
-    //       message: `Server error: ${error}`,
-    //       severity: 'error'
-    //     })
-    //   }
-    //   console.log(formData)
-  };
+
   const handleResultSearch = (result) => {
     setSearch(result);
   };
@@ -464,197 +453,21 @@ function Accessory() {
         </Row>
       </Container>
 
-      <Dialog
-        open={showModalDesc}
-        onClose={() => handleClickModalDesc(false)}
-        fullScreen
-        TransitionComponent={Transition}
-        sx={{
-          "& .MuiDialog-paper": {
-            backgroundColor: "#f5f5f5",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{ paddingTop: "10px", paddingBottom: "0px", paddingLeft: "0px" }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <IconButton
-              sx={{
-                border: "none",
-                boxShadow: "none",
-                "&:hover": { backgroundColor: "transparent" },
-              }}
-              onClick={() => handleClickModalDesc(false)}
-            >
-              <CloseIcon />
-            </IconButton>
-          </div>
-        </DialogTitle>
-        <DialogContent>
-          <Row xs={10}>
-            {formAccessory && (
-              <div className="d-flex flex-column">
-                <div className="d-flex justify-content-between  mb-3">
-                  <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                    <IconButton
-                      onClick={hanldeClickPreviosImage}
-                      sx={{
-                        border: "none",
-                        boxShadow: "none",
-                        "&:hover": { backgroundColor: "transparent" },
-                      }}
-                    >
-                      <ChevronLeft
-                        style={{
-                          width: 50,
-                          backgroundColor: "white",
-                          height: 30,
-                          justifyContent: "center",
-                        }}
-                      />
-                    </IconButton>
-
-                    {formAccessory.image ? (
-                      <ZoomableImage
-                        data={
-                          isBase64(formAccessory?.image)
-                            ? `${REACT_APP_URL_BE}${decodeURIComponent(
-                                escape(atob(formAccessory?.image))
-                              )}`
-                            : `${REACT_APP_URL_BE}${formAccessory?.image}`
-                        }
-                        alt={formAccessory?.title}
-                      />
-                    ) : (
-                      <p>Không có ảnh</p>
-                    )}
-                    <IconButton
-                      onClick={hanldeClickNextImage}
-                      sx={{
-                        border: "none",
-                        boxShadow: "none",
-                        "&:hover": { backgroundColor: "transparent" },
-                      }}
-                    >
-                      <ChevronRight
-                        style={{
-                          width: 50,
-                          backgroundColor: "white",
-                          height: 30,
-                          justifyContent: "center",
-                        }}
-                      />
-                    </IconButton>
-                  </div>
-                  <Stack
-                    spacing={4}
-                    sx={{ padding: "16px", marginTop: "50px" }}
-                  >
-                    <TextField
-                      name="title"
-                      label="Tiêu đề"
-                      onChange={handleInputChange}
-                      value={formAccessory.title || ""}
-                      sx={{ minWidth: "300px" }}
-                      error={!!errors.title}
-                      helperText={errors.title}
-                    />
-
-                    <TextField
-                      name="description"
-                      label="Mô tả"
-                      onChange={handleInputChange}
-                      value={formAccessory.description || ""}
-                      sx={{ minWidth: "300px" }}
-                      error={!!errors.description}
-                      helperText={errors.description}
-                    />
-                    {/* <Autocomplete
-                      options={typesAccessories}
-                      value={typesAccessories.find((item) => item._id === formAccessory.type) || "underfine"}
-                      getOptionLabel={(option) =>option.title}
-                      renderInput={(params) => <TextField {...params} label="Loại"/>}
-                      isOptionEqualToValue={(option, value) => option.id === value?.id}
-                      disableClearable/> */}
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                      }}
-                    >
-                      <Button
-                        onClick={handleUpdateAccessory}
-                        disabled={isLoadingButton}
-                        startIcon={
-                          isLoadingButton ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : null
-                        }
-                      >
-                        Sửa
-                      </Button>
-                      <Button
-                        disabled={isLoadingButton}
-                        color="warning"
-                        startIcon={
-                          isLoadingButton ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : null
-                        }
-                      >
-                        Xóa
-                      </Button>
-                    </div>
-                  </Stack>
-                </div>
-
-                <div className="w-100 mt-4">
-                  <h6>More images:</h6>
-                  <div className="d-flex flex-wrap justify-content-start">
-                    {data.accessories.map((image, index) => {
-                      return (
-                        <Card
-                          key={index}
-                          className="m-2"
-                          style={{
-                            width: "100px",
-                            cursor: "pointer",
-                            border:
-                              formAccessory && formAccessory._id === image._id
-                                ? "3px solid orangered"
-                                : "none",
-                          }}
-                          data-bs-target="#imageModal"
-                          onClick={() => handleClickOnAnotherImage(index)}
-                        >
-                          <Card.Img
-                            variant="top"
-                            src={
-                              isBase64(image?.image)
-                                ? `${REACT_APP_URL_BE}${decodeURIComponent(
-                                    escape(atob(image?.image))
-                                  )}`
-                                : `${REACT_APP_URL_BE}${image?.image}`
-                            }
-                            alt={image?.title}
-                            style={{
-                              width: "100%",
-                              height: "100px",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-          </Row>
-        </DialogContent>
-      </Dialog>
+      <AccessoryDetailDialog
+        showModalDesc={showModalDesc}
+        handleClickModalDesc={handleClickModalDesc}
+        formAccessory={formAccessory}
+        data={data}
+        formDataUpdate={formDataUpdate}
+        setFormDataUpdate={setFormDataUpdate}
+        errors={errors}
+        isLoadingButton={isLoadingButton}
+        handleClickOnAnotherImage={handleClickOnAnotherImage}
+        hanldeClickPreviosImage={hanldeClickPreviosImage}
+        hanldeClickNextImage={hanldeClickNextImage}
+        Transition={Transition}
+        isBase64={isBase64}
+      />
 
       <Dialog
         open={showModal}
@@ -829,7 +642,7 @@ function Accessory() {
       <Snackbar
         open={snackBar.open}
         autoHideDuration={3000}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
         onClose={handleSnackbarClose}
         TransitionComponent={Transition}
       >
