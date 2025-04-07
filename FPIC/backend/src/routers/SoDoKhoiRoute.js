@@ -1,7 +1,5 @@
 app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
   try {
-    // ... (phần kiểm tra file như trước)
-
     const pdfDoc = new PDF({
       name: req.body.name,
       filename: req.file.filename,
@@ -11,7 +9,7 @@ app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
       mimetype: req.file.mimetype,
       url: `/uploads/${req.file.filename}`,
     });
-    
+
     await pdfDoc.save();
 
     res.status(201).json({

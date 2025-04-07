@@ -1,6 +1,6 @@
-const express = require('express')
-const router = express.Router()
-const typeAccessory = require("../controller/TypeAccessoryController")
+const express = require("express");
+const router = express.Router();
+const typeAccessory = require("../controller/TypeAccessoryController");
 
-router.get("/get-types-accessory", typeAccessory.getTypesAccessory)
-module.exports = router
+router.get("/get-types-accessory", typeAccessory.getTypesAccessory);
+module.exports = router;

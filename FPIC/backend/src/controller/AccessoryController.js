@@ -73,6 +73,7 @@ exports.getAccessory = async (req, res) => {
     });
   }
 };
+
 exports.createAccessory = async (req, res) => {
   try {
     const accessory = req.body;

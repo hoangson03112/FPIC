@@ -34,7 +34,7 @@ import {
 import AccountContext from "./http/AccountContext";
 import StorageIcon from "@mui/icons-material/Storage";
 
-const drawerWidth = 280;
+const drawerWidth = 300;
 
 const Layout = ({ children }) => {
   const theme = useTheme();
@@ -222,7 +222,7 @@ const Layout = ({ children }) => {
           <List component="div" disablePadding>
             {[
               { text: "Mẫu linh kiện, chủng loại", path: "/page/1" },
-              { text: "Mẫu điểm yếu trên Bo mạch", path: "/weak-point" },
+              { text: "Mẫu điểm yếu trên bo mạch", path: "/weak-point" },
               { text: "Mẫu sơ đồ khối", path: "/block-diagram" },
               { text: "Mẫu bản mạch", path: "/microchip" },
             ].map((item) => (
@@ -345,8 +345,7 @@ const Layout = ({ children }) => {
           </List>
         </Collapse>
 
-        {/* Biểu đồ */}
-        <ListItem disablePadding>
+        {/* <ListItem disablePadding>
           <ListItemButton
             component={Link}
             to="/charts"
@@ -370,7 +369,7 @@ const Layout = ({ children }) => {
               primaryTypographyProps={{ fontWeight: 500 }}
             />
           </ListItemButton>
-        </ListItem>
+        </ListItem> */}
       </List>
 
       {/* Footer (optional) */}
