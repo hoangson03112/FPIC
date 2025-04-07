@@ -11,8 +11,6 @@ function App() {
   const [resetKey, setResetKey] = useState(0); // State để lưu key cho ZoomableImage
   const [fileData, setFileData] = useState(null);
   const [classes, setClasses] = useState([]);
-  console.log(fileData);
-  console.log(classes);
 
   useEffect(() => {
     axios

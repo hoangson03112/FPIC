@@ -2,15 +2,16 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const fs = require("fs");
-const db = require("./config/db/index");
-const Account = require("./Model/Account");
+const db = require("./config/db");
+const Account = require("./models/Account");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 const bodyParse = require("body-parser");
-const AccessoryRouter = require("./router/AccessoryRouter");
+const AccessoryRouter = require("./routers/AccessoryRouter");
 const IMAGES_DIR = path.join(__dirname, "img");
 const IMAGES_MICROCHIP = path.join(__dirname, "microchip");
 const IMAGES_JTAG = path.join(__dirname, "jtag");
@@ -21,6 +22,7 @@ db.connect();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
@@ -205,36 +207,48 @@ app.get("/get-classes", (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    let data = req.body;
-
-    const account = await Account.findOne({ email: data.email });
-
-    if (account) {
-      const isMatch = await bcrypt.compare(data.password, account.password);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: "Tên người dùng hoặc mật khẩu không đúng" });
-      }
-      if (account.status === "active") {
-        const token = jwt.sign({ _id: account._id, role: account.role }, "sown", {
-          expiresIn: "3h",
-        });
-        return res.json({
-          status: "success",
-          message: "Login successful",
-          token,
-        });
-      }
-
+    const { email, password } = req.body;
+    if (!email || !password) {
       return res
-        .status(403)
-        .json({ status: "inactive", message: "Tài khoản chưa được kích hoạt" });
-    } else {
-      return res.status(401).json({ message: "Sai tên đăng nhập hoặc email" });
+        .status(400)
+        .json({ message: "Vui lòng nhập email và mật khẩu" });
     }
+
+    const account = await Account.findOne({ email });
+
+    if (!account) {
+      return res.status(401).json({ message: "Email không tồn tại" }); // Thông báo rõ ràng
+    }
+
+    const isMatch = await bcrypt.compare(password, account.password); // ✅ Thêm await
+    if (!isMatch) {
+      return res.status(401).json({ message: "Mật khẩu không đúng" }); // Thông báo riêng
+    }
+
+    if (account.status !== "active") {
+      return res.status(403).json({
+        status: "inactive",
+        message: "Tài khoản chưa được kích hoạt",
+      });
+    }
+
+    // Tạo token nếu mọi thứ hợp lệ
+    const token = jwt.sign(
+      { _id: account._id, role: account.role },
+      "sown" || "temporary_secret_key",
+      { expiresIn: process.env.JWT_EXPIRES_IN || "3h" }
+    );
+
+    return res.json({
+      status: "success",
+      message: "Đăng nhập thành công",
+      token,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error });
+    console.error("Login error:", error); // Log lỗi để debug
+    return res
+      .status(500)
+      .json({ message: "Lỗi server", error: error.message });
   }
 });
 
@@ -246,14 +260,13 @@ app.get("/authentication", async (req, res) => {
 
   try {
     const data = jwt.verify(token, "sown");
-    const account = await Account.findById(data._id);
+    const account = await Account.findById(data._id).select("-password");
 
     if (!account) {
       return res.status(404).json({ message: "Account not found" });
     }
 
-    const { password, ...accountResponse } = account.toObject();
-    res.json({ status: "success", account: accountResponse });
+    res.json({ status: "success", account: account });
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token expired" });
@@ -285,18 +298,17 @@ const verifyToken = (req, res, next) => {
   if (authHeader) {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, "sown", (err, user) => {
+      // Sửa ở đây
       if (err) {
         return res.sendStatus(403);
       }
       req.user = user;
       next();
-      d;
     });
   } else {
     res.sendStatus(401);
   }
 };
-
 app.get("/admin/accounts", verifyAdmin, async (req, res) => {
   try {
     const accounts = await Account.find({}, "-password");
@@ -320,6 +332,7 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
       ...account,
       password: hashedPassword,
     });
+    console.log(newAccount);
 
     await newAccount.save();
     res
@@ -383,9 +396,86 @@ app.get("/admin/accounts/count", async (req, res) => {
   res.json({ count: userCount });
 });
 
+const type = require("./routers/TypeAccessoryRouter");
+const TypeModel = require("./models/TypeAccessory");
+app.use("/", type);
 
-const IMAGE_DIR = "C:/Users/nguye/Documents/gui/gui/BTN";
-const type = require('./router/TypeAccessoryRouter')
-app.use("/images", express.static(IMAGE_DIR));
-app.use("/", type)
+const DIR_TYPE = path.join(__dirname, "public/images");
+app.get("/import-types", async (req, res) => {
+  try {
+    const subfolders = fs
+      .readdirSync(DIR_TYPE)
+      .filter((folder) =>
+        fs.statSync(path.join(DIR_TYPE, folder)).isDirectory()
+      );
+    const savePromises = subfolders.map(async (folder) => {
+      const files = fs
+        .readdirSync(path.join(DIR_TYPE, folder))
+        .filter(
+          (file) =>
+            file.endsWith(".png") ||
+            file.endsWith("jpg") ||
+            file.endsWith("jpeg")
+        );
+
+      if (files.length === 0) return null;
+
+      const firstImagePath = `/public/images/${folder}/${files[0]}`;
+      const imageBase64 = Buffer.from(firstImagePath).toString("base64");
+
+      const newType = new TypeModel({
+        title: folder,
+        contentType: "image/png",
+        image: imageBase64,
+      });
+
+      return await newType.save();
+    });
+
+    const results = await Promise.all(savePromises);
+    res.json({
+      message: `Lưu thành công ${results.filter(Boolean).length} Loại`,
+    });
+  } catch (error) {
+    console.log(`Luwu thất bại: ${error}`);
+    res.json({ message: "Lưu thất bại" });
+  }
+});
+const DIR_IMAGE = path.join(__dirname, "public/images/C");
+const AccessoryModel = require("./models/Accessory");
+app.get("/import-accessories", async (req, res) => {
+  try {
+    const images = fs
+      .readdirSync(DIR_IMAGE)
+      .filter(
+        (image) =>
+          image.endsWith(".png") ||
+          image.endsWith("jpg") ||
+          image.endsWith("jpeg")
+      );
+
+    if (images.length === 0) return null;
+
+    const saveAccessories = images.map(async (image) => {
+      const accessoryPath = `/public/images/C/${image}`;
+      const imageBase64 = Buffer.from(accessoryPath).toString("base64");
+
+      const newAccessory = new AccessoryModel({
+        title: image,
+        description: "",
+        image: imageBase64,
+        type: "67bb2d4a9e8b6d1860f8dd4f",
+      });
+      return await newAccessory.save();
+    });
+
+    const results = await Promise.all(saveAccessories);
+    res.json({
+      message: `Luwu thành công ${results.filter(Boolean).length} file`,
+    });
+  } catch (error) {
+    console.log("Lưu thất bại", error);
+    res.json({ message: `Luwu thất bại` });
+  }
+});
 app.listen(9999, () => console.log("Server is running on port 9999"));

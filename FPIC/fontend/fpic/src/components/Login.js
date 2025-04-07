@@ -1,9 +1,26 @@
 import React, { useState } from "react";
-import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
+import {
+  Box,
+  Button,
+  Container,
+  CssBaseline,
+  TextField,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Paper,
+  Link,
+} from "@mui/material";
+import {
+  Visibility,
+  VisibilityOff,
+  EmailOutlined,
+  LockOutlined,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
+import { REACT_APP_URL_BE } from "../config";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,14 +39,14 @@ const Login = () => {
     e.preventDefault();
 
     if (!validateEmail(email)) {
-      setEmailError("Invalid email format.");
+      setEmailError("Email không hợp lệ.");
       return;
     } else {
       setEmailError("");
     }
 
     if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters long.");
+      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự.");
       return;
     } else {
       setPasswordError("");
@@ -40,109 +57,124 @@ const Login = () => {
         email,
         password,
       });
-
+      console.log(response);
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.token);
-        navigate("/");
+        navigate("/dashboard");
       } else if (response.data.status !== "success") {
         alert(response.data.c);
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        setEmailError("Invalid email or password.");
+        setEmailError(error.response.data.message);
       } else {
-        setEmailError("An error occurred. Please try again.");
+        setEmailError("Đã xảy ra lỗi. Vui lòng thử lại.");
       }
     }
   };
 
   return (
-    <div
-      className="min-vh-100 d-flex align-items-center justify-content-center py-5"
-      style={{
-        backgroundImage: "linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)",
       }}
     >
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-            <div className="card shadow-lg border-0">
-              <div className="card-body p-4 p-sm-5">
-                <h1 className="text-center mb-4 fw-light">Đăng nhập</h1>
-                <form onSubmit={handleSubmit}>
-                  <div className="form-floating mb-4">
-                    <input
-                      type="email"
-                      className={`form-control ${
-                        emailError ? "is-invalid" : ""
-                      }`}
-                      id="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                    <label
-                      htmlFor="email"
-                      className="d-flex align-items-center gap-2"
-                    >
-                      <FaEnvelope className="text-muted" />
-                      <span>Email</span>
-                    </label>
-                    {emailError && (
-                      <div className="invalid-feedback">{emailError}</div>
-                    )}
-                  </div>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Paper
+          elevation={6}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: 4,
+            borderRadius: 3,
+          }}
+        >
+          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+            Đăng nhập
+          </Typography>
 
-                  <div className="form-floating mb-4">
-                    <input
-                      type={passwordVisible ? "text" : "password"}
-                      className={`form-control ${
-                        passwordError ? "is-invalid" : ""
-                      }`}
-                      id="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <label
-                      htmlFor="password"
-                      className="d-flex align-items-center gap-2"
-                    >
-                      <FaLock className="text-muted" />
-                      <span>Mật khẩu</span>
-                    </label>
-                    <button
-                      type="button"
-                      className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none me-3"
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!emailError}
+              helperText={emailError}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlined color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Mật khẩu"
+              type={passwordVisible ? "text" : "password"}
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!passwordError}
+              helperText={passwordError}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
                       onClick={() => setPasswordVisible(!passwordVisible)}
-                      style={{ zIndex: 5 }}
+                      edge="end"
                     >
-                      {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                    {passwordError && (
-                      <div className="invalid-feedback">{passwordError}</div>
-                    )}
-                  </div>
+                      {passwordVisible ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-                  <div className="d-grid gap-2  ">
-                    <button
-                      type="submit"
-                      className="w-75 mt-4 p-2 btn btn-outline-primary btn-lg"
-                    >
-                      Đăng nhập
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                background:
+                  "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
+                "&:hover": {
+                  background:
+                    "linear-gradient(to right, #2575fc 0%, #6a11cb 100%)",
+                },
+              }}
+            >
+              Đăng nhập
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 
