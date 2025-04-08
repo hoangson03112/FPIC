@@ -12,6 +12,13 @@ import {
   Button,
   CircularProgress,
   Dialog,
+  DialogTitle,
+  Fade,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Stack,
+  alpha,
 } from "@mui/material";
 import {
   Close as CloseIcon,
@@ -27,6 +34,8 @@ import {
 import ZoomableImage from "../ZoomableImage";
 import { REACT_APP_URL_BE } from "../config";
 import axios from "axios";
+
+import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 
 export const AccessoryDetailDialog = ({
   showModalDesc,
@@ -44,8 +53,10 @@ export const AccessoryDetailDialog = ({
   isBase64,
   setIsLoadingButton,
   setSnackBar,
+  setData,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
   const handleUpdateAccessory = async () => {
     if (!isEditing) {
@@ -53,7 +64,6 @@ export const AccessoryDetailDialog = ({
       return;
     }
 
-    // Nếu đang chỉnh sửa, gửi API để lưu
     setIsLoadingButton(true);
     const form = new FormData();
     form.append("title", formDataUpdate.title);
@@ -75,12 +85,64 @@ export const AccessoryDetailDialog = ({
         message: response.data.message,
         severity: "success",
       });
-      setIsEditing(false); // Quay lại chế độ chỉ đọc sau khi lưu thành công
-      // Cập nhật lại dữ liệu nếu cần (fetch lại hoặc cập nhật state)
+      setIsEditing(false);
     } catch (error) {
       setSnackBar({
         open: true,
         message: error.response?.data?.message || "Lỗi khi cập nhật",
+        severity: "error",
+      });
+    } finally {
+      setIsLoadingButton(false);
+    }
+  };
+  const handleDeleteAccessory = async () => {
+    setIsLoadingButton(true);
+
+    const previousData = data.accessories;
+    const deletedIndex = data.accessories.findIndex(
+      (item) => item._id === formAccessory._id
+    );
+
+    const nextAccessory =
+      data.accessories[deletedIndex + 1] || data.accessories[deletedIndex - 1];
+
+    setData((prev) => ({
+      ...prev,
+      accessories: prev.accessories.filter(
+        (item) => item._id !== formAccessory._id
+      ),
+    }));
+
+    try {
+      await axios.delete(`${REACT_APP_URL_BE}/accessory/${formAccessory._id}`);
+      setSnackBar({
+        open: true,
+        message: "Xoá thành công!",
+        severity: "success",
+      });
+
+      // Nếu còn phụ kiện khác, hiển thị nó
+      if (nextAccessory) {
+        setFormDataUpdate({
+          title: nextAccessory.title,
+          description: nextAccessory.description,
+        });
+        handleClickOnAnotherImage(
+          data.accessories.findIndex((a) => a._id === nextAccessory._id)
+        );
+      } else {
+        // Nếu không còn phụ kiện nào, hiển thị trạng thái trống
+        setFormDataUpdate({});
+      }
+    } catch (error) {
+      setData((prev) => ({
+        ...prev,
+        accessories: previousData,
+      }));
+      setSnackBar({
+        open: true,
+        message: error.response?.data?.message || "Lỗi khi xóa",
         severity: "error",
       });
     } finally {
@@ -115,7 +177,7 @@ export const AccessoryDetailDialog = ({
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" sx={{ ml: 2, fontWeight: 500 }}>
-              Chi tiết phụ kiện
+              Chi tiết linh kiện
             </Typography>
           </Box>
         </Toolbar>
@@ -124,7 +186,6 @@ export const AccessoryDetailDialog = ({
       <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <Container maxWidth="xl" sx={{ py: 4, flexGrow: 1 }}>
           <Grid container spacing={3}>
-            {/* Main Image Display */}
             <Grid item xs={12} md={8} lg={9}>
               <Paper
                 elevation={0}
@@ -140,7 +201,6 @@ export const AccessoryDetailDialog = ({
               >
                 {formAccessory && (
                   <>
-                    {/* Main Image */}
                     <Box
                       sx={{
                         position: "relative",
@@ -369,7 +429,11 @@ export const AccessoryDetailDialog = ({
                 )}
               </Paper>
             </Grid>
-
+            <DeleteConfirmationDialog
+              setOpenConfirmDelete={setOpenConfirmDelete}
+              handleDeleteAccessory={handleDeleteAccessory}
+              openConfirmDelete={openConfirmDelete}
+            />
             {/* Form and Info Panel */}
             <Grid item xs={12} md={4} lg={3}>
               {formAccessory && (
@@ -489,6 +553,7 @@ export const AccessoryDetailDialog = ({
                         fullWidth
                         variant="outlined"
                         color="error"
+                        onClick={() => setOpenConfirmDelete(true)}
                         disabled={isLoadingButton}
                         startIcon={
                           isLoadingButton ? (

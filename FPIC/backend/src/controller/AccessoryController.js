@@ -147,7 +147,7 @@ exports.updateAccessory = async (req, res) => {
     if (updateAccessory) {
       return res.status(200).json({
         status: 200,
-        message: "update accessory succesfully",
+        message: "Cập nhât linh kiện thành công",
         data: updateAccessory,
       });
     } else {
@@ -166,9 +166,21 @@ exports.updateAccessory = async (req, res) => {
 exports.deleteAccessory = async (req, res) => {
   try {
     const { id } = req.params;
+
     const existsAccessory = await AccessoryModel.findById(id);
     if (!existsAccessory) {
       return res.status(404).json("ID accessory not found");
+    }
+
+    try {
+      fs.unlinkSync(
+        path.join(
+          __dirname,
+          "../" + decodeURIComponent(escape(atob(existsAccessory?.image)))
+        )
+      );
+    } catch (err) {
+      console.error("Lỗi khi xóa file:", err);
     }
     const deleteAccessory = await AccessoryModel.findByIdAndDelete(id);
     if (deleteAccessory) {

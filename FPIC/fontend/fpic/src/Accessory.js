@@ -246,6 +246,7 @@ function Accessory() {
       return false;
     }
   }
+
   return (
     <div className="bg-image">
       <Container fluid>
@@ -288,7 +289,6 @@ function Accessory() {
                             size="small"
                             onClick={() => {
                               setSearch("");
-                              handleResultSearch("");
                             }}
                             sx={{ color: "text.secondary" }}
                           >
@@ -316,11 +316,9 @@ function Accessory() {
                     value={search || ""}
                     onChange={(e) => {
                       setSearch(e.target.value);
-                      handleResultSearch(e.target.value);
                     }}
                   />
 
-                  {/* Gợi ý tìm kiếm */}
                   {search && (
                     <Paper
                       sx={{
@@ -339,19 +337,18 @@ function Accessory() {
                     >
                       <List dense>
                         {data.typesAccessories
-                          .filter((item) =>
-                            item.title
-                              .toLowerCase()
-                              .includes(search.toLowerCase())
+                          ?.filter((item) =>
+                            item?.title
+                              ?.toLowerCase()
+                              ?.includes(search?.toLowerCase() || "")
                           )
-                          .slice(0, 5)
-                          .map((item, index) => (
+                          ?.slice(0, 5)
+                          ?.map((item) => (
                             <ListItem
-                              key={index}
+                              key={item._id}
                               button
                               onClick={() => {
                                 setSearch(item.title);
-                                handleResultSearch(item.title);
                               }}
                               sx={{
                                 "&:hover": {
@@ -467,6 +464,9 @@ function Accessory() {
         hanldeClickNextImage={hanldeClickNextImage}
         Transition={Transition}
         isBase64={isBase64}
+        setIsLoadingButton={setIsLoadingButton}
+        setSnackBar={setSnackBar}
+        setData={setData}
       />
 
       <Dialog

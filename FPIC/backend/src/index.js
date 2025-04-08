@@ -10,15 +10,25 @@ const SoDoKhoi = require("./models/SoDoKhoi");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
-const axios = require("axios");
+const { default: upload } = require("./config/multer/multer");
 const bodyParse = require("body-parser");
 const AccessoryRouter = require("./routers/AccessoryRouter");
 const IMAGES_DIR = path.join(__dirname, "img");
-const IMAGES_MICROCHIP = path.join(__dirname, "microchip");
-const IMAGES_JTAG = path.join(__dirname, "jtag");
-const IMAGES_TESTPIN = path.join(__dirname, "testpin");
-const IMAGES_LPC = path.join(__dirname, "LPC");
+const multer = require("multer");
+const uploadWeakPoint = multer({ storage: multer.memoryStorage() });
+const IMAGES_MICROCHIP = path.join(__dirname, "../microchip");
 
+const {
+  getLPC,
+  getTestPin,
+  getJTAG,
+  getFootPrint,
+  getUnusedPort,
+  getVias,
+  getSPI,
+  getSMB,
+  postWeakPoint,
+} = require("./controller/WeakPointController");
 db.connect();
 app.use(cors());
 app.use(express.json());
@@ -26,6 +36,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
+app.use("/jtag", express.static("jtag"));
+
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
 app.get("/images", (req, res) => {
@@ -88,60 +100,16 @@ app.get("/images-microchip/count", (req, res) => {
     res.json({ count: imageCount });
   });
 });
-app.get("/images-jtag", (req, res) => {
-  fs.readdir(IMAGES_JTAG, (err, files) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ message: "Error reading microchip directory", err });
-    }
+app.get("/images-jtag", getJTAG);
+app.get("/images-test-pin", getTestPin);
+app.get("/images-lpc", getLPC);
+app.get("/images-footprint", getFootPrint);
+app.get("/images-unused-port", getUnusedPort);
+app.get("/images-vias", getVias);
+app.get("/images-spi", getSPI);
+app.get("/images-smb", getSMB);
+app.post("/uploadWeakPoint", uploadWeakPoint.single("image"), postWeakPoint);
 
-    const images = files
-      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
-      .map((file) => ({
-        name: file,
-        img: `/jtag/${file}`,
-      }));
-
-    res.json(images);
-  });
-});
-app.get("/images-test-pin", (req, res) => {
-  fs.readdir(IMAGES_TESTPIN, (err, files) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ message: "Error reading microchip directory", err });
-    }
-
-    const images = files
-      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
-      .map((file) => ({
-        name: file,
-        img: `/testpin/${file}`,
-      }));
-
-    res.json(images);
-  });
-});
-app.get("/images-lpc", (req, res) => {
-  fs.readdir(IMAGES_LPC, (err, files) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ message: "Error reading microchip directory", err });
-    }
-
-    const images = files
-      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
-      .map((file) => ({
-        name: file,
-        img: `/LPC/${file}`,
-      }));
-
-    res.json(images);
-  });
-});
 app.post("/get-json-file", (req, res) => {
   const { fileName } = req.body;
   const image = fs.readFileSync(
@@ -435,7 +403,7 @@ app.get("/import-types", async (req, res) => {
 });
 const DIR_IMAGE = path.join(__dirname, "public/images/C");
 const AccessoryModel = require("./models/Accessory");
-const { default: upload } = require("./config/multer/multer");
+
 app.get("/import-accessories", async (req, res) => {
   try {
     const images = fs

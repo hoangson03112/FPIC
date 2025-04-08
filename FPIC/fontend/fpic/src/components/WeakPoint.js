@@ -46,6 +46,7 @@ import {
   Category,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
+import { REACT_APP_URL_BE } from "../config";
 
 // Custom styled components
 const GradientHeader = styled(Box)(({ theme }) => ({
@@ -221,60 +222,38 @@ const WeakPoint = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const apiEndpoint = `http://localhost:9999/images-${formData.category
-      .toLowerCase()
-      .replace("_", "-")}`;
 
     try {
-      let imageUrl = selectedItem?.img || ""; // Giữ URL ảnh cũ nếu có
-
-      // Nếu có ảnh mới được tải lên
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("image", imageFile); // 'image' là tên field mà server expect
-
-        try {
-          // Gọi API upload ảnh
-          const uploadResponse = await axios.post(
-            "http://localhost:9999/upload",
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          imageUrl = uploadResponse.data.url; // Giả sử server trả về { url: '...' }
-        } catch (uploadError) {
-          console.error("Upload ảnh thất bại:", uploadError);
-          setError("Upload ảnh thất bại. Vui lòng thử lại.");
-          return;
-        }
-      }
+      let imageUrl = selectedItem?.img || "";
 
       if (modalMode === "add") {
-        const newItem = {
-          id: Math.random().toString(36).substr(2, 9),
-          name: formData.name,
-          description: formData.description,
-          img: imageUrl || "/placeholder-image.jpg", // Sử dụng ảnh mới hoặc ảnh mặc định
-          category: formData.category,
-        };
-        await axios.post(apiEndpoint, newItem);
+        let form = new FormData();
+        form.append("image", imageFile);
+        form.append("description", formData.description ?? "");
+        form.append("name", formData.name);
+        form.append("category", formData.category); // gửi theo body luôn
+
+        const response = await axios.post(
+          `${REACT_APP_URL_BE}/uploadWeakPoint`,
+          form,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
         setCategories((prev) => ({
           ...prev,
-          [formData.category]: [...prev[formData.category], newItem],
+          [formData.category]: [...prev[formData.category], response.data],
         }));
+        console.log(response);
       } else if (modalMode === "edit") {
         const updatedItem = {
           ...selectedItem,
           name: formData.name,
           description: formData.description,
-          img: imageUrl || selectedItem.img, // Giữ ảnh cũ nếu không có ảnh mới
+          img: imageUrl || selectedItem.img,
           category: formData.category,
         };
-        await axios.put(`${apiEndpoint}/${selectedItem.id}`, updatedItem);
+        // await axios.put(`${apiEndpoint}/${selectedItem.id}`, updatedItem);
         setCategories((prev) => ({
           ...prev,
           [formData.category]: prev[formData.category].map((item) =>
@@ -282,7 +261,7 @@ const WeakPoint = () => {
           ),
         }));
       } else if (modalMode === "delete") {
-        await axios.delete(`${apiEndpoint}/${selectedItem.id}`);
+        // await axios.delete(`${apiEndpoint}/${selectedItem.id}`);
         setCategories((prev) => ({
           ...prev,
           [activeTab]: prev[activeTab].filter(
@@ -425,7 +404,6 @@ const WeakPoint = () => {
             </Stack>
           </Stack>
 
-          {/* Error Alert */}
           {error && (
             <Alert
               severity="error"
@@ -436,7 +414,6 @@ const WeakPoint = () => {
             </Alert>
           )}
 
-          {/* Loading State */}
           {isLoading ? (
             <Box sx={{ textAlign: "center", py: 5 }}>
               <CircularProgress color="primary" size={60} thickness={4} />
@@ -463,8 +440,8 @@ const WeakPoint = () => {
                           <CardMedia
                             component="img"
                             height="180"
-                            image={item.img || "/placeholder-image.jpg"}
-                            alt={item.name || `Thành phần ${index + 1}`}
+                            image={`${REACT_APP_URL_BE}${item.img}`}
+                            alt={`${REACT_APP_URL_BE}${item.img}`}
                             sx={{
                               objectFit: "contain",
                               p: 2,
@@ -692,7 +669,7 @@ const WeakPoint = () => {
                   }}
                 >
                   <img
-                    src={selectedItem?.img || "/placeholder-image.jpg"}
+                    src={`${REACT_APP_URL_BE}${selectedItem.img}`}
                     alt={selectedItem?.name}
                     style={{
                       maxWidth: "100%",
@@ -725,12 +702,6 @@ const WeakPoint = () => {
                           />
                         </TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>Mô tả</TableCell>
-                        <TableCell>
-                          {selectedItem?.description || "Không có mô tả"}
-                        </TableCell>
-                      </TableRow>
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -749,45 +720,7 @@ const WeakPoint = () => {
                     size="small"
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                   />
-                  {/* 
-                  <FormControl
-                    fullWidth
-                    size="small"
-                    sx={{
-                      "& .MuiInputLabel-root": {
-                        backgroundColor: "background.paper",
-                        px: 1,
-                        transform: formData.category
-                          ? "translate(14px, -9px) scale(0.75)"
-                          : "",
-                      },
-                      "& .MuiOutlinedInput-root": { borderRadius: 2 },
-                    }}
-                  >
-                    <InputLabel shrink={!!formData.category}>
-                      Danh mục
-                    </InputLabel>
-                    <Select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      required
-                      label="Danh mục"
-                    >
-                      {Object.keys(categories).map((category) => (
-                        <MenuItem key={category} value={category}>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={1}
-                          >
-                            <Category fontSize="small" />
-                            <span>{categoryNames[category]}</span>
-                          </Stack>
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl> */}
+
                   <Box>
                     <Button
                       variant="outlined"
