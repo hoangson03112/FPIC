@@ -1,17 +1,28 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-async function connect() {
+export async function connect() {
   try {
     mongoose.set("strictQuery", false);
-    await mongoose.connect("mongodb+srv://huycodon117:Huy22032003@cluster0.fnzyusx.mongodb.net/FPIC?retryWrites=true&w=majority&appName=Cluster0", {
+
+    // Thêm sự kiện kết nối
+    mongoose.connection.on("connected", () => {
+      console.log("✅ Mongoose connected to DB");
+    });
+
+    mongoose.connection.on("error", (err) => {
+      console.error("❌ Mongoose connection error:", err);
+    });
+
+    // Thêm timeout
+    await mongoose.connect("mongodb://127.0.0.1:27017/FPIC", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // 5 giây timeout
     });
-    console.log("Connected to MongoDB");
+
+    console.log("✅ Connected to MongoDB (main function)");
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+    console.error("❌ MongoDB connection failed:", error);
     process.exit(1);
   }
 }
-
-module.exports = { connect };

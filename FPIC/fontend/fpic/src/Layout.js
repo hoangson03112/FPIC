@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   Box,
   Drawer,
@@ -34,9 +34,9 @@ import {
 import AccountContext from "./http/AccountContext";
 import StorageIcon from "@mui/icons-material/Storage";
 
-const drawerWidth = 280;
+const drawerWidth = 300;
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
@@ -63,7 +63,7 @@ const Layout = () => {
   };
 
   const navigateTo = () => {
-    window.location.href = `/auth/login`;
+    navigate("/auth/login");
   };
 
   const toggleSubMenu = (menu) => {
@@ -77,6 +77,7 @@ const Layout = () => {
     const fetchData = async () => {
       try {
         const data = await AccountContext.Authentication();
+
         setAccount(data.account);
       } catch (error) {
         console.error("Error fetching account data: ", error);
@@ -103,28 +104,51 @@ const Layout = () => {
   }, [currentPath]);
 
   const drawer = (
-    <Box sx={{ bgcolor: "primary.main", color: "white", height: "100%" }}>
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
+    <Box
+      sx={{
+        bgcolor: "primary.main",
+        color: "white",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Header của Drawer */}
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          bgcolor: "primary.dark",
+        }}
+      >
         <Avatar
           sx={{
-            width: 56,
-            height: 56,
+            width: 48,
+            height: 48,
             bgcolor: "white",
             color: "primary.main",
           }}
         >
           <AdminPanelSettings />
         </Avatar>
-        <Box>
-          {account?.firstName && account?.lastName ? (
+        <Box sx={{ flexGrow: 1 }}>
+          {account?.fullName ? (
             <Box>
-              <Typography variant="subtitle1">
-                {account.lastName + " " + account.firstName}
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                {account?.fullName}
               </Typography>
               <Button
                 startIcon={<Logout />}
                 onClick={handleLogout}
-                sx={{ color: "white", p: 0, justifyContent: "flex-start" }}
+                sx={{
+                  color: "white",
+                  p: 0,
+                  mt: 0.5,
+                  textTransform: "none",
+                  "&:hover": { color: "grey.300" },
+                }}
               >
                 Đăng xuất
               </Button>
@@ -135,6 +159,7 @@ const Layout = () => {
               color="secondary"
               onClick={navigateTo}
               startIcon={<Login />}
+              sx={{ textTransform: "none", fontWeight: 500 }}
             >
               Đăng Nhập
             </Button>
@@ -142,33 +167,54 @@ const Layout = () => {
         </Box>
       </Box>
 
-      <Divider sx={{ bgcolor: "white", opacity: 0.2 }} />
+      <Divider sx={{ bgcolor: "white", opacity: 0.3, my: 1 }} />
 
-      <List>
+      {/* Danh sách menu */}
+      <List sx={{ flexGrow: 1, px: 1 }}>
+        {/* Trang chủ */}
         <ListItem disablePadding>
           <ListItemButton
             component={Link}
-            to="/"
-            selected={currentPath === "/"}
+            to="/dashboard"
+            selected={currentPath === "/dashboard"}
             sx={{
+              borderRadius: 1,
+              mb: 0.5,
               "&.Mui-selected": {
-                bgcolor: "rgba(255, 255, 255, 0.1)",
+                bgcolor: "primary.light",
+                color: "white",
+                "&:hover": { bgcolor: "primary.light" },
               },
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
             }}
           >
-            <ListItemIcon sx={{ color: "white" }}>
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
               <Home />
             </ListItemIcon>
-            <ListItemText primary="Trang chủ" />
+            <ListItemText
+              primary="Trang chủ"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
           </ListItemButton>
         </ListItem>
 
+        {/* Xây dựng dữ liệu */}
         <ListItem disablePadding>
-          <ListItemButton onClick={() => toggleSubMenu("menu1")}>
-            <ListItemIcon sx={{ color: "white" }}>
+          <ListItemButton
+            onClick={() => toggleSubMenu("menu1")}
+            sx={{
+              borderRadius: 1,
+              mb: 0.5,
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
               <StorageIcon />
             </ListItemIcon>
-            <ListItemText primary="Xây dựng dữ liệu" />
+            <ListItemText
+              primary="Xây dựng dữ liệu"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
             {subMenus.menu1 ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
         </ListItem>
@@ -176,7 +222,7 @@ const Layout = () => {
           <List component="div" disablePadding>
             {[
               { text: "Mẫu linh kiện, chủng loại", path: "/page/1" },
-              { text: "Mẫu điểm yếu trên Bo mạch", path: "/weak-point" },
+              { text: "Mẫu điểm yếu trên bo mạch", path: "/weak-point" },
               { text: "Mẫu sơ đồ khối", path: "/block-diagram" },
               { text: "Mẫu bản mạch", path: "/microchip" },
             ].map((item) => (
@@ -186,14 +232,15 @@ const Layout = () => {
                 to={item.path}
                 selected={currentPath.includes(item.path)}
                 sx={{
-                  pl: 4,
+                  pl: 6,
+                  borderRadius: 1,
+                  mb: 0.5,
                   "&.Mui-selected": {
                     bgcolor: "white",
                     color: "primary.main",
-                    "&:hover": {
-                      bgcolor: "white",
-                    },
+                    "&:hover": { bgcolor: "grey.200" },
                   },
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
                 }}
               >
                 <ListItemText primary={item.text} />
@@ -202,34 +249,66 @@ const Layout = () => {
           </List>
         </Collapse>
 
-        {/* Assessment Management */}
+        {/* Quản lý đánh giá */}
         <ListItem disablePadding>
-          <ListItemButton onClick={() => toggleSubMenu("menu2")}>
-            <ListItemIcon sx={{ color: "white" }}>
+          <ListItemButton
+            onClick={() => toggleSubMenu("menu2")}
+            sx={{
+              borderRadius: 1,
+              mb: 0.5,
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
               <Assessment />
             </ListItemIcon>
-            <ListItemText primary="Quản lý đánh giá" />
+            <ListItemText
+              primary="Quản lý đánh giá"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
             {subMenus.menu2 ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
         </ListItem>
         <Collapse in={subMenus.menu2} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }}>
-              <ListItemText primary="Danh mục sản phẩm đã đánh giá" />
-            </ListItemButton>
-            <ListItemButton sx={{ pl: 4 }}>
-              <ListItemText primary="Kết quả đánh giá" />
-            </ListItemButton>
+            {[
+              { text: "Danh mục sản phẩm đã đánh giá", path: "#" },
+              { text: "Kết quả đánh giá", path: "#" },
+            ].map((item) => (
+              <ListItemButton
+                key={item.text}
+                component={Link}
+                to={item.path}
+                sx={{
+                  pl: 6,
+                  borderRadius: 1,
+                  mb: 0.5,
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+                }}
+              >
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            ))}
           </List>
         </Collapse>
 
-        {/* Administration */}
+        {/* Quản trị */}
         <ListItem disablePadding>
-          <ListItemButton onClick={() => toggleSubMenu("menu3")}>
-            <ListItemIcon sx={{ color: "white" }}>
+          <ListItemButton
+            onClick={() => toggleSubMenu("menu3")}
+            sx={{
+              borderRadius: 1,
+              mb: 0.5,
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
               <AdminPanelSettings />
             </ListItemIcon>
-            <ListItemText primary="Quản trị" />
+            <ListItemText
+              primary="Quản trị"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
             {subMenus.menu3 ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
         </ListItem>
@@ -249,14 +328,15 @@ const Layout = () => {
                 to={item.path}
                 selected={currentPath.includes(item.path)}
                 sx={{
-                  pl: 4,
+                  pl: 6,
+                  borderRadius: 1,
+                  mb: 0.5,
                   "&.Mui-selected": {
                     bgcolor: "white",
                     color: "primary.main",
-                    "&:hover": {
-                      bgcolor: "white",
-                    },
+                    "&:hover": { bgcolor: "grey.200" },
                   },
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
                 }}
               >
                 <ListItemText primary={item.text} />
@@ -265,26 +345,52 @@ const Layout = () => {
           </List>
         </Collapse>
 
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon sx={{ color: "white" }}>
+        {/* <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/charts"
+            selected={currentPath === "/charts"}
+            sx={{
+              borderRadius: 1,
+              mb: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "primary.light",
+                color: "white",
+                "&:hover": { bgcolor: "primary.light" },
+              },
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
               <BarChart />
             </ListItemIcon>
-            <ListItemText primary="Biểu đồ" />
+            <ListItemText
+              primary="Biểu đồ"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
           </ListItemButton>
-        </ListItem>
+        </ListItem> */}
       </List>
+
+      {/* Footer (optional) */}
+      <Box sx={{ p: 2, textAlign: "center", bgcolor: "primary.dark" }}>
+        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+          © 2025 FPIC
+        </Typography>
+      </Box>
     </Box>
   );
 
   return (
     <Box sx={{ display: "flex" }}>
+      {/* AppBar cho mobile */}
       <AppBar
         position="fixed"
         sx={{
           display: { md: "none" },
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          bgcolor: "primary.main",
+          boxShadow: "none",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
         }}
       >
         <Toolbar>
@@ -293,38 +399,41 @@ const Layout = () => {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: "none" } }}
+            sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            FPIC
+          </Typography>
         </Toolbar>
       </AppBar>
 
+      {/* Drawer */}
       <Box
         component="nav"
         sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
       >
-        {/* Mobile drawer */}
+        {/* Drawer mobile */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", md: "none" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
               bgcolor: "primary.main",
+              borderRight: "none",
             },
           }}
         >
           {drawer}
         </Drawer>
 
-        {/* Desktop drawer */}
+        {/* Drawer desktop */}
         <Drawer
           variant="permanent"
           sx={{
@@ -333,6 +442,7 @@ const Layout = () => {
               boxSizing: "border-box",
               width: drawerWidth,
               bgcolor: "primary.main",
+              borderRight: "none",
             },
           }}
           open
@@ -341,16 +451,19 @@ const Layout = () => {
         </Drawer>
       </Box>
 
+      {/* Nội dung chính */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
           width: { md: `calc(100% - ${drawerWidth}px)` },
+          bgcolor: "grey.70",
+          minHeight: "100vh",
           mt: { xs: 7, md: 0 },
         }}
       >
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );
