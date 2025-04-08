@@ -1,14 +1,10 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const pdfSchema = new mongoose.Schema({
-  name: String,
-  filename: String,
-  path: String,
-  originalname: String,
-  size: Number,
-  mimetype: String,
-  url: String,
-  createdAt: { type: Date, default: Date.now },
-});
-
-const PDF = mongoose.model("PDF", pdfSchema, "sodokhoi");
+const SoDoKhoiSchema = new mongoose.Schema(
+  {
+    name: String,
+    filePath: String,
+  },
+  { timestamps: true, collection: "sodokhoi" }
+);
+module.exports = mongoose.model("SoDoKhoi", SoDoKhoiSchema);

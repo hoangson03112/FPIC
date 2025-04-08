@@ -6,6 +6,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const fs = require("fs");
 const db = require("./config/db");
 const Account = require("./models/Account");
+const SoDoKhoi = require("./models/SoDoKhoi");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
+app.use("/uploads", express.static("uploads"));
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
 app.get("/images", (req, res) => {
@@ -42,7 +44,6 @@ app.get("/images", (req, res) => {
     res.json(images);
   });
 });
-
 app.get("/images/count", (req, res) => {
   fs.readdir(IMAGES_DIR, (err, files) => {
     if (err) {
@@ -56,7 +57,6 @@ app.get("/images/count", (req, res) => {
     res.json({ count: imageCount });
   });
 });
-
 app.get("/images-microchip", (req, res) => {
   fs.readdir(IMAGES_MICROCHIP, (err, files) => {
     if (err) {
@@ -106,7 +106,6 @@ app.get("/images-jtag", (req, res) => {
     res.json(images);
   });
 });
-
 app.get("/images-test-pin", (req, res) => {
   fs.readdir(IMAGES_TESTPIN, (err, files) => {
     if (err) {
@@ -125,7 +124,6 @@ app.get("/images-test-pin", (req, res) => {
     res.json(images);
   });
 });
-
 app.get("/images-lpc", (req, res) => {
   fs.readdir(IMAGES_LPC, (err, files) => {
     if (err) {
@@ -144,7 +142,6 @@ app.get("/images-lpc", (req, res) => {
     res.json(images);
   });
 });
-
 app.post("/get-json-file", (req, res) => {
   const { fileName } = req.body;
   const image = fs.readFileSync(
@@ -181,7 +178,6 @@ app.post("/get-json-file", (req, res) => {
     });
   });
 });
-
 app.get("/get-classes", (req, res) => {
   const filePath = path.join(__dirname, "meta.json");
 
@@ -204,7 +200,6 @@ app.get("/get-classes", (req, res) => {
     });
   });
 });
-
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -251,7 +246,6 @@ app.post("/login", async (req, res) => {
       .json({ message: "Lỗi server", error: error.message });
   }
 });
-
 app.get("/authentication", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -274,7 +268,6 @@ app.get("/authentication", async (req, res) => {
     return res.status(401).json({ message: "Invalid token" });
   }
 });
-
 const verifyAdmin = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -333,7 +326,6 @@ app.post("/admin/create-account", verifyToken, async (req, res) => {
       password: hashedPassword,
     });
     console.log(newAccount);
-
     await newAccount.save();
     res
       .status(201)
@@ -443,6 +435,7 @@ app.get("/import-types", async (req, res) => {
 });
 const DIR_IMAGE = path.join(__dirname, "public/images/C");
 const AccessoryModel = require("./models/Accessory");
+const { default: upload } = require("./config/multer/multer");
 app.get("/import-accessories", async (req, res) => {
   try {
     const images = fs
@@ -450,8 +443,8 @@ app.get("/import-accessories", async (req, res) => {
       .filter(
         (image) =>
           image.endsWith(".png") ||
-          image.endsWith("jpg") ||
-          image.endsWith("jpeg")
+          image.endsWith(".jpg") ||
+          image.endsWith(".jpeg")
       );
 
     if (images.length === 0) return null;
@@ -478,4 +471,101 @@ app.get("/import-accessories", async (req, res) => {
     res.json({ message: `Luwu thất bại` });
   }
 });
+
+app.get("/fpic/sodokhoi", async (req, res) => {
+  try {
+    const list = await SoDoKhoi.find(); // Lấy toàn bộ dữ liệu
+    res.json(list);
+  } catch (error) {
+    console.error("Lỗi lấy danh sách:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/fpic/sodokhoi", upload.single("pdf"), async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    const newSoDoKhoi = new SoDoKhoi({
+      name: name,
+      filePath: req.file.path,
+    });
+
+    await newSoDoKhoi.save();
+    res.status(201).json(newSoDoKhoi);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error: error.message,
+      details: error.stack,
+    });
+  }
+});
+
+app.delete("/fpic/sodokhoi/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Kiểm tra xem sơ đồ khối có tồn tại không
+    const soDoKhoi = await SoDoKhoi.findById(id);
+    if (!soDoKhoi) {
+      return res.status(404).json({ error: "Sơ đồ khối không tồn tại!" });
+    }
+
+    // Xóa file PDF trên server
+    const filePath = path.join(process.cwd(), soDoKhoi.filePath); // Lấy đường dẫn đầy đủ của file
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath); // Xóa file nếu tồn tại
+    }
+
+    // Xóa dữ liệu trong database
+    await SoDoKhoi.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Xóa sơ đồ khối thành công!" });
+  } catch (error) {
+    console.error("Lỗi khi xóa sơ đồ khối:", error);
+    res.status(500).json({ error: "Lỗi server!", details: error.message });
+  }
+});
+
+app.put("/fpic/sodokhoi/:id", upload.single("pdf"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const file = req.file;
+
+    // Tìm tài liệu cũ
+    const existingFile = await SoDoKhoi.findById(id);
+    if (!existingFile) {
+      return res.status(404).json({ message: "Không tìm thấy tài liệu" });
+    }
+
+    // Xóa file cũ nếu có file mới
+    if (file && existingFile.filePath) {
+      const oldFilePath = path.join(
+        "uploads/",
+        existingFile.filePath.split("\\").pop().split("/").pop()
+      );
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+    }
+
+    // Cập nhật dữ liệu mới
+    const updatedSoDoKhoi = await SoDoKhoi.findByIdAndUpdate(
+      id,
+      {
+        name: name || existingFile.name, // Giữ nguyên tên nếu không cập nhật
+        filePath: file ? file.path : existingFile.filePath,
+      },
+      { new: true }
+    );
+
+    res.json(updatedSoDoKhoi);
+  } catch (error) {
+    console.error("Lỗi khi cập nhật sơ đồ khối:", error);
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+});
+
 app.listen(9999, () => console.log("Server is running on port 9999"));

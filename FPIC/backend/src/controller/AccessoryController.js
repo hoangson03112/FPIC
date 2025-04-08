@@ -1,6 +1,9 @@
+const path = require("path");
+const fs = require("fs");
 const Accessory = require("../models/Accessory");
 const AccessoryModel = require("../models/Accessory");
-
+const TypeModel = require("../models/TypeAccessory");
+const DIR_TYPE = path.join(__dirname, "../public/images");
 exports.getAccessories = async (req, res) => {
   try {
     let { page, limit, type } = req.query;
@@ -76,30 +79,51 @@ exports.getAccessory = async (req, res) => {
 exports.createAccessory = async (req, res) => {
   try {
     const accessory = req.body;
+
+    const type = await TypeModel.findById(accessory.type);
+    if (!type) {
+      return res.status(404).json({
+        status: 404,
+        message: "Type not found",
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         status: 400,
         message: "No file uploaded",
       });
     }
-    const imageBase64 = req.file.buffer;
+
+    const folderPath = path.join(DIR_TYPE, type.title);
+    const ext = path.extname(req.file.originalname);
+    const name = path.basename(req.file.originalname, ext);
+    const fileName = `${name}_${Date.now()}${ext}`;
+
+    const filePath = path.join(folderPath, fileName);
+    fs.writeFileSync(filePath, req.file.buffer);
+
+    const imageUrl = `/public/images/${type.title}/${fileName}`;
+    const imageBase64 = Buffer.from(imageUrl).toString("base64");
     const newAccessory = new Accessory({
       title: accessory.title,
       description: accessory.description,
       image: imageBase64,
       type: accessory.type,
     });
+
     await newAccessory.save();
 
     return res.status(201).json({
       status: 201,
-      message: "create new accessory successfully",
+      message: "Create new accessory successfully",
       data: newAccessory,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Server error:", error);
+    return res.status(500).json({
       status: 500,
-      message: `Server error: ${error}`,
+      message: `Server error: ${error.message}`,
     });
   }
 };
