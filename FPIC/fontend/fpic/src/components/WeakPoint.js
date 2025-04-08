@@ -111,7 +111,7 @@ const WeakPoint = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
+    // description: "",
     imageURL: "",
     category: "jtag",
   });
@@ -158,9 +158,8 @@ const WeakPoint = () => {
 
   // Filter items based on search term
   const filteredItems = (categories[activeTab] || []).filter(
-    (item) =>
-      item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    (item) => item.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    // ||item.description?.toLowerCase().includes(searchTerm.toLowerCase()
   );
 
   // Calculate pagination
@@ -176,7 +175,7 @@ const WeakPoint = () => {
     setModalMode("add");
     setFormData({
       name: "",
-      description: "",
+      // description: "",
       imageURL: "",
       category: activeTab,
     });
@@ -187,7 +186,7 @@ const WeakPoint = () => {
     setSelectedItem(item);
     setFormData({
       name: item.name || "",
-      description: item.description || "",
+      // description: item.description || "",
       category: activeTab,
     });
     setImagePreview(null); // Reset image preview
@@ -229,9 +228,9 @@ const WeakPoint = () => {
       if (modalMode === "add") {
         let form = new FormData();
         form.append("image", imageFile);
-        form.append("description", formData.description ?? "");
+        // form.append("description", formData.description ?? "");
         form.append("name", formData.name);
-        form.append("category", formData.category); // gửi theo body luôn
+        form.append("category", formData.category);
 
         const response = await axios.post(
           `${REACT_APP_URL_BE}/uploadWeakPoint`,
@@ -240,16 +239,16 @@ const WeakPoint = () => {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
+
         setCategories((prev) => ({
           ...prev,
           [formData.category]: [...prev[formData.category], response.data],
         }));
-        console.log(response);
       } else if (modalMode === "edit") {
         const updatedItem = {
           ...selectedItem,
           name: formData.name,
-          description: formData.description,
+          // description: formData.description,
           img: imageUrl || selectedItem.img,
           category: formData.category,
         };
@@ -261,7 +260,9 @@ const WeakPoint = () => {
           ),
         }));
       } else if (modalMode === "delete") {
-        // await axios.delete(`${apiEndpoint}/${selectedItem.id}`);
+        // await axios.delete(`${REACT_APP_URL_BE}/${selectedItem.id}`);
+        console.log(selectedItem);
+
         setCategories((prev) => ({
           ...prev,
           [activeTab]: prev[activeTab].filter(
@@ -426,100 +427,87 @@ const WeakPoint = () => {
               {/* Items Grid */}
               {displayedItems.length > 0 ? (
                 <Grid container spacing={3}>
-                  {displayedItems.map((item, index) => (
-                    <Grid
-                      item
-                      xs={12}
-                      sm={6}
-                      md={4}
-                      lg={3}
-                      key={item.id || index}
-                    >
-                      <CategoryCard>
-                        <Box sx={{ position: "relative" }}>
-                          <CardMedia
-                            component="img"
-                            height="180"
-                            image={`${REACT_APP_URL_BE}${item.img}`}
-                            alt={`${REACT_APP_URL_BE}${item.img}`}
-                            sx={{
-                              objectFit: "contain",
-                              p: 2,
-                              cursor: "pointer",
-                              bgcolor: "background.default",
-                            }}
-                            onClick={() => handleViewItem(item)}
-                          />
-                          <Chip
-                            label={categoryNames[activeTab]}
-                            size="small"
-                            color="primary"
-                            sx={{
-                              position: "absolute",
-                              top: 8,
-                              left: 8,
-                              fontWeight: 600,
-                            }}
-                          />
-                        </Box>
-                        <CardContent sx={{ flexGrow: 1 }}>
-                          <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{ fontWeight: 600 }}
-                          >
-                            {item.name || `Thành phần ${index + 1}`}
-                          </Typography>
-                          {item.description && (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
+                  {displayedItems.map((item, index) => {
+                    return (
+                      <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        key={item.id || index}
+                      >
+                        <CategoryCard>
+                          <Box sx={{ position: "relative" }}>
+                            <CardMedia
+                              component="img"
+                              height="180"
+                              image={`${REACT_APP_URL_BE}${item.img}`}
+                              alt={`${REACT_APP_URL_BE}${item.img}`}
                               sx={{
-                                lineHeight: 1.4,
-                                display: "-webkit-box",
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden",
+                                objectFit: "contain",
+                                p: 2,
+                                cursor: "pointer",
+                                bgcolor: "background.default",
                               }}
-                            >
-                              {item.description}
-                            </Typography>
-                          )}
-                        </CardContent>
-                        <Divider />
-                        <CardActions
-                          sx={{ justifyContent: "space-between", p: 1.5 }}
-                        >
-                          <Tooltip title="Xem chi tiết">
-                            <IconButton
-                              color="info"
                               onClick={() => handleViewItem(item)}
+                            />
+                            <Chip
+                              label={categoryNames[activeTab]}
+                              size="small"
+                              color="primary"
+                              sx={{
+                                position: "absolute",
+                                top: 8,
+                                left: 8,
+                                fontWeight: 600,
+                              }}
+                            />
+                          </Box>
+                          <CardContent sx={{ flexGrow: 1 }}>
+                            <Typography
+                              variant="h6"
+                              gutterBottom
+                              sx={{ fontWeight: 600 }}
                             >
-                              <Visibility />
-                            </IconButton>
-                          </Tooltip>
-                          <Stack direction="row" spacing={1}>
-                            <Tooltip title="Sửa">
+                              {item.name || `Thành phần ${index + 1}`}
+                            </Typography>
+                          </CardContent>
+                          <Divider />
+                          <CardActions
+                            sx={{ justifyContent: "space-between", p: 1.5 }}
+                          >
+                            <Tooltip title="Xem chi tiết">
                               <IconButton
-                                color="secondary"
-                                onClick={() => handleEditItem(item)}
+                                color="info"
+                                onClick={() => handleViewItem(item)}
                               >
-                                <Edit />
+                                <Visibility />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="Xóa">
-                              <IconButton
-                                color="error"
-                                onClick={() => handleDeleteItem(item)}
-                              >
-                                <Delete />
-                              </IconButton>
-                            </Tooltip>
-                          </Stack>
-                        </CardActions>
-                      </CategoryCard>
-                    </Grid>
-                  ))}
+                            <Stack direction="row" spacing={1}>
+                              <Tooltip title="Sửa">
+                                <IconButton
+                                  color="secondary"
+                                  onClick={() => handleEditItem(item)}
+                                >
+                                  <Edit />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Xóa">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => handleDeleteItem(item)}
+                                >
+                                  <Delete />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
+                          </CardActions>
+                        </CategoryCard>
+                      </Grid>
+                    );
+                  })}
                 </Grid>
               ) : (
                 <Box
@@ -648,12 +636,11 @@ const WeakPoint = () => {
               <Box sx={{ textAlign: "center", py: 2 }}>
                 <Warning color="error" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                  Xác nhận xóa thành phần?
+                  Xác nhận xóa điểm yếu?
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 3 }}>
-                  Bạn đang xóa thành phần{" "}
-                  <strong>"{selectedItem?.name}"</strong>. Hành động này không
-                  thể hoàn tác.
+                  Bạn đang xóa điểm yếu <strong>"{selectedItem?.name}"</strong>.
+                  Hành động này không thể hoàn tác.
                 </Typography>
               </Box>
             ) : modalMode === "view" ? (
@@ -755,7 +742,11 @@ const WeakPoint = () => {
                           }}
                         >
                           <img
-                            src={imagePreview || selectedItem?.img}
+                            src={
+                              imagePreview ||
+                              `${REACT_APP_URL_BE}${selectedItem.img}`
+                            }
+                            // src={imagePreview || selectedItem?.img}
                             alt="Preview"
                             style={{
                               maxWidth: "100%",
@@ -770,19 +761,6 @@ const WeakPoint = () => {
                       </Box>
                     )}
                   </Box>
-
-                  <TextField
-                    fullWidth
-                    label="Mô tả"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    multiline
-                    rows={4}
-                    variant="outlined"
-                    size="small"
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-                  />
                 </Stack>
               </form>
             )}

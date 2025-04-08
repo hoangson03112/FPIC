@@ -7,8 +7,8 @@ const IMAGES_FOOTPRINT = path.join(__dirname, "../../footprint");
 
 const IMAGES_UNUSEDPORT = path.join(__dirname, "../../unused_port");
 const IMAGES_VIAS = path.join(__dirname, "../../vias");
-const IMAGES_SMB = path.join(__dirname, "../../smb");
-const IMAGES_SPI = path.join(__dirname, "../../spi");
+const IMAGES_SMB = path.join(__dirname, "../../SMB");
+const IMAGES_SPI = path.join(__dirname, "../../SPI");
 
 exports.getJTAG = async (req, res) => {
   fs.readdir(IMAGES_JTAG, (err, files) => {
@@ -23,7 +23,7 @@ exports.getJTAG = async (req, res) => {
         /\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff|tif|jfif|heic|ico)$/i.test(file)
       )
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/jtag/${file}`,
       }));
 
@@ -41,7 +41,7 @@ exports.getTestPin = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/testpin/${file}`,
       }));
 
@@ -59,7 +59,7 @@ exports.getLPC = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/LPC/${file}`,
       }));
 
@@ -77,7 +77,7 @@ exports.getFootPrint = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/footprint/${file}`,
       }));
 
@@ -95,7 +95,7 @@ exports.getUnusedPort = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/unused_port/${file}`,
       }));
 
@@ -113,7 +113,7 @@ exports.getVias = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/vias/${file}`,
       }));
 
@@ -131,7 +131,7 @@ exports.getSPI = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/spi/${file}`,
       }));
 
@@ -149,7 +149,7 @@ exports.getSMB = async (req, res) => {
     const images = files
       .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
       .map((file) => ({
-        name: file,
+        name: file.replace(/\.[^/.]+$/, ""),
         img: `/smb/${file}`,
       }));
 
@@ -185,8 +185,7 @@ exports.postWeakPoint = async (req, res) => {
 
     res.json({
       message: "Upload thành công",
-      fileName: finalName,
-      filePath,
+      img: "/" + category + "/" + finalName,
       name,
       description,
       category,

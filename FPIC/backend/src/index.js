@@ -36,7 +36,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
+
 app.use("/jtag", express.static("jtag"));
+app.use("/testpin", express.static("testpin"));
+app.use("/lpc", express.static("lpc"));
+app.use("/microchip", express.static("microchip"));
+app.use("/footprint", express.static("footprint"));
+app.use("/unused_port", express.static("unused_port"));
+app.use("/vias", express.static("vias"));
+app.use("/spi", express.static("SPI"));
+app.use("/smb", express.static("SMB"));
 
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
