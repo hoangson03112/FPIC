@@ -156,7 +156,7 @@ const renderCustomizedLabel = ({
 };
 
 const AdminDashboard = () => {
-  const [countUser, setCountUser] = useState(150);
+  const [countUser, setCountUser] = useState(10);
   const [countImages, setCountImages] = useState(643);
   const [countMicrochip, setCountMicrochip] = useState(89);
   const [countWeakPoints, setCountWeakPoints] = useState(35);

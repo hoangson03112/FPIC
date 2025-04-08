@@ -1,345 +1,898 @@
 import React, { useEffect, useState } from "react";
-import WeakPointItem from "./WeakPointItem";
 import axios from "axios";
-import "./WeakPoint.css";
+import {
+  Container,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+  Typography,
+  Grid,
+  Tabs,
+  Tab,
+  Button,
+  Modal,
+  Box,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Pagination,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableContainer,
+  Paper,
+  Stack,
+  Chip,
+  Avatar,
+  Tooltip,
+  IconButton,
+  Divider,
+} from "@mui/material";
+import {
+  Add,
+  Visibility,
+  Edit,
+  Delete,
+  Warning,
+  Search,
+  Close,
+  CloudUpload,
+  Category,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
 
-const itemsPerPage = 6;
+// Custom styled components
+const GradientHeader = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3),
+  background: "linear-gradient(135deg, #1976d2 0%, #0d47a1 100%)",
+  color: "white",
+  textAlign: "center",
+  boxShadow: theme.shadows[2],
+  marginBottom: theme.spacing(3),
+}));
+
+const CategoryCard = styled(Card)(({ theme }) => ({
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  transition: "0.3s",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: theme.shadows[8],
+  },
+}));
+
+const StyledTabs = styled(Tabs)({
+  "& .MuiTabs-indicator": {
+    height: 4,
+    borderRadius: "2px 2px 0 0",
+  },
+});
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  textTransform: "none",
+  fontWeight: theme.typography.fontWeightMedium,
+  fontSize: theme.typography.pxToRem(15),
+  marginRight: theme.spacing(1),
+  "&.Mui-selected": {
+    color: theme.palette.primary.main,
+  },
+}));
+
 const WeakPoint = () => {
-  const [imagesJtag, setImagesJtag] = useState([]);
-  const [imagesTestPin, setImagesTestPin] = useState([]);
-  const [imagesLPC, setImagesLPC] = useState([]);
+  // State declarations (keep the same)
+  const [categories, setCategories] = useState({
+    jtag: [],
+    testPin: [],
+    lpc: [],
+    footprint: [],
+    unusedPort: [],
+    vias: [],
+    spi: [],
+    smb: [],
+  });
+  const [activeTab, setActiveTab] = useState("jtag");
   const [currentPage, setCurrentPage] = useState(1);
-  const [imagesFootprint, setImagesFootprint] = useState([
-    {
-      name: "Unknown_0.png",
-      img: "/footprint/Unknown_0.png",
-    },
-    {
-      name: "Unknown_1.png",
-      img: "/footprint/Unknown_1.png",
-    },
-    {
-      name: "Unknown_2.png",
-      img: "/footprint/Unknown_2.png",
-    },
-    {
-      name: "Unknown_3.png",
-      img: "/footprint/Unknown_3.png",
-    },
-    {
-      name: "Unknown_4.png",
-      img: "/footprint/Unknown_4.png",
-    },
-    {
-      name: "Unknown_5.png",
-      img: "/footprint/Unknown_5.png",
-    },
-    {
-      name: "Unknown_6.png",
-      img: "/footprint/Unknown_6.png",
-    },
-  ]);
-  const [imagesUnusedPort, setImagesUnusedPort] = useState([
-    {
-      name: "image.png",
-      img: "/unused_port/image.png",
-    },
-    {
-      name: "image copy.png",
-      img: "/unused_port/image copy.png",
-    },
-    {
-      name: "image copy 4.png",
-      img: "/unused_port/image copy 4.png",
-    },
-    {
-      name: "image copy 3.png",
-      img: "/unused_port/image copy 3.png",
-    },
-    {
-      name: "image copy 2.png",
-      img: "/unused_port/image copy 2.png",
-    },
-  ]);
-  const [imagesVias, setImagesVias] = useState([
-    {
-      name: "Unknown_0.png",
-      img: "/vias/Unknown_0.png",
-    },
-    {
-      name: "Unknown_1.png",
-      img: "/vias/Unknown_1.png",
-    },
-    {
-      name: "Unknown_2.png",
-      img: "/vias/Unknown_2.png",
-    },
-    {
-      name: "Unknown_3.png",
-      img: "/vias/Unknown_3.png",
-    },
-    {
-      name: "Unknown_4.png",
-      img: "/vias/Unknown_4.png",
-    },
-    {
-      name: "Unknown_5.png",
-      img: "/vias/Unknown_5.png",
-    },
-    {
-      name: "Unknown_6.png",
-      img: "/vias/Unknown_6.png",
-    },
-  ]);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("add");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    imageURL: "",
+    category: "jtag",
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch data (keep the same)
   useEffect(() => {
-    axios
-      .get("http://localhost:9999/images-jtag")
-      .then((response) => {
-        setImagesJtag(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching images:", error);
-      });
+    setIsLoading(true);
+    const endpoints = [
+      { key: "jtag", url: "http://localhost:9999/images-jtag" },
+      { key: "testPin", url: "http://localhost:9999/images-test-pin" },
+      { key: "lpc", url: "http://localhost:9999/images-lpc" },
+      { key: "footprint", url: "http://localhost:9999/images-footprint" },
+      { key: "unusedPort", url: "http://localhost:9999/images-unused-port" },
+      { key: "vias", url: "http://localhost:9999/images-vias" },
+      { key: "spi", url: "http://localhost:9999/images-spi" },
+      { key: "smb", url: "http://localhost:9999/images-smb" },
+    ];
 
-    axios
-      .get("http://localhost:9999/images-test-pin")
-      .then((response) => {
-        setImagesTestPin(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching images:", error);
-      });
+    const fetchAllData = async () => {
+      try {
+        const newCategories = { ...categories };
+        for (const endpoint of endpoints) {
+          try {
+            const response = await axios.get(endpoint.url);
+            newCategories[endpoint.key] = response.data.map((item) => ({
+              ...item,
+              id: item.id || Math.random().toString(36).substr(2, 9),
+            }));
+          } catch (err) {
+            console.error(`Error fetching ${endpoint.key} data:`, err);
+          }
+        }
+        setCategories(newCategories);
+        setIsLoading(false);
+      } catch (err) {
+        setError("Không thể tải dữ liệu. Vui lòng thử lại.");
+        setIsLoading(false);
+      }
+    };
 
-    axios
-      .get("http://localhost:9999/images-lpc")
-      .then((response) => {
-        setImagesLPC(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching images:", error);
-      });
+    fetchAllData();
   }, []);
-  const totalPages = Math.ceil(imagesTestPin.length / itemsPerPage);
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
+  // Filter items based on search term
+  const filteredItems = (categories[activeTab] || []).filter(
+    (item) =>
+      item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  console.log(imagesJtag);
+  const displayedItems = filteredItems.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // CRUD handlers (keep the same)
+  const handleAddItem = () => {
+    setModalMode("add");
+    setFormData({
+      name: "",
+      description: "",
+      imageURL: "",
+      category: activeTab,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleEditItem = (item) => {
+    setSelectedItem(item);
+    setFormData({
+      name: item.name || "",
+      description: item.description || "",
+      category: activeTab,
+    });
+    setImagePreview(null); // Reset image preview
+    setImageFile(null); // Reset image file
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleViewItem = (item) => {
+    setSelectedItem(item);
+    setModalMode("view");
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteItem = (item) => {
+    setSelectedItem(item);
+    setModalMode("delete");
+    setIsModalOpen(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const apiEndpoint = `http://localhost:9999/images-${formData.category
+      .toLowerCase()
+      .replace("_", "-")}`;
+
+    try {
+      let imageUrl = selectedItem?.img || ""; // Giữ URL ảnh cũ nếu có
+
+      // Nếu có ảnh mới được tải lên
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile); // 'image' là tên field mà server expect
+
+        try {
+          // Gọi API upload ảnh
+          const uploadResponse = await axios.post(
+            "http://localhost:9999/upload",
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+
+          imageUrl = uploadResponse.data.url; // Giả sử server trả về { url: '...' }
+        } catch (uploadError) {
+          console.error("Upload ảnh thất bại:", uploadError);
+          setError("Upload ảnh thất bại. Vui lòng thử lại.");
+          return;
+        }
+      }
+
+      if (modalMode === "add") {
+        const newItem = {
+          id: Math.random().toString(36).substr(2, 9),
+          name: formData.name,
+          description: formData.description,
+          img: imageUrl || "/placeholder-image.jpg", // Sử dụng ảnh mới hoặc ảnh mặc định
+          category: formData.category,
+        };
+        await axios.post(apiEndpoint, newItem);
+        setCategories((prev) => ({
+          ...prev,
+          [formData.category]: [...prev[formData.category], newItem],
+        }));
+      } else if (modalMode === "edit") {
+        const updatedItem = {
+          ...selectedItem,
+          name: formData.name,
+          description: formData.description,
+          img: imageUrl || selectedItem.img, // Giữ ảnh cũ nếu không có ảnh mới
+          category: formData.category,
+        };
+        await axios.put(`${apiEndpoint}/${selectedItem.id}`, updatedItem);
+        setCategories((prev) => ({
+          ...prev,
+          [formData.category]: prev[formData.category].map((item) =>
+            item.id === selectedItem.id ? updatedItem : item
+          ),
+        }));
+      } else if (modalMode === "delete") {
+        await axios.delete(`${apiEndpoint}/${selectedItem.id}`);
+        setCategories((prev) => ({
+          ...prev,
+          [activeTab]: prev[activeTab].filter(
+            (item) => item.id !== selectedItem.id
+          ),
+        }));
+      }
+
+      setIsModalOpen(false);
+      setSelectedItem(null);
+      setImageFile(null);
+      setImagePreview(null);
+    } catch (err) {
+      console.error("Operation failed:", err);
+      setError("Thao tác thất bại. Vui lòng thử lại.");
+    }
+  };
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setCurrentPage(1);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Category display names
+  const categoryNames = {
+    jtag: "JTAG",
+    testPin: "Test Pin",
+    lpc: "LPC",
+    footprint: "Footprint",
+    unusedPort: "Unused Port",
+    vias: "Vias",
+    spi: "SPI",
+    smb: "SMB",
+  };
 
   return (
-    <div className="container mt-4">
-      <nav>
-        <div class="nav nav-tabs" id="nav-tab" role="tablist">
-          <button
-            class="nav-link active p-3 fs-4 m-0"
-            id="nav-home-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-home"
-            type="button"
-            role="tab"
-            aria-controls="nav-home"
-            aria-selected="true"
-          >
-            JTAG
-          </button>
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-profile-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-profile"
-            type="button"
-            role="tab"
-            aria-controls="nav-profile"
-            aria-selected="false"
-          >
-            TestPin
-          </button>
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-contact-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-contact"
-            type="button"
-            role="tab"
-            aria-controls="nav-contact"
-            aria-selected="false"
-          >
-            LPC
-          </button>
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-contact-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-footprint"
-            type="button"
-            role="tab"
-            aria-controls="nav-footprint"
-            aria-selected="false"
-          >
-            Footprint
-          </button>{" "}
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-contact-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-vias"
-            type="button"
-            role="tab"
-            aria-controls="nav-vias"
-            aria-selected="false"
-          >
-            Vias
-          </button>{" "}
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-contact-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-unused"
-            type="button"
-            role="tab"
-            aria-controls="nav-unused"
-            aria-selected="false"
-          >
-            Unused ports
-          </button>{" "}
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-contact-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-spi"
-            type="button"
-            role="tab"
-            aria-controls="nav-spi"
-            aria-selected="false"
-          >
-            SPI
-          </button>{" "}
-          <button
-            class="nav-link p-3 fs-4 m-0"
-            id="nav-contact-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#nav-smb"
-            type="button"
-            role="tab"
-            aria-controls="nav-smb"
-            aria-selected="false"
-          >
-            SMB
-          </button>
-        </div>
-      </nav>
-      <div className="tab-content mt-4" id="nav-tabContent">
-        <div
-          class="tab-pane fade show active"
-          id="nav-home"
-          role="tabpanel"
-          aria-labelledby="nav-home-tab"
-          tabindex="0"
+    <Container maxWidth="xl" sx={{ py: 2 }}>
+      {/* Header with gradient */}
+      <GradientHeader>
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          sx={{ fontWeight: 600 }}
         >
-          <div className="row">
-            {imagesJtag.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
+          Điểm Yếu Trên Bo Mạch
+        </Typography>
+      </GradientHeader>
+
+      {/* Main Content */}
+      <Paper elevation={2} sx={{ borderRadius: 3, overflow: "hidden", mb: 4 }}>
+        {/* Tabs with improved styling */}
+        <Box sx={{ bgcolor: "background.paper" }}>
+          <StyledTabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{ px: 2 }}
+          >
+            {Object.keys(categories).map((category) => (
+              <StyledTab
+                key={category}
+                label={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Category fontSize="small" />
+                    <span>{categoryNames[category]}</span>
+                    <Chip
+                      label={categories[category].length}
+                      size="small"
+                      color="primary"
+                      sx={{ borderRadius: 1 }}
+                    />
+                  </Stack>
+                }
+                value={category}
+              />
             ))}
-          </div>
-        </div>
-        <div
-          class="tab-pane fade"
-          id="nav-profile"
-          role="tabpanel"
-          aria-labelledby="nav-profile-tab"
-          tabindex="0"
+          </StyledTabs>
+        </Box>
+
+        {/* Content Area */}
+        <Box sx={{ p: 3 }}>
+          {/* Action Bar with Search and Add */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+            sx={{ mb: 3 }}
+          >
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              <Box component="span" color="primary.main">
+                {categoryNames[activeTab]}
+              </Box>
+              <Box component="span" sx={{ ml: 1, color: "text.secondary" }}>
+                ({filteredItems.length} items)
+              </Box>
+            </Typography>
+
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
+            >
+              <TextField
+                size="small"
+                placeholder="Tìm kiếm..."
+                InputProps={{
+                  startAdornment: <Search color="action" sx={{ mr: 1 }} />,
+                  endAdornment: searchTerm && (
+                    <IconButton size="small" onClick={() => setSearchTerm("")}>
+                      <Close fontSize="small" />
+                    </IconButton>
+                  ),
+                }}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                sx={{
+                  width: { xs: "100%", sm: 300 },
+                  "& .MuiOutlinedInput-root": { borderRadius: 2 },
+                }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Add />}
+                onClick={handleAddItem}
+                sx={{ borderRadius: 2 }}
+              >
+                Thêm Mới
+              </Button>
+            </Stack>
+          </Stack>
+
+          {/* Error Alert */}
+          {error && (
+            <Alert
+              severity="error"
+              onClose={() => setError(null)}
+              sx={{ mb: 3, borderRadius: 2 }}
+            >
+              {error}
+            </Alert>
+          )}
+
+          {/* Loading State */}
+          {isLoading ? (
+            <Box sx={{ textAlign: "center", py: 5 }}>
+              <CircularProgress color="primary" size={60} thickness={4} />
+              <Typography variant="body1" sx={{ mt: 2 }}>
+                Đang tải dữ liệu...
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              {/* Items Grid */}
+              {displayedItems.length > 0 ? (
+                <Grid container spacing={3}>
+                  {displayedItems.map((item, index) => (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      lg={3}
+                      key={item.id || index}
+                    >
+                      <CategoryCard>
+                        <Box sx={{ position: "relative" }}>
+                          <CardMedia
+                            component="img"
+                            height="180"
+                            image={item.img || "/placeholder-image.jpg"}
+                            alt={item.name || `Thành phần ${index + 1}`}
+                            sx={{
+                              objectFit: "contain",
+                              p: 2,
+                              cursor: "pointer",
+                              bgcolor: "background.default",
+                            }}
+                            onClick={() => handleViewItem(item)}
+                          />
+                          <Chip
+                            label={categoryNames[activeTab]}
+                            size="small"
+                            color="primary"
+                            sx={{
+                              position: "absolute",
+                              top: 8,
+                              left: 8,
+                              fontWeight: 600,
+                            }}
+                          />
+                        </Box>
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Typography
+                            variant="h6"
+                            gutterBottom
+                            sx={{ fontWeight: 600 }}
+                          >
+                            {item.name || `Thành phần ${index + 1}`}
+                          </Typography>
+                          {item.description && (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
+                                lineHeight: 1.4,
+                                display: "-webkit-box",
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {item.description}
+                            </Typography>
+                          )}
+                        </CardContent>
+                        <Divider />
+                        <CardActions
+                          sx={{ justifyContent: "space-between", p: 1.5 }}
+                        >
+                          <Tooltip title="Xem chi tiết">
+                            <IconButton
+                              color="info"
+                              onClick={() => handleViewItem(item)}
+                            >
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
+                          <Stack direction="row" spacing={1}>
+                            <Tooltip title="Sửa">
+                              <IconButton
+                                color="secondary"
+                                onClick={() => handleEditItem(item)}
+                              >
+                                <Edit />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Xóa">
+                              <IconButton
+                                color="error"
+                                onClick={() => handleDeleteItem(item)}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
+                          </Stack>
+                        </CardActions>
+                      </CategoryCard>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    py: 8,
+                    border: "1px dashed",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Search
+                    sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    {searchTerm
+                      ? "Không tìm thấy kết quả"
+                      : "Không có thành phần nào"}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{ mb: 3 }}
+                  >
+                    {searchTerm
+                      ? "Hãy thử với từ khóa khác hoặc xóa bộ lọc tìm kiếm"
+                      : "Bạn có muốn thêm thành phần đầu tiên cho danh mục này không?"}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Add />}
+                    onClick={handleAddItem}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Thêm thành phần
+                  </Button>
+                </Box>
+              )}
+
+              {/* Pagination */}
+              {filteredItems.length > 0 && (
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  justifyContent="space-between"
+                  alignItems="center"
+                  spacing={2}
+                  sx={{ mt: 4 }}
+                >
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Số mục/trang</InputLabel>
+                    <Select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      <MenuItem value={8}>8</MenuItem>
+                      <MenuItem value={16}>16</MenuItem>
+                      <MenuItem value={24}>24</MenuItem>
+                      <MenuItem value={48}>48</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Typography variant="body2" color="text.secondary">
+                    Hiển thị {startIndex + 1}-
+                    {Math.min(startIndex + itemsPerPage, filteredItems.length)}{" "}
+                    / {filteredItems.length} mục
+                  </Typography>
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={(e, page) => setCurrentPage(page)}
+                    color="primary"
+                    shape="rounded"
+                    showFirstButton
+                    showLastButton
+                    sx={{ "& .MuiPaginationItem-root": { borderRadius: 1 } }}
+                  />
+                </Stack>
+              )}
+            </>
+          )}
+        </Box>
+      </Paper>
+
+      {/* Modal */}
+      <Modal
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setImagePreview(null);
+          setImageFile(null);
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "95%", sm: 500, md: 600 },
+            bgcolor: "background.paper",
+            borderRadius: 3,
+            boxShadow: 24,
+            outline: "none",
+            maxHeight: "90vh",
+            overflowY: "auto",
+          }}
         >
-          <div className="row">
-            {imagesTestPin.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>
-        <div
-          class="tab-pane fade"
-          id="nav-contact"
-          role="tabpanel"
-          aria-labelledby="nav-contact-tab"
-          tabindex="0"
-        >
-          <div className="row">
-            {imagesLPC.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>
-        <div
-          class="tab-pane fade"
-          id="nav-footprint"
-          role="tabpanel"
-          aria-labelledby="nav-contact-tab"
-          tabindex="0"
-        >
-          <div className="row">
-            {imagesFootprint.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>
-        <div
-          class="tab-pane fade"
-          id="nav-vias"
-          role="tabpanel"
-          aria-labelledby="nav-contact-tab"
-          tabindex="0"
-        >
-          <div className="row">
-            {imagesVias.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>{" "}
-        <div
-          class="tab-pane fade"
-          id="nav-unused"
-          role="tabpanel"
-          aria-labelledby="nav-contact-tab"
-          tabindex="0"
-        >
-          <div className="row">
-            {imagesUnusedPort.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>{" "}
-        <div
-          class="tab-pane fade"
-          id="nav-spi"
-          role="tabpanel"
-          aria-labelledby="nav-contact-tab"
-          tabindex="0"
-        >
-          <div className="row">
-            {imagesLPC.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>{" "}
-        <div
-          class="tab-pane fade"
-          id="nav-smb"
-          role="tabpanel"
-          aria-labelledby="nav-contact-tab"
-          tabindex="0"
-        >
-          <div className="row">
-            {imagesTestPin.map((chip, index) => (
-              <WeakPointItem key={index} imageURL={chip.img} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+          <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider" }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              {modalMode === "add"
+                ? "Thêm Thành Phần Mới"
+                : modalMode === "edit"
+                ? "Chỉnh Sửa Thành Phần"
+                : modalMode === "delete"
+                ? "Xác Nhận Xóa"
+                : "Chi Tiết Thành Phần"}
+            </Typography>
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            {modalMode === "delete" ? (
+              <Box sx={{ textAlign: "center", py: 2 }}>
+                <Warning color="error" sx={{ fontSize: 60, mb: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  Xác nhận xóa thành phần?
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 3 }}>
+                  Bạn đang xóa thành phần{" "}
+                  <strong>"{selectedItem?.name}"</strong>. Hành động này không
+                  thể hoàn tác.
+                </Typography>
+              </Box>
+            ) : modalMode === "view" ? (
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mb: 3,
+                    bgcolor: "background.default",
+                    borderRadius: 2,
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={selectedItem?.img || "/placeholder-image.jpg"}
+                    alt={selectedItem?.name}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: 300,
+                      objectFit: "contain",
+                    }}
+                  />
+                </Box>
+                <TableContainer component={Paper} variant="outlined">
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                          Tên
+                        </TableCell>
+                        <TableCell>
+                          {selectedItem?.name || "Không có tên"}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Danh mục
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={categoryNames[activeTab]}
+                            color="primary"
+                            size="small"
+                            avatar={<Category fontSize="small" />}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "bold" }}>Mô tả</TableCell>
+                        <TableCell>
+                          {selectedItem?.description || "Không có mô tả"}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <Stack spacing={3}>
+                  <TextField
+                    fullWidth
+                    label="Tên thành phần"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    size="small"
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  />
+                  {/* 
+                  <FormControl
+                    fullWidth
+                    size="small"
+                    sx={{
+                      "& .MuiInputLabel-root": {
+                        backgroundColor: "background.paper",
+                        px: 1,
+                        transform: formData.category
+                          ? "translate(14px, -9px) scale(0.75)"
+                          : "",
+                      },
+                      "& .MuiOutlinedInput-root": { borderRadius: 2 },
+                    }}
+                  >
+                    <InputLabel shrink={!!formData.category}>
+                      Danh mục
+                    </InputLabel>
+                    <Select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      required
+                      label="Danh mục"
+                    >
+                      {Object.keys(categories).map((category) => (
+                        <MenuItem key={category} value={category}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
+                          >
+                            <Category fontSize="small" />
+                            <span>{categoryNames[category]}</span>
+                          </Stack>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl> */}
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      fullWidth
+                      startIcon={<CloudUpload />}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Tải lên hình ảnh
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </Button>
+                    {(imagePreview ||
+                      (modalMode === "edit" &&
+                        selectedItem?.img &&
+                        !imagePreview)) && (
+                      <Box sx={{ mt: 2, textAlign: "center" }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Xem trước:
+                        </Typography>
+                        <Box
+                          sx={{
+                            mt: 1,
+                            p: 1,
+                            border: "1px dashed",
+                            borderColor: "divider",
+                            borderRadius: 1,
+                          }}
+                        >
+                          <img
+                            src={imagePreview || selectedItem?.img}
+                            alt="Preview"
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: 150,
+                              objectFit: "contain",
+                            }}
+                            onError={(e) => {
+                              e.target.src = "/placeholder-image.jpg";
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <TextField
+                    fullWidth
+                    label="Mô tả"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    multiline
+                    rows={4}
+                    variant="outlined"
+                    size="small"
+                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  />
+                </Stack>
+              </form>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              p: 2,
+              borderTop: 1,
+              borderColor: "divider",
+              textAlign: "right",
+            }}
+          >
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                onClick={() => setIsModalOpen(false)}
+                sx={{ borderRadius: 2 }}
+              >
+                {modalMode === "view" ? "Đóng" : "Hủy"}
+              </Button>
+              {modalMode !== "view" && (
+                <Button
+                  variant="contained"
+                  color={modalMode === "delete" ? "error" : "primary"}
+                  onClick={handleSubmit}
+                  startIcon={
+                    modalMode === "delete" ? <Delete /> : <CloudUpload />
+                  }
+                  sx={{ borderRadius: 2 }}
+                >
+                  {modalMode === "add"
+                    ? "Thêm"
+                    : modalMode === "edit"
+                    ? "Lưu"
+                    : "Xóa"}
+                </Button>
+              )}
+            </Stack>
+          </Box>
+        </Box>
+      </Modal>
+    </Container>
   );
 };
 

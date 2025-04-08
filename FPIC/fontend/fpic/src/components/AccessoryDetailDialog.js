@@ -47,10 +47,8 @@ export const AccessoryDetailDialog = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  // Xử lý cập nhật thông tin
   const handleUpdateAccessory = async () => {
     if (!isEditing) {
-      // Nếu chưa chỉnh sửa, chuyển sang chế độ edit
       setIsEditing(true);
       return;
     }
