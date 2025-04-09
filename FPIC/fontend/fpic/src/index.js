@@ -10,7 +10,7 @@ import Login from "./components/Login";
 import ManageAccount from "./components/ManageAccount";
 import Layout from "./Layout";
 import AdminHomePage from "./components/AdminHomePage";
-import MicrochipList from "./components/Microchip";
+import MicrochipList from "./components/MicrochipList";
 import WeakPoint from "./components/WeakPoint";
 import BlockDiagram from "./components/BlockDiagram";
 import MainBoard from "./components/MainBoard";

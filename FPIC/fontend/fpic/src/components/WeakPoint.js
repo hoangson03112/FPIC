@@ -107,6 +107,7 @@ const WeakPoint = () => {
   const [modalMode, setModalMode] = useState("add");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [nameError, setNameError] = useState(""); // Thêm state để lưu lỗi tên
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
@@ -179,6 +180,7 @@ const WeakPoint = () => {
       imageURL: "",
       category: activeTab,
     });
+    setNameError(""); // Reset name error when opening modal
     setIsModalOpen(true);
   };
 
@@ -189,6 +191,7 @@ const WeakPoint = () => {
       // description: item.description || "",
       category: activeTab,
     });
+    setNameError(""); // Reset name error when opening modal
     setImagePreview(null); // Reset image preview
     setImageFile(null); // Reset image file
     setModalMode("edit");
@@ -219,17 +222,47 @@ const WeakPoint = () => {
     }
   };
 
+  // Hàm kiểm tra tên đã tồn tại chưa
+  const checkNameExists = (name, category, currentItemId = null) => {
+    return categories[category].some(
+      (item) =>
+        item.name?.toLowerCase() === name.toLowerCase() &&
+        (currentItemId === null || item.id !== currentItemId)
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Xóa khoảng trắng ở đầu và cuối tên
+    const trimmedName = formData.name.trim();
+
+    // Kiểm tra tên trống
+    if (trimmedName === "") {
+      setNameError("Tên không được để trống");
+      return;
+    }
+
+    // Kiểm tra tên đã tồn tại chưa
+    const currentItemId = modalMode === "edit" ? selectedItem.id : null;
+    if (checkNameExists(trimmedName, formData.category, currentItemId)) {
+      setNameError("Tên này đã tồn tại trong danh mục, vui lòng chọn tên khác");
+      return;
+    }
 
     try {
       let imageUrl = selectedItem?.img || "";
 
       if (modalMode === "add") {
+        // Kiểm tra xem đã chọn hình ảnh chưa
+        if (!imageFile) {
+          setError("Vui lòng chọn hình ảnh cho thành phần mới");
+          return;
+        }
+
         let form = new FormData();
         form.append("image", imageFile);
-        // form.append("description", formData.description ?? "");
-        form.append("name", formData.name);
+        form.append("name", trimmedName); // Sử dụng tên đã trim
         form.append("category", formData.category);
 
         const response = await axios.post(
@@ -247,7 +280,7 @@ const WeakPoint = () => {
       } else if (modalMode === "edit") {
         const updatedItem = {
           ...selectedItem,
-          name: formData.name,
+          name: trimmedName, // Sử dụng tên đã trim
           // description: formData.description,
           img: imageUrl || selectedItem.img,
           category: formData.category,
@@ -260,13 +293,17 @@ const WeakPoint = () => {
           ),
         }));
       } else if (modalMode === "delete") {
-        // await axios.delete(`${REACT_APP_URL_BE}/${selectedItem.id}`);
-        console.log(selectedItem);
+        await axios.delete(`${REACT_APP_URL_BE}/deleteWeakPoint`, {
+          data: {
+            category: activeTab,
+            img: selectedItem.img,
+          },
+        });
 
         setCategories((prev) => ({
           ...prev,
           [activeTab]: prev[activeTab].filter(
-            (item) => item.id !== selectedItem.id
+            (item) => item.img !== selectedItem.img
           ),
         }));
       }
@@ -275,11 +312,13 @@ const WeakPoint = () => {
       setSelectedItem(null);
       setImageFile(null);
       setImagePreview(null);
+      setNameError(""); // Reset name error
     } catch (err) {
       console.error("Operation failed:", err);
       setError("Thao tác thất bại. Vui lòng thử lại.");
     }
   };
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setCurrentPage(1);
@@ -288,6 +327,25 @@ const WeakPoint = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Kiểm tra lỗi tên khi người dùng nhập
+    if (name === "name") {
+      if (value.trim() === "") {
+        setNameError("Tên không được để trống");
+      } else if (
+        checkNameExists(
+          value,
+          formData.category,
+          modalMode === "edit" ? selectedItem.id : null
+        )
+      ) {
+        setNameError(
+          "Tên này đã tồn tại trong danh mục, vui lòng chọn tên khác"
+        );
+      } else {
+        setNameError("");
+      }
+    }
   };
 
   // Category display names
@@ -602,6 +660,7 @@ const WeakPoint = () => {
           setIsModalOpen(false);
           setImagePreview(null);
           setImageFile(null);
+          setNameError(""); // Reset name error
         }}
       >
         <Box
@@ -705,6 +764,8 @@ const WeakPoint = () => {
                     required
                     variant="outlined"
                     size="small"
+                    error={!!nameError}
+                    helperText={nameError}
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                   />
 
@@ -724,6 +785,15 @@ const WeakPoint = () => {
                         onChange={handleImageChange}
                       />
                     </Button>
+                    {modalMode === "add" && !imagePreview && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ display: "block", mt: 1 }}
+                      >
+                        Vui lòng chọn hình ảnh cho thành phần
+                      </Typography>
+                    )}
                     {(imagePreview ||
                       (modalMode === "edit" &&
                         selectedItem?.img &&
@@ -746,7 +816,6 @@ const WeakPoint = () => {
                               imagePreview ||
                               `${REACT_APP_URL_BE}${selectedItem.img}`
                             }
-                            // src={imagePreview || selectedItem?.img}
                             alt="Preview"
                             style={{
                               maxWidth: "100%",
@@ -777,7 +846,10 @@ const WeakPoint = () => {
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
                 variant="outlined"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setNameError("");
+                }}
                 sx={{ borderRadius: 2 }}
               >
                 {modalMode === "view" ? "Đóng" : "Hủy"}
@@ -789,6 +861,11 @@ const WeakPoint = () => {
                   onClick={handleSubmit}
                   startIcon={
                     modalMode === "delete" ? <Delete /> : <CloudUpload />
+                  }
+                  disabled={
+                    (modalMode !== "delete" &&
+                      (!!nameError || formData.name.trim() === "")) ||
+                    (modalMode === "add" && !imageFile)
                   }
                   sx={{ borderRadius: 2 }}
                 >

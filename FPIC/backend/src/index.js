@@ -17,7 +17,9 @@ const IMAGES_DIR = path.join(__dirname, "img");
 const multer = require("multer");
 const uploadWeakPoint = multer({ storage: multer.memoryStorage() });
 const IMAGES_MICROCHIP = path.join(__dirname, "../microchip");
-
+const {
+  default: uploadMicrochip,
+} = require("./config/multer/multerMicrochips");
 const {
   getLPC,
   getTestPin,
@@ -28,7 +30,12 @@ const {
   getSPI,
   getSMB,
   postWeakPoint,
+  deleteWeakPoint,
 } = require("./controller/WeakPointController");
+const {
+  postMicrochip,
+  getMicrochips,
+} = require("./controller/MicrochipController");
 db.connect();
 app.use(cors());
 app.use(express.json());
@@ -36,7 +43,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
-
 app.use("/jtag", express.static("jtag"));
 app.use("/testpin", express.static("testpin"));
 app.use("/lpc", express.static("lpc"));
@@ -46,6 +52,8 @@ app.use("/unused_port", express.static("unused_port"));
 app.use("/vias", express.static("vias"));
 app.use("/spi", express.static("SPI"));
 app.use("/smb", express.static("SMB"));
+app.use("/smb", express.static("SMB"));
+
 
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
@@ -78,24 +86,8 @@ app.get("/images/count", (req, res) => {
     res.json({ count: imageCount });
   });
 });
-app.get("/images-microchip", (req, res) => {
-  fs.readdir(IMAGES_MICROCHIP, (err, files) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ message: "Error reading microchip directory", err });
-    }
-
-    const images = files
-      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
-      .map((file) => ({
-        name: file,
-        img: `/microchip/${file}`,
-      }));
-
-    res.json(images);
-  });
-});
+app.get("/microchips", getMicrochips);
+app.post("/microchips", uploadMicrochip.single("image"), postMicrochip);
 app.get("/images-microchip/count", (req, res) => {
   fs.readdir(IMAGES_MICROCHIP, (err, files) => {
     if (err) {
@@ -118,6 +110,7 @@ app.get("/images-vias", getVias);
 app.get("/images-spi", getSPI);
 app.get("/images-smb", getSMB);
 app.post("/uploadWeakPoint", uploadWeakPoint.single("image"), postWeakPoint);
+app.delete("/deleteWeakPoint", deleteWeakPoint);
 
 app.post("/get-json-file", (req, res) => {
   const { fileName } = req.body;
@@ -451,7 +444,7 @@ app.get("/import-accessories", async (req, res) => {
 
 app.get("/fpic/sodokhoi", async (req, res) => {
   try {
-    const list = await SoDoKhoi.find(); // Lấy toàn bộ dữ liệu
+    const list = await SoDoKhoi.find();
     res.json(list);
   } catch (error) {
     console.error("Lỗi lấy danh sách:", error);

@@ -4,7 +4,6 @@ const IMAGES_JTAG = path.join(__dirname, "../../jtag");
 const IMAGES_TESTPIN = path.join(__dirname, "../../testpin");
 const IMAGES_LPC = path.join(__dirname, "../../LPC");
 const IMAGES_FOOTPRINT = path.join(__dirname, "../../footprint");
-
 const IMAGES_UNUSEDPORT = path.join(__dirname, "../../unused_port");
 const IMAGES_VIAS = path.join(__dirname, "../../vias");
 const IMAGES_SMB = path.join(__dirname, "../../SMB");
@@ -156,6 +155,7 @@ exports.getSMB = async (req, res) => {
     res.json(images);
   });
 };
+
 exports.postWeakPoint = async (req, res) => {
   try {
     const { name, description, category } = req.body;
@@ -190,6 +190,30 @@ exports.postWeakPoint = async (req, res) => {
       description,
       category,
     });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: `Server error: ${error.message}`,
+    });
+  }
+};
+
+exports.deleteWeakPoint = async (req, res) => {
+  try {
+    const { category, img } = req.body;
+
+    if (!category || !img) {
+      return res.status(400).json({ error: "Thiếu category hoặc img" });
+    }
+
+    const filePath = path.join(__dirname, "../../", img);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      res.json({ message: "Xóa thành công" });
+    } else {
+      res.status(404).json({ message: "File không tồn tại" });
+    }
   } catch (error) {
     res.status(500).json({
       status: 500,
