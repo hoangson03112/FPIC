@@ -1,7 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 const Microchip = require("../models/Microchip");
-const { log } = require("console");
 
 exports.postMicrochip = async (req, res) => {
   try {
@@ -66,21 +65,34 @@ exports.updateMicrochip = async (req, res) => {
     const data = req.body;
 
     if (!req.file) {
-      await Microchip.findByIdAndUpdate(id, data, {
+      const microchip = await Microchip.findByIdAndUpdate(id, data, {
         new: true,
       });
+      res.status(200).json({
+        message: "Cập nhật thành công",
+        microchip,
+      });
+    } else {
+      const microchip = await Microchip.findById(id);
+      const filePath = path.join(__dirname, "../../", microchip.imagePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      } else {
+        res.status(404).json({ message: "File không tồn tại" });
+      }
+      const newMicrochip = await Microchip.findByIdAndUpdate(
+        id,
+        {
+          ...data,
+          imagePath: "/microchip/" + req.file.filename,
+        },
+        { new: true }
+      );
+      res.status(200).json({
+        message: "Cập nhật thành công",
+        microchip: newMicrochip,
+      });
     }
-
-    // const updateMicrochip = await Microchip.findByIdAndUpdate(id, microchip, {
-    //   new: true,
-    // });
-    // if (updateMicrochip) {
-    //   return res.status(200).json({
-    //     status: 200,
-    //     message: "Cập nhât linh kiện thành công",
-    //     data: updateMicrochip,
-    //   });
-
   } catch (error) {
     console.error("Server error:", error);
     return res.status(500).json({

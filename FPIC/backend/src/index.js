@@ -31,6 +31,7 @@ const {
   getSMB,
   postWeakPoint,
   deleteWeakPoint,
+  updateWeakPoint,
 } = require("./controller/WeakPointController");
 const {
   postMicrochip,
@@ -50,7 +51,7 @@ app.use("/testpin", express.static("testpin"));
 app.use("/lpc", express.static("lpc"));
 app.use("/microchip", express.static("microchip"));
 app.use("/footprint", express.static("footprint"));
-app.use("/unused_port", express.static("unused_port"));
+app.use("/unusedPort", express.static("unusedPort"));
 app.use("/vias", express.static("vias"));
 app.use("/spi", express.static("SPI"));
 app.use("/smb", express.static("SMB"));
@@ -113,11 +114,16 @@ app.get("/images-unused-port", getUnusedPort);
 app.get("/images-vias", getVias);
 app.get("/images-spi", getSPI);
 app.get("/images-smb", getSMB);
-app.post("/uploadWeakPoint", postWeakPoint);
+app.post("/uploadWeakPoint", uploadWeakPoint.single("image"), postWeakPoint);
 app.delete(
-  "/deleteWeakPoint",
+  "/deleteWeakPoint/:id",
   uploadWeakPoint.single("image"),
   deleteWeakPoint
+);
+app.put(
+  "/updateWeakPoint/:id",
+  uploadWeakPoint.single("image"),
+  updateWeakPoint
 );
 
 app.post("/get-json-file", (req, res) => {

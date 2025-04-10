@@ -218,7 +218,6 @@ const MicrochipList = () => {
 
       if (currentMicrochip) {
         // Update
-        console.log(formData);
 
         const response = await axios.put(
           `${REACT_APP_URL_BE}/microchips/${currentMicrochip._id}`,
@@ -229,11 +228,10 @@ const MicrochipList = () => {
             },
           }
         );
+
         setMicrochips(
           microchips.map((item) =>
-            item._id === currentMicrochip._id
-              ? response.data.updatedMicrochip
-              : item
+            item._id === currentMicrochip._id ? response.data.microchip : item
           )
         );
         showSnackbar("Cập nhật vi mạch thành công", "success");
