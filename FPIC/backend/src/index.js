@@ -196,12 +196,12 @@ app.post("/login", async (req, res) => {
     const account = await Account.findOne({ email });
 
     if (!account) {
-      return res.status(401).json({ message: "Email không tồn tại" }); // Thông báo rõ ràng
+      return res.status(401).json({ message: "Email không tồn tại" });
     }
 
-    const isMatch = await bcrypt.compare(password, account.password); // ✅ Thêm await
+    const isMatch = bcrypt.compare(password, account.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Mật khẩu không đúng" }); // Thông báo riêng
+      return res.status(401).json({ message: "Mật khẩu không đúng" });
     }
 
     if (account.status !== "active") {
@@ -222,6 +222,12 @@ app.post("/login", async (req, res) => {
       status: "success",
       message: "Đăng nhập thành công",
       token,
+      account: {
+        _id: account._id,
+        email: account.email,
+        role: account.role,
+        status: account.status,
+      },
     });
   } catch (error) {
     console.error("Login error:", error); // Log lỗi để debug

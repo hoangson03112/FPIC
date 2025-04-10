@@ -14,8 +14,7 @@ class AccountContext {
           Authorization: `Bearer ${token}`,
         },
       });
- 
-      
+
       return response.data;
     } catch (error) {
       return error;

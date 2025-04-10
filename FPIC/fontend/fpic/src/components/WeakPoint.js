@@ -288,7 +288,7 @@ const WeakPoint = () => {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
-        showSnackbar("Cập nhật vi mạch thành công", "success");
+        showSnackbar("Thêm mẫu điểm yếu thành công", "success");
         setCategories((prev) => ({
           ...prev,
           [formData.category]: [
@@ -317,6 +317,7 @@ const WeakPoint = () => {
         await axios.delete(
           `${REACT_APP_URL_BE}/deleteWeakPoint/${selectedItem._id}`
         );
+        showSnackbar("Xóa mẫu điểm yếu thành công", "success");
 
         setCategories((prev) => ({
           ...prev,

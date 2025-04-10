@@ -8,7 +8,7 @@ import {
   Modal,
   Badge,
 } from "react-bootstrap";
-import AccountContext from "../http/AccountContext";
+import AccountContext from "../contexts/AccountContext";
 import "./ManageAccount.css";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";

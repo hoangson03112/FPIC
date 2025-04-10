@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Accessory = require("../controller/AccessoryController");
 const { default: upload } = require("../config/db/upload");
+const { checkRole } = require("../middleware/checkRole");
 
-router.get("/accessory", Accessory.getAccessories);
+router.get("/accessory", checkRole(["admin"]), Accessory.getAccessories);
 router.get("/accessory/:id", Accessory.getAccessory);
 router.post("/accessory", upload.single("file"), Accessory.createAccessory);
 router.put("/accessory/:id", upload.single("file"), Accessory.updateAccessory);

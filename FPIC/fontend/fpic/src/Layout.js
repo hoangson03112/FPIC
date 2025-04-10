@@ -31,7 +31,7 @@ import {
   Logout,
   Login,
 } from "@mui/icons-material";
-import AccountContext from "./http/AccountContext";
+import AccountContext from "./contexts/AccountContext";
 import StorageIcon from "@mui/icons-material/Storage";
 
 const drawerWidth = 300;

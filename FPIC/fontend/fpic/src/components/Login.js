@@ -60,6 +60,7 @@ const Login = () => {
       console.log(response);
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.account));
         navigate("/dashboard");
       } else if (response.data.status !== "success") {
         alert(response.data.c);
