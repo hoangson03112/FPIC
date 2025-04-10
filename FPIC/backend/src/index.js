@@ -35,6 +35,8 @@ const {
 const {
   postMicrochip,
   getMicrochips,
+  deleteMicrochip,
+  updateMicrochip,
 } = require("./controller/MicrochipController");
 db.connect();
 app.use(cors());
@@ -53,7 +55,6 @@ app.use("/vias", express.static("vias"));
 app.use("/spi", express.static("SPI"));
 app.use("/smb", express.static("SMB"));
 app.use("/smb", express.static("SMB"));
-
 
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
@@ -101,6 +102,9 @@ app.get("/images-microchip/count", (req, res) => {
     res.json({ count: imageCount });
   });
 });
+app.delete("/microchips/:id", deleteMicrochip);
+app.put("/microchips/:id", uploadMicrochip.single("image"), updateMicrochip);
+
 app.get("/images-jtag", getJTAG);
 app.get("/images-test-pin", getTestPin);
 app.get("/images-lpc", getLPC);
@@ -109,8 +113,12 @@ app.get("/images-unused-port", getUnusedPort);
 app.get("/images-vias", getVias);
 app.get("/images-spi", getSPI);
 app.get("/images-smb", getSMB);
-app.post("/uploadWeakPoint", uploadWeakPoint.single("image"), postWeakPoint);
-app.delete("/deleteWeakPoint", deleteWeakPoint);
+app.post("/uploadWeakPoint", postWeakPoint);
+app.delete(
+  "/deleteWeakPoint",
+  uploadWeakPoint.single("image"),
+  deleteWeakPoint
+);
 
 app.post("/get-json-file", (req, res) => {
   const { fileName } = req.body;

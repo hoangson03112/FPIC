@@ -148,13 +148,14 @@ const MicrochipList = () => {
   // Dialog handlers
   const handleOpenDialog = (microchip = null) => {
     setCurrentMicrochip(microchip);
+
     if (microchip) {
       setFormData({
         name: microchip.name,
         description: microchip.description,
         image: null,
       });
-      setPreviewImage(microchip.imageURL);
+      setPreviewImage(microchip.imagePath);
     } else {
       setFormData({
         name: "",
@@ -174,6 +175,8 @@ const MicrochipList = () => {
   // Details dialog handlers
   const handleOpenDetailsDialog = (microchip) => {
     setCurrentMicrochip(microchip);
+
+    setPreviewImage(microchip.imageURL);
     setOpenDetailsDialog(true);
   };
 
@@ -215,6 +218,8 @@ const MicrochipList = () => {
 
       if (currentMicrochip) {
         // Update
+        console.log(formData);
+
         const response = await axios.put(
           `${REACT_APP_URL_BE}/microchips/${currentMicrochip._id}`,
           submitData,
@@ -265,6 +270,7 @@ const MicrochipList = () => {
       setMicrochips(
         microchips.filter((item) => item._id !== microchipToDelete._id)
       );
+      setPage(1);
       showSnackbar("Xóa vi mạch thành công", "success");
       setIsDeleteConfirmOpen(false);
     } catch (error) {
@@ -437,7 +443,6 @@ const MicrochipList = () => {
         )}
       </Paper>
 
-      {/* Results summary */}
       <Box
         sx={{
           display: "flex",
@@ -796,7 +801,13 @@ const MicrochipList = () => {
                     }}
                   >
                     <img
-                      src={previewImage}
+                      src={
+                        formData.image
+                          ? previewImage
+                          : currentMicrochip
+                          ? `${REACT_APP_URL_BE}${previewImage}`
+                          : previewImage
+                      }
                       alt="Preview"
                       style={{
                         maxHeight: "140px",

@@ -237,17 +237,21 @@ const WeakPoint = () => {
     // Xóa khoảng trắng ở đầu và cuối tên
     const trimmedName = formData.name.trim();
 
-    // Kiểm tra tên trống
-    if (trimmedName === "") {
-      setNameError("Tên không được để trống");
-      return;
-    }
+    if (modalMode !== "delete") {
+      // Kiểm tra tên trống
+      if (trimmedName === "") {
+        setNameError("Tên không được để trống");
+        return;
+      }
 
-    // Kiểm tra tên đã tồn tại chưa
-    const currentItemId = modalMode === "edit" ? selectedItem.id : null;
-    if (checkNameExists(trimmedName, formData.category, currentItemId)) {
-      setNameError("Tên này đã tồn tại trong danh mục, vui lòng chọn tên khác");
-      return;
+      // Kiểm tra tên đã tồn tại chưa
+      const currentItemId = modalMode === "edit" ? selectedItem.id : null;
+      if (checkNameExists(trimmedName, formData.category, currentItemId)) {
+        setNameError(
+          "Tên này đã tồn tại trong danh mục, vui lòng chọn tên khác"
+        );
+        return;
+      }
     }
 
     try {
@@ -312,7 +316,7 @@ const WeakPoint = () => {
       setSelectedItem(null);
       setImageFile(null);
       setImagePreview(null);
-      setNameError(""); // Reset name error
+      setNameError("");
     } catch (err) {
       console.error("Operation failed:", err);
       setError("Thao tác thất bại. Vui lòng thử lại.");
