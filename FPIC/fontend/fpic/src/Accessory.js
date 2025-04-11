@@ -27,6 +27,8 @@ import {
   Typography,
   AppBar,
   Toolbar,
+  useTheme,
+  alpha,
 } from "@mui/material";
 
 import {
@@ -40,6 +42,8 @@ import {
   ImageNotSupported as ImageNotSupportedIcon,
   Collections as CollectionsIcon,
   Info as InfoIcon,
+  Memory,
+  Add,
 } from "@mui/icons-material";
 
 import { Col, Row, Card, Container } from "react-bootstrap";
@@ -47,11 +51,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "./config";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { AccessoryDetailDialog } from "./components/AccessoryDetailDialog";
+import api from "./api";
+import { AuthContext } from "./context/AuthContext";
+import { hasPermission } from "./helper/function";
 
 const Transition = React.forwardRef((props, ref) => (
   <Fade ref={ref} {...props} timeout={700} />
 ));
 function Accessory() {
+  const theme = useTheme();
+  const { user } = React.useContext(AuthContext);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(18);
   const [pageAccessory, setPageAccessory] = useState(1);
@@ -61,7 +70,9 @@ function Accessory() {
   const [errors, setErrors] = useState({});
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [currentIndex, setCurrentIndex] = useState();
-  const [search, setSearch] = useState();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [snackBar, setSnackBar] = useState({
     open: false,
     message: "",
@@ -83,12 +94,6 @@ function Accessory() {
     isLoading: false,
     error: null,
   });
-  const [formType, setFormType] = useState({
-    _id: "",
-    tilte: "",
-    image: "",
-    contentType: "",
-  });
   const [formAccessory, setFormAccessory] = useState({
     _id: "",
     title: "",
@@ -108,10 +113,41 @@ function Accessory() {
     }
   }, [currentIndex, data.accessories]);
 
+  const handleSearchChange = async (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.length > 0) {
+      try {
+        const response = await api.get(
+          `${REACT_APP_URL_BE}/search-accessories`,
+          {
+            params: { query: value, limit: 5 },
+          }
+        );
+        setSearchSuggestions(response.data.data || []);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchSuggestions([]);
+      }
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Add suggestion selection handler
+  const handleSelectSuggestion = (accessory) => {
+    setSearchTerm(accessory.title);
+    setSearchSuggestions([]);
+    setShowSuggestions(false);
+    // You can add additional logic here to navigate or show the selected accessory
+  };
   const fetchData = async () => {
     try {
       setData((prev) => ({ ...prev, isLoading: true, error: null }));
-      const response = await axios.get(
+      const response = await api.get(
         `${REACT_APP_URL_BE}/get-types-accessory`,
         {
           params: { page, limit, query: search },
@@ -139,7 +175,7 @@ function Accessory() {
     if (data.isLoading) return;
     const controller = new AbortController();
     try {
-      const response = await axios.get(`${REACT_APP_URL_BE}/accessory`, {
+      const response = await api.get(`${REACT_APP_URL_BE}/accessory`, {
         params: { page: pageAccessory, limit: limitAccessory, type: type },
         signal: controller.signal,
       });
@@ -210,7 +246,7 @@ function Accessory() {
     form.append("type", formData.type);
     form.append("file", formData.image);
     try {
-      const response = await axios.post(`${REACT_APP_URL_BE}/accessory`, form, {
+      const response = await api.post(`${REACT_APP_URL_BE}/accessory`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (response) {
@@ -250,6 +286,144 @@ function Accessory() {
   return (
     <div className="bg-image">
       <Container fluid>
+        <Paper
+          elevation={2}
+          sx={{
+            p: 3,
+            mb: 4,
+            borderRadius: 2,
+            background: `linear-gradient(120deg, ${
+              theme.palette.primary.main
+            }, ${alpha(theme.palette.primary.light, 0.8)})`,
+            color: "white",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Memory sx={{ fontSize: 40, mr: 2 }} />
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+                Quản lý Vi mạch
+              </Typography>
+              <Paper
+                elevation={1}
+                sx={{ p: 2, mb: 4, borderRadius: 2, position: "relative" }}
+              >
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Tìm kiếm vi mạch theo tên hoặc mô tả..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={() =>
+                    searchTerm.length > 0 && setShowSuggestions(true)
+                  }
+                  onBlur={() =>
+                    setTimeout(() => setShowSuggestions(false), 200)
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search color="primary" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: searchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="clear search"
+                          onClick={() => {
+                            setSearchTerm("");
+                            setSearchSuggestions([]);
+                            fetchData(); // Reset to show all items
+                          }}
+                          edge="end"
+                        >
+                          <Close fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                    sx: { borderRadius: 1.5 },
+                  }}
+                />
+
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      zIndex: 1,
+                      mt: 1,
+                      maxHeight: 300,
+                      overflow: "auto",
+                    }}
+                  >
+                    {searchSuggestions.map((accessory) => (
+                      <MenuItem
+                        key={accessory._id}
+                        onClick={() => handleSelectSuggestion(accessory)}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: theme.palette.action.hover,
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: "100%",
+                          }}
+                        >
+                          {accessory.image ? (
+                            <CardMedia
+                              component="img"
+                              image={`${REACT_APP_URL_BE}${accessory.image}`}
+                              alt={accessory.title}
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                mr: 2,
+                                borderRadius: 1,
+                              }}
+                              onError={(e) => {
+                                e.target.src = "/placeholder-microchip.png";
+                              }}
+                            />
+                          ) : (
+                            <ImageNotSupportedIcon
+                              sx={{ width: 40, height: 40, mr: 2 }}
+                            />
+                          )}
+                          <Box>
+                            <Typography variant="subtitle1">
+                              {accessory.title}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              noWrap
+                            >
+                              {accessory.description?.substring(0, 50) ||
+                                "Không có mô tả"}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Paper>
+                )}
+              </Paper>
+            </Box>
+          </Box>
+        </Paper>
         <Row>
           <Col className="main-content">
             <div className="app">
@@ -272,118 +446,23 @@ function Accessory() {
                     position: "relative",
                     mr: 2,
                   }}
-                >
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Tìm kiếm linh kiện..."
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon sx={{ color: "text.secondary" }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: search && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              setSearch("");
-                            }}
-                            sx={{ color: "text.secondary" }}
-                          >
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                      sx: {
-                        borderRadius: "28px",
-                        backgroundColor: "background.paper",
-                        boxShadow: 2,
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "1px solid",
-                          borderColor: "divider",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "primary.main",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "primary.main",
-                          borderWidth: "1px",
-                        },
-                      },
+                ></Box>
+                {hasPermission(user, "addAccessory") && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => setShowModal(true)}
+                    sx={{
+                      borderRadius: "28px",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      px: 3,
+                      py: 1,
                     }}
-                    value={search || ""}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                    }}
-                  />
-
-                  {search && (
-                    <Paper
-                      sx={{
-                        position: "absolute",
-                        zIndex: 1300,
-                        mt: 0.5,
-                        left: 0,
-                        right: 0,
-                        maxHeight: 300,
-                        overflow: "auto",
-                        boxShadow: 4,
-                        border: "1px solid",
-                        borderColor: "divider",
-                        borderRadius: 1,
-                      }}
-                    >
-                      <List dense>
-                        {data.typesAccessories
-                          ?.filter((item) =>
-                            item?.title
-                              ?.toLowerCase()
-                              ?.includes(search?.toLowerCase() || "")
-                          )
-                          ?.slice(0, 5)
-                          ?.map((item) => (
-                            <ListItem
-                              key={item._id}
-                              button
-                              onClick={() => {
-                                setSearch(item.title);
-                              }}
-                              sx={{
-                                "&:hover": {
-                                  backgroundColor: "action.hover",
-                                },
-                              }}
-                            >
-                              <ListItemText
-                                primary={item.title}
-                                primaryTypographyProps={{
-                                  fontWeight: "medium",
-                                  color: "text.primary",
-                                }}
-                              />
-                            </ListItem>
-                          ))}
-                      </List>
-                    </Paper>
-                  )}
-                </Box>
-
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => setShowModal(true)}
-                  sx={{
-                    borderRadius: "28px",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    px: 3,
-                    py: 1,
-                  }}
-                >
-                  Thêm linh kiện
-                </Button>
+                  >
+                    Thêm linh kiện
+                  </Button>
+                )}
               </Box>
 
               <div className="table">

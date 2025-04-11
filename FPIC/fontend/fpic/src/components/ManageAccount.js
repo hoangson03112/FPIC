@@ -8,7 +8,7 @@ import {
   Modal,
   Badge,
 } from "react-bootstrap";
-import AccountContext from "../http/AccountContext";
+import AccountContext from "../context/AccountContext";
 import "./ManageAccount.css";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -72,8 +72,6 @@ const ManageAccount = () => {
       } else if (response.status === 403) {
         setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
       } else if (response.status === "success" && response.accounts) {
-        console.log(response.accounts);
-
         setAccounts(
           response.accounts.filter((account) => account.role === type)
         );

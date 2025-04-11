@@ -49,6 +49,9 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { REACT_APP_URL_BE } from "../config";
+import api from "../api";
+import { AuthContext } from "../context/AuthContext";
+import { hasPermission } from "../helper/function";
 
 // Custom styled components
 const GradientHeader = styled(Box)(({ theme }) => ({
@@ -89,7 +92,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
 }));
 
 const WeakPoint = () => {
-  // State declarations (keep the same)
+  const { user } = React.useContext(AuthContext);
   const [categories, setCategories] = useState({
     jtag: [],
     testPin: [],
@@ -144,7 +147,7 @@ const WeakPoint = () => {
         const newCategories = { ...categories };
         for (const endpoint of endpoints) {
           try {
-            const response = await axios.get(endpoint.url);
+            const response = await api.get(endpoint.url);
             newCategories[endpoint.key] = response.data.map((item) => ({
               ...item,
               id: item.id || Math.random().toString(36).substr(2, 9),
@@ -281,7 +284,7 @@ const WeakPoint = () => {
         form.append("description", formData.description || "");
         form.append("category", formData.category);
 
-        const response = await axios.post(
+        const response = await api.post(
           `${REACT_APP_URL_BE}/uploadWeakPoint`,
           form,
           {
@@ -302,7 +305,7 @@ const WeakPoint = () => {
         form.append("name", formData.name.trim());
         form.append("description", formData.description);
 
-        const data = await axios.put(
+        const data = await api.put(
           `${REACT_APP_URL_BE}/updateWeakPoint/${selectedItem._id}`,
           form
         );
@@ -314,7 +317,7 @@ const WeakPoint = () => {
           ),
         }));
       } else if (modalMode === "delete") {
-        await axios.delete(
+        await api.delete(
           `${REACT_APP_URL_BE}/deleteWeakPoint/${selectedItem._id}`
         );
 
@@ -469,15 +472,17 @@ const WeakPoint = () => {
                   "& .MuiOutlinedInput-root": { borderRadius: 2 },
                 }}
               />
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Add />}
-                onClick={handleAddItem}
-                sx={{ borderRadius: 2 }}
-              >
-                Thêm Mới
-              </Button>
+              {hasPermission(user, "addWeakPoint") && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Add />}
+                  onClick={handleAddItem}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Thêm Mới
+                </Button>
+              )}
             </Stack>
           </Stack>
 
@@ -596,27 +601,31 @@ const WeakPoint = () => {
                                 <Visibility />
                               </IconButton>
                             </Tooltip>
-
-                            <Stack direction="row" spacing={1}>
-                              <Tooltip title="Sửa">
-                                <IconButton
-                                  color="secondary"
-                                  onClick={() => handleEditItem(item)}
-                                  aria-label="edit"
-                                >
-                                  <Edit />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Xóa">
-                                <IconButton
-                                  color="error"
-                                  onClick={() => handleDeleteItem(item)}
-                                  aria-label="delete"
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </Tooltip>
-                            </Stack>
+                            {hasPermission(
+                              user,
+                              "UpdateAndDeleteWeakPoint"
+                            ) && (
+                              <Stack direction="row" spacing={1}>
+                                <Tooltip title="Sửa">
+                                  <IconButton
+                                    color="secondary"
+                                    onClick={() => handleEditItem(item)}
+                                    aria-label="edit"
+                                  >
+                                    <Edit />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Xóa">
+                                  <IconButton
+                                    color="error"
+                                    onClick={() => handleDeleteItem(item)}
+                                    aria-label="delete"
+                                  >
+                                    <Delete />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            )}
                           </CardActions>
                         </CategoryCard>
                       </Grid>

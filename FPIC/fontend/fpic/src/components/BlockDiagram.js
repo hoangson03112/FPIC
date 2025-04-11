@@ -29,8 +29,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import api from "../api";
+import { REACT_APP_URL_BE } from "../config";
+import { AuthContext } from "../context/AuthContext";
+import { hasPermission } from "../helper/function";
 
 const BlockDiagram = () => {
+  const { user } = React.useContext(AuthContext);
   const [showModal, setShowModal] = useState(false);
   const [pdfFiles, setPdfFiles] = useState([]);
   const [newPdf, setNewPdf] = useState({
@@ -50,9 +55,9 @@ const BlockDiagram = () => {
   useEffect(() => {
     const fetchPdfs = async () => {
       try {
-        const response = await fetch("http://localhost:9999/fpic/sodokhoi");
-        const data = await response.json();
-        setPdfFiles(data);
+        const response = await api.get(`${REACT_APP_URL_BE}/fpic/sodokhoi`);
+
+        setPdfFiles(response.data);
       } catch (error) {
         console.error("Error fetching PDFs:", error);
         showSnackbar("Không thể tải danh sách tài liệu", "error");
@@ -76,7 +81,7 @@ const BlockDiagram = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user types
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -124,35 +129,37 @@ const BlockDiagram = () => {
       let data;
 
       if (editingId) {
-        response = await fetch(
-          `http://localhost:9999/fpic/sodokhoi/${editingId}`,
-          {
-            method: "PUT",
-            body: formData,
-          }
+        response = await api.put(
+          `${REACT_APP_URL_BE}/fpic/sodokhoi/${editingId}`,
+
+          formData
         );
-        data = await response.json();
 
         setPdfFiles(
           pdfFiles.map((pdf) =>
             pdf._id === editingId
-              ? { ...pdf, name: data.name, filePath: data.filePath }
+              ? {
+                  ...pdf,
+                  name: response.data.name,
+                  filePath: response.data.filePath,
+                }
               : pdf
           )
         );
         showSnackbar("Cập nhật tài liệu thành công");
       } else {
-        response = await fetch("http://localhost:9999/fpic/sodokhoi", {
-          method: "POST",
-          body: formData,
-        });
-        data = await response.json();
-        setPdfFiles([data, ...pdfFiles]);
-        showSnackbar("Thêm tài liệu thành công");
-      }
+        response = await api.post(
+          `${REACT_APP_URL_BE}/fpic/sodokhoi`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        setPdfFiles([response.data, ...pdfFiles]);
+        showSnackbar("Thêm tài liệu thành công");
       }
 
       setShowModal(false);
@@ -168,14 +175,11 @@ const BlockDiagram = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) {
       try {
-        const response = await fetch(
-          `http://localhost:9999/fpic/sodokhoi/${id}`,
-          {
-            method: "DELETE",
-          }
+        const response = await api.delete(
+          `${REACT_APP_URL_BE}/fpic/sodokhoi/${id}`
         );
 
-        if (response.ok) {
+        if (response) {
           setPdfFiles(pdfFiles.filter((pdf) => pdf._id !== id));
           showSnackbar("Xóa tài liệu thành công");
         } else {
@@ -211,18 +215,19 @@ const BlockDiagram = () => {
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
           Sơ Đồ Khối
         </Typography>
-
-        <Fab
-          color="primary"
-          aria-label="add"
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          sx={{ boxShadow: 3 }}
-        >
-          <AddIcon />
-        </Fab>
+        {hasPermission(user, "addBlockDiagram") && (
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+            sx={{ boxShadow: 3 }}
+          >
+            <AddIcon />
+          </Fab>
+        )}
       </Box>
 
       <Divider sx={{ mb: 4 }} />
@@ -267,7 +272,7 @@ const BlockDiagram = () => {
                 <CardContent sx={{ flexGrow: 1, p: 0 }}>
                   <Box sx={{ height: 500, position: "relative" }}>
                     <object
-                      data={`http://localhost:9999/${file.filePath}`}
+                      data={`${REACT_APP_URL_BE}/${file.filePath}`}
                       type="application/pdf"
                       width="100%"
                       height="100%"
@@ -305,29 +310,33 @@ const BlockDiagram = () => {
                   </Typography>
 
                   <CardActions sx={{ justifyContent: "center", gap: 1 }}>
-                    <Tooltip title="Sửa">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        startIcon={<EditIcon />}
-                        onClick={() => handleEdit(file)}
-                      >
-                        Sửa
-                      </Button>
-                    </Tooltip>
+                    {hasPermission(user, "UpdateAndDeleteBlockDiagram") && (
+                      <>
+                        <Tooltip title="Sửa">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            startIcon={<EditIcon />}
+                            onClick={() => handleEdit(file)}
+                          >
+                            Sửa
+                          </Button>
+                        </Tooltip>
 
-                    <Tooltip title="Xóa">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="error"
-                        startIcon={<DeleteIcon />}
-                        onClick={() => handleDelete(file._id)}
-                      >
-                        Xóa
-                      </Button>
-                    </Tooltip>
+                        <Tooltip title="Xóa">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleDelete(file._id)}
+                          >
+                            Xóa
+                          </Button>
+                        </Tooltip>
+                      </>
+                    )}
 
                     <Tooltip title="Xem full-screen">
                       <Button
@@ -337,7 +346,7 @@ const BlockDiagram = () => {
                         startIcon={<VisibilityIcon />}
                         onClick={() =>
                           window.open(
-                            `http://localhost:9999/${file.filePath}`,
+                            `${REACT_APP_URL_BE}/${file.filePath}`,
                             "_blank"
                           )
                         }
@@ -524,7 +533,7 @@ const BlockDiagram = () => {
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={handleCloseSnackbar}

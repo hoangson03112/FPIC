@@ -14,74 +14,77 @@ import MicrochipList from "./components/MicrochipList";
 import WeakPoint from "./components/WeakPoint";
 import BlockDiagram from "./components/BlockDiagram";
 import MainBoard from "./components/MainBoard";
+import { AuthProvider } from "./context/AuthContext";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />}></Route>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Login />}></Route>
 
-        <Route
-          path="/page/:currentPage"
-          element={
-            <Layout>
-              <Accessory />
-            </Layout>
-          }
-        ></Route>
+          <Route
+            path="/page/:currentPage"
+            element={
+              <Layout>
+                <Accessory />
+              </Layout>
+            }
+          ></Route>
 
-        <Route path="/auth/login" element={<Login />}></Route>
+          <Route path="/auth/login" element={<Login />}></Route>
 
-        <Route
-          path="/dashboard"
-          element={
-            <Layout>
-              <AdminHomePage />
-            </Layout>
-          }
-        ></Route>
-        <Route
-          path="/admin/manager-account/:type"
-          element={
-            <Layout>
-              <ManageAccount />
-            </Layout>
-          }
-        ></Route>
-        <Route
-          path="/microchip"
-          element={
-            <Layout>
-              <MicrochipList />
-            </Layout>
-          }
-        ></Route>
-        <Route
-          path="/weak-point"
-          element={
-            <Layout>
-              <WeakPoint />
-            </Layout>
-          }
-        ></Route>
-        <Route
-          path="/block-diagram"
-          element={
-            <Layout>
-              <BlockDiagram />
-            </Layout>
-          }
-        ></Route>
-        <Route
-          path="/main-board"
-          element={
-            <Layout>
-              <MainBoard />
-            </Layout>
-          }
-        ></Route>
-      </Routes>
+          <Route
+            path="/dashboard"
+            element={
+              <Layout>
+                <AdminHomePage />
+              </Layout>
+            }
+          ></Route>
+          <Route
+            path="/admin/manager-account/:type"
+            element={
+              <Layout>
+                <ManageAccount />
+              </Layout>
+            }
+          ></Route>
+          <Route
+            path="/microchip"
+            element={
+              <Layout>
+                <MicrochipList />
+              </Layout>
+            }
+          ></Route>
+          <Route
+            path="/weak-point"
+            element={
+              <Layout>
+                <WeakPoint />
+              </Layout>
+            }
+          ></Route>
+          <Route
+            path="/block-diagram"
+            element={
+              <Layout>
+                <BlockDiagram />
+              </Layout>
+            }
+          ></Route>
+          <Route
+            path="/main-board"
+            element={
+              <Layout>
+                <MainBoard />
+              </Layout>
+            }
+          ></Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

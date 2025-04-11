@@ -1,6 +1,6 @@
 import axios from "axios";
 import { REACT_APP_URL_SERVER, REACT_APP_URL_BE } from "../config";
-
+import api from "../api";
 class AccountContext {
   async Authentication() {
     try {
@@ -14,8 +14,7 @@ class AccountContext {
           Authorization: `Bearer ${token}`,
         },
       });
- 
-      
+
       return response.data;
     } catch (error) {
       return error;
@@ -25,7 +24,7 @@ class AccountContext {
   async getAllAccounts() {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${REACT_APP_URL_BE}/admin/accounts`, {
+      const response = await api.get(`${REACT_APP_URL_BE}/admin/accounts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -61,7 +60,7 @@ class AccountContext {
         return { message: "Chưa đăng nhập", status: 401 };
       }
 
-      const response = await axios.post(
+      const response = await api.post(
         `${REACT_APP_URL_BE}/admin/create-account`,
         { account },
         {
@@ -83,7 +82,7 @@ class AccountContext {
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
-      const response = await axios.delete(
+      const response = await api.delete(
         `${REACT_APP_URL_BE}/admin/delete-account`,
         {
           headers: {
@@ -117,7 +116,7 @@ class AccountContext {
         },
       };
 
-      const response = await axios.put(
+      const response = await api.put(
         `${REACT_APP_URL_BE}/admin/update-account/${id}`,
         accountUpdated,
         config
@@ -137,7 +136,7 @@ class AccountContext {
   }
   async getCountUser() {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${REACT_APP_URL_BE}/admin/accounts/count`
       );
 

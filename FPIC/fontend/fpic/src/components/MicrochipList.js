@@ -43,6 +43,9 @@ import {
 } from "@mui/icons-material";
 import axios from "axios";
 import { REACT_APP_URL_BE } from "../config";
+import api from "../api";
+import { AuthContext } from "../context/AuthContext";
+import { hasPermission } from "../helper/function";
 
 const MicrochipList = () => {
   const theme = useTheme();
@@ -63,7 +66,7 @@ const MicrochipList = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [microchipToDelete, setMicrochipToDelete] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-
+  const { user } = React.useContext(AuthContext);
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -125,11 +128,10 @@ const MicrochipList = () => {
     setShowSuggestions(false);
   };
 
-  // Fetch microchips data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${REACT_APP_URL_BE}/microchips`);
+        const response = await api.get(`${REACT_APP_URL_BE}/microchips`);
         setMicrochips(response.data.microchips);
       } catch (error) {
         showSnackbar("Lỗi khi tải dữ liệu", "error");
@@ -219,7 +221,7 @@ const MicrochipList = () => {
       if (currentMicrochip) {
         // Update
 
-        const response = await axios.put(
+        const response = await api.put(
           `${REACT_APP_URL_BE}/microchips/${currentMicrochip._id}`,
           submitData,
           {
@@ -237,7 +239,7 @@ const MicrochipList = () => {
         showSnackbar("Cập nhật vi mạch thành công", "success");
       } else {
         // Create
-        const response = await axios.post(
+        const response = await api.post(
           `${REACT_APP_URL_BE}/microchips`,
           submitData,
           {
@@ -262,7 +264,7 @@ const MicrochipList = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(
+      await api.delete(
         `${REACT_APP_URL_BE}/microchips/${microchipToDelete._id}`
       );
       setMicrochips(
@@ -309,7 +311,6 @@ const MicrochipList = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header with gradient background */}
       <Paper
         elevation={2}
         sx={{
@@ -332,24 +333,26 @@ const MicrochipList = () => {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Memory sx={{ fontSize: 40, mr: 2 }} />
             <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-              Quản lý Vi mạch
+              Mẫu bản mạch
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => handleOpenDialog()}
-            sx={{
-              bgcolor: "white",
-              color: theme.palette.primary.main,
-              fontWeight: "bold",
-              "&:hover": {
-                bgcolor: alpha(theme.palette.common.white, 0.9),
-              },
-            }}
-          >
-            Thêm mới
-          </Button>
+          {hasPermission(user, "addMicrochip") && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => handleOpenDialog()}
+              sx={{
+                bgcolor: "white",
+                color: theme.palette.primary.main,
+                fontWeight: "bold",
+                "&:hover": {
+                  bgcolor: alpha(theme.palette.common.white, 0.9),
+                },
+              }}
+            >
+              Thêm mới
+            </Button>
+          )}
         </Box>
       </Paper>
 
@@ -484,13 +487,15 @@ const MicrochipList = () => {
               ? "Hãy thử tìm kiếm với từ khóa khác"
               : "Hãy thêm vi mạch mới để bắt đầu"}
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => handleOpenDialog()}
-          >
-            Thêm vi mạch mới
-          </Button>
+          {hasPermission(user, "addMicrochip") && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => handleOpenDialog()}
+            >
+              Thêm vi mạch mới
+            </Button>
+          )}
         </Paper>
       )}
 
@@ -560,23 +565,25 @@ const MicrochipList = () => {
                 >
                   Chi tiết
                 </Button>
-                <Box>
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => handleOpenDialog(microchip)}
-                    sx={{ mr: 1 }}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleDeleteConfirm(microchip)}
-                  >
-                    <Delete />
-                  </IconButton>
-                </Box>
+                {hasPermission(user, "UpdateAndDeleteMicrochip") && (
+                  <Box>
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={() => handleOpenDialog(microchip)}
+                      sx={{ mr: 1 }}
+                    >
+                      <Edit />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDeleteConfirm(microchip)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                )}
               </CardActions>
             </Card>
           </Grid>
