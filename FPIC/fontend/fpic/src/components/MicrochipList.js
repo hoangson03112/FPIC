@@ -27,6 +27,7 @@ import {
   alpha,
   MenuItem,
   Pagination,
+  styled,
 } from "@mui/material";
 import {
   Add,
@@ -39,7 +40,9 @@ import {
   Image,
   Visibility,
   CalendarToday,
-  Info,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import axios from "axios";
 import { REACT_APP_URL_BE } from "../config";
@@ -47,11 +50,67 @@ import api from "../api";
 import { AuthContext } from "../context/AuthContext";
 import { hasPermission } from "../helper/function";
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  borderRadius: "12px",
+  position: "relative",
+  maxWidth: 600,
+  margin: "0",
+  boxShadow: theme.shadows[3],
+  transition: "all 0.3s ease",
+  "&:hover": {
+    boxShadow: theme.shadows[6],
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    paddingLeft: "8px",
+    "& fieldset": {
+      borderColor: theme.palette.grey[300],
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+    "&.Mui-focused fieldset": {
+      borderWidth: "1px",
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
+
+const SuggestionsPaper = styled(Paper)(({ theme }) => ({
+  position: "absolute",
+  top: "calc(100% + 8px)",
+  left: 0,
+  right: 0,
+  zIndex: 1300,
+  maxHeight: "400px",
+  overflow: "auto",
+  borderRadius: "12px",
+  boxShadow: theme.shadows[6],
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const AddButton = styled(Button)(({ theme }) => ({
+  borderRadius: "28px",
+  textTransform: "none",
+  fontWeight: 600,
+  padding: "10px 24px",
+  marginTop: "16px",
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+    transform: "translateY(-2px)",
+    boxShadow: theme.shadows[4],
+  },
+  transition: "all 0.3s ease",
+}));
 const MicrochipList = () => {
   const theme = useTheme();
   const fileInputRef = useRef(null);
 
-  // State management
   const [microchips, setMicrochips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -62,32 +121,30 @@ const MicrochipList = () => {
     message: "",
     severity: "success",
   });
+  const [isSearching, setIsSearching] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [microchipToDelete, setMicrochipToDelete] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const { user } = React.useContext(AuthContext);
-  // Form state
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     image: null,
   });
 
-  // Pagination and search state
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(6);
 
-  // Filter microchips based on search term
   const filteredMicrochips = microchips.filter(
     (microchip) =>
       microchip.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       microchip.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Get current page items
   const paginatedMicrochips = filteredMicrochips.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
@@ -95,12 +152,10 @@ const MicrochipList = () => {
 
   const totalPages = Math.ceil(filteredMicrochips.length / rowsPerPage);
 
-  // Pagination handler
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  // Search handlers
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -112,7 +167,7 @@ const MicrochipList = () => {
             microchip.name?.toLowerCase().includes(value.toLowerCase()) ||
             microchip.description?.toLowerCase().includes(value.toLowerCase())
         )
-        .slice(0, 5); // Limit to 5 suggestions
+        .slice(0, 5);
 
       setSearchSuggestions(filtered);
       setShowSuggestions(true);
@@ -142,12 +197,10 @@ const MicrochipList = () => {
     fetchData();
   }, []);
 
-  // Show notification
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
 
-  // Dialog handlers
   const handleOpenDialog = (microchip = null) => {
     setCurrentMicrochip(microchip);
 
@@ -174,7 +227,6 @@ const MicrochipList = () => {
     setPreviewImage(null);
   };
 
-  // Details dialog handlers
   const handleOpenDetailsDialog = (microchip) => {
     setCurrentMicrochip(microchip);
 
@@ -186,7 +238,6 @@ const MicrochipList = () => {
     setOpenDetailsDialog(false);
   };
 
-  // Form handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -197,7 +248,6 @@ const MicrochipList = () => {
     if (file) {
       setFormData((prev) => ({ ...prev, image: file }));
 
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -206,10 +256,8 @@ const MicrochipList = () => {
     }
   };
 
-  // Submit form
   const handleSubmit = async () => {
     try {
-      // Create FormData for file upload
       const submitData = new FormData();
       submitData.append("name", formData.name);
       submitData.append("description", formData.description);
@@ -256,7 +304,12 @@ const MicrochipList = () => {
     }
   };
 
-  // Delete handlers
+  const clearSearch = () => {
+    setSearchTerm("");
+    setSearchSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   const handleDeleteConfirm = (microchip) => {
     setMicrochipToDelete(microchip);
     setIsDeleteConfirmOpen(true);
@@ -278,7 +331,6 @@ const MicrochipList = () => {
     }
   };
 
-  // Loading state
   if (loading) {
     return (
       <Box
@@ -296,7 +348,6 @@ const MicrochipList = () => {
     );
   }
 
-  // Format date helper
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -310,7 +361,7 @@ const MicrochipList = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box sx={{ mb: 4 }}>
       <Paper
         elevation={2}
         sx={{
@@ -332,117 +383,153 @@ const MicrochipList = () => {
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Memory sx={{ fontSize: 40, mr: 2 }} />
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>
               Mẫu bản mạch
             </Typography>
           </Box>
-          {hasPermission(user, "addMicrochip") && (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => handleOpenDialog()}
-              sx={{
-                bgcolor: "white",
-                color: theme.palette.primary.main,
-                fontWeight: "bold",
-                "&:hover": {
-                  bgcolor: alpha(theme.palette.common.white, 0.9),
-                },
-              }}
-            >
-              Thêm mới
-            </Button>
-          )}
         </Box>
       </Paper>
 
-      {/* Search Bar */}
-      <Paper
-        elevation={1}
-        sx={{ p: 2, mb: 4, borderRadius: 2, position: "relative" }}
-      >
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Tìm kiếm vi mạch theo tên hoặc mô tả..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          onFocus={() => searchTerm.length > 0 && setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search color="primary" />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="clear search"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSearchSuggestions([]);
-                  }}
-                  edge="end"
-                >
-                  <Close fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ),
-            sx: { borderRadius: 1.5 },
+      <Box>
+        {/* Search and Add */}
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 1500,
+            mx: "auto",
+            position: "relative",
+            mb: 4,
           }}
-        />
-
-        {showSuggestions && searchSuggestions.length > 0 && (
-          <Paper
-            elevation={3}
+        >
+          <Box
             sx={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              zIndex: 1,
-              mt: 1,
-              maxHeight: 300,
-              overflow: "auto",
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              justifyContent: "space-evenly",
             }}
           >
-            {searchSuggestions.map((microchip) => (
-              <MenuItem
-                key={microchip._id}
-                onClick={() => handleSelectSuggestion(microchip)}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: theme.palette.action.hover,
-                  },
+            <StyledPaper elevation={1} component="form" sx={{ flex: 1 }}>
+              <StyledTextField
+                fullWidth
+                variant="outlined"
+                placeholder="Tìm kiếm vi mạch theo tên hoặc mô tả..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => searchTerm.trim() && setShowSuggestions(true)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon
+                        color="primary"
+                        sx={{ fontSize: "1.25rem" }}
+                      />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <>
+                      {isSearching && (
+                        <CircularProgress size={20} sx={{ mr: 1 }} />
+                      )}
+                      {searchTerm && (
+                        <IconButton
+                          aria-label="clear search"
+                          onClick={clearSearch}
+                          edge="end"
+                          size="small"
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </>
+                  ),
                 }}
+              />
+
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <SuggestionsPaper>
+                  {searchSuggestions.map((item) => (
+                    <MenuItem
+                      key={item._id || item.id}
+                      onClick={() => handleSelectSuggestion(item)}
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: theme.palette.action.hover,
+                        },
+                        py: 1.5,
+                        px: 2,
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        "&:last-child": {
+                          borderBottom: "none",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <CardMedia
+                          component="img"
+                          image={`${REACT_APP_URL_BE}${item.imagePath}`}
+                          alt={item.name || "No name"}
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            mr: 2,
+                            borderRadius: 1,
+                            objectFit: "cover",
+                          }}
+                          onError={(e) => {
+                            e.target.src = "/placeholder-microchip.png";
+                          }}
+                        />
+                        <Box sx={{ overflow: "hidden" }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: 500,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {item.name || "Không có tên"}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {item.description?.substring(0, 60) ||
+                              "Không có mô tả"}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </SuggestionsPaper>
+              )}
+            </StyledPaper>
+
+            {hasPermission(user, "addMicrochip") && (
+              <AddButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpenDialog()}
               >
-                <Box
-                  sx={{ display: "flex", alignItems: "center", width: "100%" }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={`${REACT_APP_URL_BE}${microchip.imagePath}`}
-                    alt={microchip.name}
-                    sx={{ width: 40, height: 40, mr: 2, borderRadius: 1 }}
-                    onError={(e) => {
-                      e.target.src = "/placeholder-microchip.png";
-                    }}
-                  />
-                  <Box>
-                    <Typography variant="subtitle1">
-                      {microchip.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {microchip.description.substring(0, 50)}...
-                    </Typography>
-                  </Box>
-                </Box>
-              </MenuItem>
-            ))}
-          </Paper>
-        )}
-      </Paper>
+                Thêm
+              </AddButton>
+            )}
+          </Box>
+        </Box>
+      </Box>
 
       <Box
         sx={{
@@ -463,7 +550,6 @@ const MicrochipList = () => {
         </Typography>
       </Box>
 
-      {/* Empty state */}
       {filteredMicrochips.length === 0 && (
         <Paper
           elevation={0}
@@ -499,10 +585,9 @@ const MicrochipList = () => {
         </Paper>
       )}
 
-      {/* Microchips Grid with animation */}
       <Grid container spacing={3}>
         {paginatedMicrochips.map((microchip) => (
-          <Grid item xs={12} sm={6} md={4} key={microchip._id}>
+          <Grid item xs={6} sm={4} md={3} key={microchip._id}>
             <Card
               elevation={1}
               sx={{
@@ -954,7 +1039,7 @@ const MicrochipList = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

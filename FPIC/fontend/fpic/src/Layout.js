@@ -35,6 +35,7 @@ import AccountContext from "./context/AccountContext";
 import StorageIcon from "@mui/icons-material/Storage";
 import { AuthContext } from "./context/AuthContext";
 import { hasPermission } from "./helper/function";
+import DeveloperBoard from "@mui/icons-material/DeveloperBoard";
 
 const drawerWidth = 300;
 
@@ -54,7 +55,7 @@ const Layout = ({ children }) => {
     menu2: false,
     menu3: false,
   });
-
+  
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -178,6 +179,32 @@ const Layout = ({ children }) => {
             </ListItemButton>
           </ListItem>
         )}
+
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/identification"
+            selected={currentPath === "/identification"}
+            sx={{
+              borderRadius: 1,
+              mb: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "primary.light",
+                color: "white",
+                "&:hover": { bgcolor: "primary.light" },
+              },
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+              <DeveloperBoard />
+            </ListItemIcon>
+            <ListItemText
+              primary="Nhận diện"
+              primaryTypographyProps={{ fontWeight: 500 }}
+            />
+          </ListItemButton>
+        </ListItem>
 
         {/* Xây dựng dữ liệu */}
         <ListItem disablePadding>

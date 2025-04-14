@@ -296,13 +296,12 @@ const BlockDiagram = () => {
     setShowModal(true);
   };
 
-  // Filter PDFs based on search term
   const filteredPdfs = pdfFiles.filter((pdf) =>
     pdf.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Box sx={{ pb: 2 }}>
       <Paper
         elevation={2}
         sx={{
@@ -319,14 +318,14 @@ const BlockDiagram = () => {
           sx={{
             display: "flex",
             gap: 2,
-            justifyContent: "space-evenly",
+            justifyContent: "start",
             alignItems: "center",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Memory sx={{ fontSize: 40, mr: 2 }} />
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-              Điểm yếu bo mạch
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>
+              Sơ đồ khối
             </Typography>
           </Box>
         </Box>
@@ -347,7 +346,7 @@ const BlockDiagram = () => {
             display: "flex",
             gap: 2,
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "space-evenly",
           }}
         >
           <StyledPaper
@@ -455,8 +454,7 @@ const BlockDiagram = () => {
 
       <Divider sx={{ mb: 4 }} />
 
-      {/* PDF List */}
-      <Grid container spacing={3}>
+      <Grid container spacing={6}>
         {filteredPdfs.length === 0 ? (
           <Grid item xs={12}>
             <Paper
@@ -480,7 +478,7 @@ const BlockDiagram = () => {
           </Grid>
         ) : (
           filteredPdfs.map((file) => (
-            <Grid key={file._id} item xs={12} md={6}>
+            <Grid key={file._id} item xs={10} md={6}>
               <Card
                 elevation={3}
                 sx={{
@@ -770,7 +768,7 @@ const BlockDiagram = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

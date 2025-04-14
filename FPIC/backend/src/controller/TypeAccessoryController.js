@@ -7,13 +7,16 @@ exports.getTypesAccessory = async (req, res) => {
     limit = parseInt(limit) || 12;
     const skip = (page - 1) * limit;
     const filter = {};
+
     if (query) {
       filter.title = { $regex: query, $options: "i" };
     }
     const types = await TypeModel.find(filter).skip(skip).limit(limit);
-
-    const totalItem =
-      query != null ? types.length : await TypeModel.countDocuments();
+    const totalItem = query?.trim()
+      ? await TypeModel.countDocuments({
+          title: { $regex: query, $options: "i" },
+        })
+      : await TypeModel.countDocuments();
 
     if (types) {
       const typesWithBase64 = types.map((type) => ({
@@ -22,6 +25,8 @@ exports.getTypesAccessory = async (req, res) => {
           ? Buffer.from(type.image, "base64").toString("utf-8")
           : null,
       }));
+      console.log(totalItem);
+
       res.status(200).json({
         status: 200,
         message: "get types successfully",

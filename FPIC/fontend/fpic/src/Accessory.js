@@ -16,10 +16,6 @@ import {
   Fade,
   Autocomplete,
   Box,
-  InputAdornment,
-  Paper,
-  MenuItem,
-  CardMedia,
   Typography,
   Grid,
 } from "@mui/material";
@@ -43,8 +39,6 @@ import { Col, Row, Card, Container } from "react-bootstrap";
 import { AccessoryDetailDialog } from "./components/AccessoryDetailDialog";
 import { REACT_APP_URL_BE } from "./config";
 import api from "./api";
-import { AuthContext } from "./context/AuthContext";
-import { hasPermission } from "./helper/function";
 import SeachBox from "./components/SeachBox";
 import RenderActionBar from "./components/renderActionBar";
 
@@ -59,11 +53,9 @@ function Accessory() {
   const [pageAccessory, setPageAccessory] = useState(1);
   const [limitAccessory] = useState(12);
 
-  // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showModalDesc, setShowModalDesc] = useState(false);
 
-  // Form states
   const [errors, setErrors] = useState({});
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -83,14 +75,12 @@ function Accessory() {
     description: "",
   });
 
-  // Search states
   const [searchTerm, setSearchTerm] = useState("");
   const [search, setSearch] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Data state
   const [data, setData] = useState({
     typesAccessories: [],
     accessories: [],
@@ -100,17 +90,22 @@ function Accessory() {
     error: null,
   });
 
-  // Notification state
   const [snackBar, setSnackBar] = useState({
     open: false,
     message: "",
     severity: "",
   });
 
-  // Effects
   useEffect(() => {
     fetchData();
   }, [page, limit, search]);
+
+  // Update accessory page data when pageAccessory changes
+  useEffect(() => {
+    if (data.accessories.length > 0 && formAccessory.type) {
+      fetchAccessories(formAccessory.type);
+    }
+  }, [pageAccessory, limitAccessory]);
 
   useEffect(() => {
     const item = data.accessories[currentIndex];
@@ -125,7 +120,6 @@ function Accessory() {
       if (searchTerm.trim()) {
         handleSearch(searchTerm);
       } else {
-        // Quan trọng: Clear suggestions nếu input trống
         setSearchSuggestions([]);
         setShowSuggestions(false);
       }
@@ -134,7 +128,6 @@ function Accessory() {
     return () => clearTimeout(delaySearch);
   }, [searchTerm]);
 
-  // API Functions
   const fetchData = async () => {
     try {
       setData((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -144,16 +137,22 @@ function Accessory() {
           params: { page, limit, query: search },
         }
       );
-
+      console.log(response);
       setData((prev) => ({
         ...prev,
         typesAccessories: response.data.data || [],
         pagination: response.data.pagination || {
           totalPages: 0,
           currentPage: 1,
+          totalItem: 0,
         },
         isLoading: false,
       }));
+
+      // Ensure page state matches response
+      if (response.data.pagination?.currentPage) {
+        setPage(response.data.pagination.currentPage);
+      }
     } catch (error) {
       setData((prev) => ({ ...prev, isLoading: false, error }));
       showNotification(
@@ -181,6 +180,11 @@ function Accessory() {
           pagination_access: response.data.pagination,
           isLoading: false,
         }));
+
+        // Update current page state to match response
+        if (response.data.pagination?.currentPage) {
+          setPageAccessory(response.data.pagination.currentPage);
+        }
 
         if (response.data.data?.length > 0) {
           setCurrentIndex(0);
@@ -293,8 +297,15 @@ function Accessory() {
   }, []);
 
   // Event Handlers
-  const handlePageChange = (newPage) => {
-    setPage(Math.max(1, Math.min(newPage, data.pagination.totalPages)));
+  const handlePageChange = (_, newPage) => {
+    // Update page state - this will trigger the useEffect to fetch data
+    setPage(newPage);
+  };
+
+  // Handler for accessory pagination
+  const handleAccessoryPageChange = (_, newPage) => {
+    // Update pageAccessory state - this will trigger the useEffect to fetch accessories
+    setPageAccessory(newPage);
   };
 
   const handleInputChange = (event) => {
@@ -318,12 +329,16 @@ function Accessory() {
     e?.preventDefault();
     setSearch(searchTerm);
     setShowSuggestions(false);
+    // Reset to page 1 when submitting a new search
+    setPage(1);
   };
 
   const handleSelectSuggestion = (accessory) => {
     setSearchTerm(accessory.title);
     setSearch(accessory.title);
     setShowSuggestions(false);
+    // Reset to page 1 when selecting a suggestion
+    setPage(1);
 
     if (accessory.type) {
       fetchAccessories(accessory.type);
@@ -335,10 +350,14 @@ function Accessory() {
     setSearchTerm("");
     setSearch("");
     clearSearchState();
+    // Reset to page 1 when clearing search
+    setPage(1);
     fetchData();
   };
 
   const handleClickItem = (type) => {
+    // Reset accessory pagination when viewing a new type
+    setPageAccessory(1);
     fetchAccessories(type._id);
     handleClickModalDesc(true);
   };
@@ -429,11 +448,6 @@ function Accessory() {
             />
             <Card.Body>
               <Card.Title>{type?.title || "Không có tiêu đề"}</Card.Title>
-              <Card.Text>
-                {type?.description?.substring(0, 100) +
-                  (type?.description?.length > 100 ? "..." : "") ||
-                  "Không có mô tả"}
-              </Card.Text>
             </Card.Body>
           </Card>
         ))}
@@ -618,7 +632,7 @@ function Accessory() {
   // Main Render
   return (
     <div className="bg-image">
-      <Container fluid>
+      <Box>
         <SeachBox
           handleSearchSubmit={handleSearchSubmit}
           handleSearchChange={handleSearchChange}
@@ -646,33 +660,35 @@ function Accessory() {
                 <div>{renderAccessoryGrid()}</div>
               </div>
 
+              {/* Main pagination for types of accessories */}
               {data.pagination.totalPages > 1 && (
-                <div
-                  className="pagination-footer"
-                  style={{
+                <Box
+                  sx={{
                     display: "flex",
                     justifyContent: "center",
                     marginTop: "20px",
+                    padding: "10px",
                   }}
                 >
                   <Pagination
                     count={data.pagination.totalPages}
-                    page={data.pagination.currentPage}
-                    onChange={(_, newPage) => handlePageChange(newPage)}
+                    page={page}
+                    onChange={handlePageChange}
                     showFirstButton
                     showLastButton
                     shape="rounded"
+                    color="primary"
+                    size="large"
                     siblingCount={1}
                     boundaryCount={1}
                   />
-                </div>
+                </Box>
               )}
             </div>
           </Col>
         </Row>
-      </Container>
+      </Box>
 
-      {/* Detail Dialog */}
       <AccessoryDetailDialog
         showModalDesc={showModalDesc}
         handleClickModalDesc={handleClickModalDesc}
@@ -690,12 +706,13 @@ function Accessory() {
         setIsLoadingButton={setIsLoadingButton}
         setSnackBar={setSnackBar}
         setData={setData}
+        // Add these props for the AccessoryDetailDialog pagination
+        pageAccessory={pageAccessory}
+        handleAccessoryPageChange={handleAccessoryPageChange}
       />
 
-      {/* Add Accessory Dialog */}
       {renderAddAccessoryDialog()}
 
-      {/* Notifications */}
       <Snackbar
         open={snackBar.open}
         autoHideDuration={3000}

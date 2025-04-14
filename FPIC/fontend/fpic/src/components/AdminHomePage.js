@@ -11,6 +11,7 @@ import {
   Snackbar,
   Alert,
   styled,
+  Paper,
 } from "@mui/material";
 import {
   People,
@@ -34,7 +35,7 @@ import {
 } from "recharts";
 import axios from "axios";
 import { REACT_APP_URL_BE } from "../config";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 
 // Constants
 const COLORS = [
@@ -190,6 +191,7 @@ const CustomBarTooltip = ({ active, payload, label }) => {
 };
 
 const AdminDashboard = () => {
+  const theme = useTheme();
   const [stats, setStats] = useState({
     users: 0,
     accessories: 0,
@@ -250,16 +252,43 @@ const AdminDashboard = () => {
       setChartLoading(true);
       try {
         const token = localStorage.getItem("token");
-        // Giả lập API
         const componentResponse = {
           data: [
-            { name: "Router", value: 156, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
-            { name: "PC", value: 128, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
-            { name: "USB", value: 98, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
-            { name: "Access Point", value: 87, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
-            { name: "Switch", value: 45, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
-            { name: "Server", value: 67, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
-            { name: "FPJA", value: 34, weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 } },
+            {
+              name: "Router",
+              value: 156,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
+            {
+              name: "PC",
+              value: 128,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
+            {
+              name: "USB",
+              value: 98,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
+            {
+              name: "Access Point",
+              value: 87,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
+            {
+              name: "Switch",
+              value: 45,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
+            {
+              name: "Server",
+              value: 67,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
+            {
+              name: "FPJA",
+              value: 34,
+              weakPoints: { SMB: 15, JTAG: 12, TestPin: 10 },
+            },
           ],
         };
 
@@ -345,25 +374,18 @@ const AdminDashboard = () => {
           ],
         };
 
-        // Thay bằng API thực tế nếu có
-        /*
-        const componentResponse = await axios.get(`${REACT_APP_URL_BE}/stats/component-types`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const weakPointResponse = await axios.get(`${REACT_APP_URL_BE}/stats/weak-points`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        */
-
-        const componentData = componentResponse.data.length > 0 ? componentResponse.data : [];
+        const componentData =
+          componentResponse.data.length > 0 ? componentResponse.data : [];
         setComponentTypes(
-          componentData.map(item => ({
+          componentData.map((item) => ({
             ...item,
             total: componentData.reduce((sum, d) => sum + d.value, 0),
           }))
         );
 
-        setWeakPointData(weakPointResponse.data.length > 0 ? weakPointResponse.data : []);
+        setWeakPointData(
+          weakPointResponse.data.length > 0 ? weakPointResponse.data : []
+        );
         setChartLoading(false);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -375,7 +397,6 @@ const AdminDashboard = () => {
     fetchChartData();
   }, []);
 
-  // Handlers
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -400,7 +421,6 @@ const AdminDashboard = () => {
     });
   };
 
-  // StatCard component
   const StatCard = ({ title, count, Icon, color, linkTo }) => (
     <StyledCard>
       <CardContent sx={{ flexGrow: 1, textAlign: "center", p: 3 }}>
@@ -442,13 +462,34 @@ const AdminDashboard = () => {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
-      <GradientHeader>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-          Admin Dashboard
-        </Typography>
-      </GradientHeader>
+    <Box>
+      <Paper
+        elevation={2}
+        sx={{
+          p: 3,
+          mb: 4,
+          borderRadius: 2,
+          background: `linear-gradient(120deg, ${
+            theme.palette.primary.main
+          }, ${alpha(theme.palette.primary.light, 0.8)})`,
+          color: "white",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Memory sx={{ fontSize: 40, mr: 2 }} />
+            <Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
+              Thống kê dữ liệu
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
 
       {isLoading ? (
         <Box sx={{ textAlign: "center", py: 5 }}>
@@ -460,17 +501,19 @@ const AdminDashboard = () => {
       ) : (
         <Grid container spacing={3}>
           {/* Stat Cards (except Block Diagrams) */}
-          {STAT_CARDS.filter(card => card.key !== "blockDiagrams").map((card) => (
-            <Grid item xs={12} sm={6} md={3} key={card.title}>
-              <StatCard
-                title={card.title}
-                count={stats[card.key]}
-                Icon={card.icon}
-                color={card.color}
-                linkTo={card.linkTo}
-              />
-            </Grid>
-          ))}
+          {STAT_CARDS.filter((card) => card.key !== "blockDiagrams").map(
+            (card) => (
+              <Grid item xs={12} sm={6} md={3} key={card.title}>
+                <StatCard
+                  title={card.title}
+                  count={stats[card.key]}
+                  Icon={card.icon}
+                  color={card.color}
+                  linkTo={card.linkTo}
+                />
+              </Grid>
+            )
+          )}
 
           {/* Row for Component Distribution and Block Diagrams */}
           <Grid container item xs={12} spacing={3}>
@@ -493,7 +536,10 @@ const AdminDashboard = () => {
                       </Typography>
                     </Box>
                   ) : chartError ? (
-                    <Typography color="error" sx={{ textAlign: "center", py: 5 }}>
+                    <Typography
+                      color="error"
+                      sx={{ textAlign: "center", py: 5 }}
+                    >
                       {chartError}
                     </Typography>
                   ) : componentTypes.length === 0 ? (
@@ -516,7 +562,9 @@ const AdminDashboard = () => {
                             onClick={handlePieClick}
                             activeIndex={
                               selectedType
-                                ? componentTypes.findIndex(t => t.name === selectedType)
+                                ? componentTypes.findIndex(
+                                    (t) => t.name === selectedType
+                                  )
                                 : -1
                             }
                             activeShape={{ stroke: "#000", strokeWidth: 2 }}
@@ -539,13 +587,26 @@ const AdminDashboard = () => {
                         </PieChart>
                       </ResponsiveContainer>
                       {selectedType && (
-                        <Box sx={{ mt: 3, p: 2, bgcolor: "grey.100", borderRadius: 2 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+                        <Box
+                          sx={{
+                            mt: 3,
+                            p: 2,
+                            bgcolor: "grey.100",
+                            borderRadius: 2,
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: "bold", mb: 1 }}
+                          >
                             Chi tiết: {selectedType}
                           </Typography>
-                          {componentTypes.find(t => t.name === selectedType)?.weakPoints ? (
+                          {componentTypes.find((t) => t.name === selectedType)
+                            ?.weakPoints ? (
                             Object.entries(
-                              componentTypes.find(t => t.name === selectedType).weakPoints
+                              componentTypes.find(
+                                (t) => t.name === selectedType
+                              ).weakPoints
                             ).map(([key, value]) => (
                               <Typography key={key} variant="body2">
                                 {key}: {value}
@@ -566,16 +627,18 @@ const AdminDashboard = () => {
 
             {/* Stat Card - Block Diagrams */}
             <Grid item xs={12} sm={6} md={4}>
-              {STAT_CARDS.filter(card => card.key === "blockDiagrams").map((card) => (
-                <StatCard
-                  key={card.title}
-                  title={card.title}
-                  count={stats[card.key]}
-                  Icon={card.icon}
-                  color={card.color}
-                  linkTo={card.linkTo}
-                />
-              ))}
+              {STAT_CARDS.filter((card) => card.key === "blockDiagrams").map(
+                (card) => (
+                  <StatCard
+                    key={card.title}
+                    title={card.title}
+                    count={stats[card.key]}
+                    Icon={card.icon}
+                    color={card.color}
+                    linkTo={card.linkTo}
+                  />
+                )
+              )}
             </Grid>
           </Grid>
 
@@ -631,7 +694,14 @@ const AdminDashboard = () => {
                         ))}
                       </BarChart>
                     </ResponsiveContainer>
-                    <Box sx={{ mt: 3, display: "flex", gap: 2, justifyContent: "flex-end" }}>
+                    <Box
+                      sx={{
+                        mt: 3,
+                        display: "flex",
+                        gap: 2,
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       <Button
                         variant="contained"
                         sx={{
@@ -685,7 +755,7 @@ const AdminDashboard = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

@@ -15,6 +15,8 @@ import WeakPoint from "./components/WeakPoint";
 import BlockDiagram from "./components/BlockDiagram";
 import MainBoard from "./components/MainBoard";
 import { AuthProvider } from "./context/AuthContext";
+import Identification from "./components/Identification";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
@@ -35,6 +37,14 @@ root.render(
 
           <Route path="/login" element={<Login />}></Route>
 
+          <Route
+            path="/identification"
+            element={
+              <Layout>
+                <Identification />
+              </Layout>
+            }
+          ></Route>
           <Route
             path="/dashboard"
             element={

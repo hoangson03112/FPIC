@@ -264,14 +264,12 @@ const WeakPoint = () => {
     setCurrentPage(1);
   };
 
-  // Filter items based on search term
   const filteredItems = (categories[activeTab] || []).filter(
     (item) =>
       item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Calculate pagination
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const displayedItems = filteredItems.slice(
@@ -353,14 +351,6 @@ const WeakPoint = () => {
         setNameError("Tên không được để trống");
         return;
       }
-
-      const currentItemId = modalMode === "edit" ? selectedItem.id : null;
-      if (checkNameExists(trimmedName, formData.category, currentItemId)) {
-        setNameError(
-          "Tên này đã tồn tại trong danh mục, vui lòng chọn tên khác"
-        );
-        return;
-      }
     }
 
     try {
@@ -369,7 +359,13 @@ const WeakPoint = () => {
           setError("Vui lòng chọn hình ảnh cho thành phần mới");
           return;
         }
-
+        const currentItemId = modalMode === "edit" ? selectedItem.id : null;
+        if (checkNameExists(trimmedName, formData.category, currentItemId)) {
+          setNameError(
+            "Tên này đã tồn tại trong danh mục, vui lòng chọn tên khác"
+          );
+          return;
+        }
         let form = new FormData();
         form.append("image", imageFile);
         form.append("name", trimmedName);
@@ -477,7 +473,7 @@ const WeakPoint = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 2 }}>
+    <Box sx={{ pb: 2 }}>
       <Paper
         elevation={2}
         sx={{
@@ -493,20 +489,19 @@ const WeakPoint = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "start",
             alignItems: "center",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Memory sx={{ fontSize: 40, mr: 2 }} />
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>
               Điểm yếu bo mạch
             </Typography>
           </Box>
         </Box>
       </Paper>
       <Box>
-        {/* Search and Add */}
         <Box
           sx={{
             width: "100%",
@@ -1258,7 +1253,7 @@ const WeakPoint = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

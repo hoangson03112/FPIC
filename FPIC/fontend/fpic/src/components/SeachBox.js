@@ -123,7 +123,7 @@ export default function SearchBox({
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Memory sx={{ fontSize: 40, mr: 2 }} />
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 700 }}>
               Quản lý Vi mạch
             </Typography>
           </Box>
