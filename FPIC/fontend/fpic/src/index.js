@@ -14,9 +14,7 @@ import MicrochipList from "./components/MicrochipList";
 import WeakPoint from "./components/WeakPoint";
 import BlockDiagram from "./components/BlockDiagram";
 import MainBoard from "./components/MainBoard";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { AuthProvider } from "./contexts/AuthContext";
-
+import { AuthProvider } from "./context/AuthContext";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
@@ -40,11 +38,9 @@ root.render(
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute requiredRoles={["admin"]}>
-                <Layout>
-                  <AdminHomePage />
-                </Layout>
-              </ProtectedRoute>
+              <Layout>
+                <AdminHomePage />
+              </Layout>
             }
           ></Route>
           <Route

@@ -36,6 +36,9 @@ import { REACT_APP_URL_BE } from "../config";
 import axios from "axios";
 
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+import api from "../api";
+import { AuthContext } from "../context/AuthContext";
+import { hasPermission } from "../helper/function";
 
 export const AccessoryDetailDialog = ({
   showModalDesc,
@@ -57,6 +60,7 @@ export const AccessoryDetailDialog = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const { user } = React.useContext(AuthContext);
 
   const handleUpdateAccessory = async () => {
     if (!isEditing) {
@@ -75,7 +79,7 @@ export const AccessoryDetailDialog = ({
     }
 
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `${REACT_APP_URL_BE}/accessory/${formAccessory._id}`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
@@ -115,7 +119,7 @@ export const AccessoryDetailDialog = ({
     }));
 
     try {
-      await axios.delete(`${REACT_APP_URL_BE}/accessory/${formAccessory._id}`);
+      await api.delete(`${REACT_APP_URL_BE}/accessory/${formAccessory._id}`);
       setSnackBar({
         open: true,
         message: "Xoá thành công!",
@@ -524,54 +528,55 @@ export const AccessoryDetailDialog = ({
                         },
                       }}
                     />
-
-                    <Box sx={{ mt: 3 }}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        onClick={handleUpdateAccessory}
-                        disabled={isLoadingButton}
-                        startIcon={
-                          isLoadingButton ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : (
-                            <EditIcon />
-                          )
-                        }
-                        sx={{
-                          py: 1.2,
-                          mb: 2,
-                          borderRadius: "8px",
-                          textTransform: "none",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {isEditing ? "Lưu thông tin" : "Cập nhật thông tin"}
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        color="error"
-                        onClick={() => setOpenConfirmDelete(true)}
-                        disabled={isLoadingButton}
-                        startIcon={
-                          isLoadingButton ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : (
-                            <DeleteIcon />
-                          )
-                        }
-                        sx={{
-                          py: 1.2,
-                          borderRadius: "8px",
-                          textTransform: "none",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Xóa phụ kiện
-                      </Button>
-                    </Box>
+                    {hasPermission(user, "UpdateAndDeleteAccessory") && (
+                      <Box sx={{ mt: 3 }}>
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          onClick={handleUpdateAccessory}
+                          disabled={isLoadingButton}
+                          startIcon={
+                            isLoadingButton ? (
+                              <CircularProgress size={20} color="inherit" />
+                            ) : (
+                              <EditIcon />
+                            )
+                          }
+                          sx={{
+                            py: 1.2,
+                            mb: 2,
+                            borderRadius: "8px",
+                            textTransform: "none",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {isEditing ? "Lưu thông tin" : "Cập nhật thông tin"}
+                        </Button>
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color="error"
+                          onClick={() => setOpenConfirmDelete(true)}
+                          disabled={isLoadingButton}
+                          startIcon={
+                            isLoadingButton ? (
+                              <CircularProgress size={20} color="inherit" />
+                            ) : (
+                              <DeleteIcon />
+                            )
+                          }
+                          sx={{
+                            py: 1.2,
+                            borderRadius: "8px",
+                            textTransform: "none",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Xóa phụ kiện
+                        </Button>
+                      </Box>
+                    )}
                   </Box>
                 </Paper>
               )}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Box,
   Button,
@@ -21,8 +21,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { REACT_APP_URL_BE } from "../config";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -57,13 +59,17 @@ const Login = () => {
         email,
         password,
       });
-      console.log(response);
+
       if (response.data.status === "success") {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.account));
-        navigate("/dashboard");
-      } else if (response.data.status !== "success") {
-        alert(response.data.c);
+        login(response.data.user, response.data.token);
+
+        if (response.data.user.role !== "admin") {
+          navigate("/page/1");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        alert(response.data.message || "Login failed");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {

@@ -20,17 +20,91 @@ import {
   Alert,
   Fab,
   Divider,
+  alpha,
+  useTheme,
+  InputAdornment,
+  MenuItem,
+  Paper as MuiPaper,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import {
+  Add as AddIcon,
+  Close as CloseIcon,
+  CloudUpload as CloudUploadIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Visibility as VisibilityIcon,
+  PictureAsPdf as PictureAsPdfIcon,
+  Search as SearchIcon,
+  Memory,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import api from "../api";
+import { REACT_APP_URL_BE } from "../config";
+import { AuthContext } from "../context/AuthContext";
+import { hasPermission } from "../helper/function";
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  borderRadius: "12px",
+  position: "relative",
+  maxWidth: 600,
+  margin: "0",
+  boxShadow: theme.shadows[3],
+  transition: "all 0.3s ease",
+  "&:hover": {
+    boxShadow: theme.shadows[6],
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    paddingLeft: "8px",
+    "& fieldset": {
+      borderColor: theme.palette.grey[300],
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+    "&.Mui-focused fieldset": {
+      borderWidth: "1px",
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
+
+const SuggestionsPaper = styled(Paper)(({ theme }) => ({
+  position: "absolute",
+  top: "calc(100% + 8px)",
+  left: 0,
+  right: 0,
+  zIndex: 1300,
+  maxHeight: "400px",
+  overflow: "auto",
+  borderRadius: "12px",
+  boxShadow: theme.shadows[6],
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const AddButton = styled(Button)(({ theme }) => ({
+  borderRadius: "28px",
+  textTransform: "none",
+  fontWeight: 600,
+  padding: "10px 24px",
+  marginTop: "16px",
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+    transform: "translateY(-2px)",
+    boxShadow: theme.shadows[4],
+  },
+  transition: "all 0.3s ease",
+}));
 
 const BlockDiagram = () => {
+  const theme = useTheme();
+  const { user } = React.useContext(AuthContext);
   const [showModal, setShowModal] = useState(false);
   const [pdfFiles, setPdfFiles] = useState([]);
   const [newPdf, setNewPdf] = useState({
@@ -45,14 +119,17 @@ const BlockDiagram = () => {
     message: "",
     severity: "success",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Fetch PDFs from backend
   useEffect(() => {
     const fetchPdfs = async () => {
       try {
-        const response = await fetch("http://localhost:9999/fpic/sodokhoi");
-        const data = await response.json();
-        setPdfFiles(data);
+        const response = await api.get(`${REACT_APP_URL_BE}/fpic/sodokhoi`);
+        setPdfFiles(response.data);
       } catch (error) {
         console.error("Error fetching PDFs:", error);
         showSnackbar("Không thể tải danh sách tài liệu", "error");
@@ -62,6 +139,41 @@ const BlockDiagram = () => {
     fetchPdfs();
   }, []);
 
+  // Search handlers
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowSuggestions(value.trim().length > 0);
+    setIsSearching(true);
+
+    if (value.trim().length > 0) {
+      const suggestions = pdfFiles
+        .filter((pdf) => pdf.name?.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 10);
+      setSearchSuggestions(suggestions);
+    } else {
+      setSearchSuggestions([]);
+    }
+    setIsSearching(false);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setShowSuggestions(false);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setSearchSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const handleSelectSuggestion = (pdf) => {
+    setSearchTerm(pdf.name);
+    setShowSuggestions(false);
+  };
+
+  // Snackbar
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
@@ -70,13 +182,14 @@ const BlockDiagram = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  // Form handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPdf((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear error when user types
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -88,7 +201,6 @@ const BlockDiagram = () => {
         ...prev,
         file: e.target.files[0],
       }));
-      // Clear file error when user selects a file
       if (errors.file) {
         setErrors((prev) => ({ ...prev, file: null }));
       }
@@ -114,45 +226,41 @@ const BlockDiagram = () => {
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append("name", newPdf.name);
-
     if (newPdf.file) {
       formData.append("pdf", newPdf.file);
     }
 
     try {
       let response;
-      let data;
-
       if (editingId) {
-        response = await fetch(
-          `http://localhost:9999/fpic/sodokhoi/${editingId}`,
-          {
-            method: "PUT",
-            body: formData,
-          }
+        response = await api.put(
+          `${REACT_APP_URL_BE}/fpic/sodokhoi/${editingId}`,
+          formData
         );
-        data = await response.json();
-
         setPdfFiles(
           pdfFiles.map((pdf) =>
             pdf._id === editingId
-              ? { ...pdf, name: data.name, filePath: data.filePath }
+              ? {
+                  ...pdf,
+                  name: response.data.name,
+                  filePath: response.data.filePath,
+                }
               : pdf
           )
         );
         showSnackbar("Cập nhật tài liệu thành công");
       } else {
-        response = await fetch("http://localhost:9999/fpic/sodokhoi", {
-          method: "POST",
-          body: formData,
-        });
-        data = await response.json();
-        setPdfFiles([data, ...pdfFiles]);
+        response = await api.post(
+          `${REACT_APP_URL_BE}/fpic/sodokhoi`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        setPdfFiles([response.data, ...pdfFiles]);
         showSnackbar("Thêm tài liệu thành công");
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       setShowModal(false);
@@ -168,19 +276,9 @@ const BlockDiagram = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa tài liệu này?")) {
       try {
-        const response = await fetch(
-          `http://localhost:9999/fpic/sodokhoi/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (response.ok) {
-          setPdfFiles(pdfFiles.filter((pdf) => pdf._id !== id));
-          showSnackbar("Xóa tài liệu thành công");
-        } else {
-          throw new Error("Không thể xóa tài liệu");
-        }
+        await api.delete(`${REACT_APP_URL_BE}/fpic/sodokhoi/${id}`);
+        setPdfFiles(pdfFiles.filter((pdf) => pdf._id !== id));
+        showSnackbar("Xóa tài liệu thành công");
       } catch (error) {
         console.error("Error deleting PDF:", error);
         showSnackbar("Không thể xóa tài liệu", "error");
@@ -198,38 +296,168 @@ const BlockDiagram = () => {
     setShowModal(true);
   };
 
+  // Filter PDFs based on search term
+  const filteredPdfs = pdfFiles.filter((pdf) =>
+    pdf.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Paper
+        elevation={2}
+        sx={{
+          p: 3,
+          mb: 4,
+          borderRadius: 2,
+          background: `linear-gradient(120deg, ${
+            theme.palette.primary.main
+          }, ${alpha(theme.palette.primary.light, 0.8)})`,
+          color: "white",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            justifyContent: "space-evenly",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Memory sx={{ fontSize: 40, mr: 2 }} />
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+              Điểm yếu bo mạch
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Search and Add */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          width: "100%",
+          maxWidth: 1500,
+          mx: "auto",
+          position: "relative",
           mb: 4,
         }}
       >
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-          Sơ Đồ Khối
-        </Typography>
-
-        <Fab
-          color="primary"
-          aria-label="add"
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
-          sx={{ boxShadow: 3 }}
         >
-          <AddIcon />
-        </Fab>
+          <StyledPaper
+            elevation={1}
+            component="form"
+            onSubmit={handleSearchSubmit}
+            sx={{ flex: 1 }}
+          >
+            <StyledTextField
+              fullWidth
+              variant="outlined"
+              placeholder="Tìm kiếm tài liệu theo tên..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onFocus={() => searchTerm.trim() && setShowSuggestions(true)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="primary" sx={{ fontSize: "1.25rem" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <>
+                    {isSearching && (
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                    )}
+                    {searchTerm && (
+                      <IconButton
+                        aria-label="clear search"
+                        onClick={clearSearch}
+                        edge="end"
+                        size="small"
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </>
+                ),
+              }}
+            />
+
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <SuggestionsPaper>
+                {searchSuggestions.map((pdf) => (
+                  <MenuItem
+                    key={pdf._id}
+                    onClick={() => handleSelectSuggestion(pdf)}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                      py: 1.5,
+                      px: 2,
+                      borderBottom: `1px solid ${theme.palette.divider}`,
+                      "&:last-child": {
+                        borderBottom: "none",
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <PictureAsPdfIcon
+                        color="primary"
+                        sx={{ mr: 2, fontSize: 24 }}
+                      />
+                      <Box sx={{ overflow: "hidden" }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 500,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {pdf.name || "Không có tên"}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </SuggestionsPaper>
+            )}
+          </StyledPaper>
+
+          {hasPermission(user, "addBlockDiagram") && (
+            <AddButton
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                resetForm();
+                setShowModal(true);
+              }}
+            >
+              Thêm
+            </AddButton>
+          )}
+        </Box>
       </Box>
 
       <Divider sx={{ mb: 4 }} />
 
       {/* PDF List */}
       <Grid container spacing={3}>
-        {pdfFiles.length === 0 ? (
+        {filteredPdfs.length === 0 ? (
           <Grid item xs={12}>
             <Paper
               elevation={0}
@@ -244,12 +472,14 @@ const BlockDiagram = () => {
                 sx={{ fontSize: 60, color: "text.secondary", opacity: 0.5 }}
               />
               <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
-                Chưa có tài liệu nào. Hãy thêm tài liệu mới.
+                {searchTerm
+                  ? "Không tìm thấy tài liệu"
+                  : "Chưa có tài liệu nào. Hãy thêm tài liệu mới."}
               </Typography>
             </Paper>
           </Grid>
         ) : (
-          pdfFiles.map((file) => (
+          filteredPdfs.map((file) => (
             <Grid key={file._id} item xs={12} md={6}>
               <Card
                 elevation={3}
@@ -267,7 +497,7 @@ const BlockDiagram = () => {
                 <CardContent sx={{ flexGrow: 1, p: 0 }}>
                   <Box sx={{ height: 500, position: "relative" }}>
                     <object
-                      data={`http://localhost:9999/${file.filePath}`}
+                      data={`${REACT_APP_URL_BE}/${file.filePath}`}
                       type="application/pdf"
                       width="100%"
                       height="100%"
@@ -305,29 +535,33 @@ const BlockDiagram = () => {
                   </Typography>
 
                   <CardActions sx={{ justifyContent: "center", gap: 1 }}>
-                    <Tooltip title="Sửa">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        startIcon={<EditIcon />}
-                        onClick={() => handleEdit(file)}
-                      >
-                        Sửa
-                      </Button>
-                    </Tooltip>
+                    {hasPermission(user, "UpdateAndDeleteBlockDiagram") && (
+                      <>
+                        <Tooltip title="Sửa">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="primary"
+                            startIcon={<EditIcon />}
+                            onClick={() => handleEdit(file)}
+                          >
+                            Sửa
+                          </Button>
+                        </Tooltip>
 
-                    <Tooltip title="Xóa">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="error"
-                        startIcon={<DeleteIcon />}
-                        onClick={() => handleDelete(file._id)}
-                      >
-                        Xóa
-                      </Button>
-                    </Tooltip>
+                        <Tooltip title="Xóa">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleDelete(file._id)}
+                          >
+                            Xóa
+                          </Button>
+                        </Tooltip>
+                      </>
+                    )}
 
                     <Tooltip title="Xem full-screen">
                       <Button
@@ -337,7 +571,7 @@ const BlockDiagram = () => {
                         startIcon={<VisibilityIcon />}
                         onClick={() =>
                           window.open(
-                            `http://localhost:9999/${file.filePath}`,
+                            `${REACT_APP_URL_BE}/${file.filePath}`,
                             "_blank"
                           )
                         }
@@ -524,7 +758,7 @@ const BlockDiagram = () => {
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={handleCloseSnackbar}

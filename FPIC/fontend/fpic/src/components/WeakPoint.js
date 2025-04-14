@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Container,
   Card,
@@ -35,30 +34,27 @@ import {
   Divider,
   Snackbar,
   Fade,
+  InputAdornment,
+  Paper as MuiPaper,
 } from "@mui/material";
 import {
-  Add,
+  Add as AddIcon,
   Visibility,
   Edit,
   Delete,
   Warning,
-  Search,
-  Close,
   CloudUpload,
   Category,
+  Search as SearchIcon,
+  Close as CloseIcon,
+  Memory,
 } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import { REACT_APP_URL_BE } from "../config";
-
-// Custom styled components
-const GradientHeader = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  background: "linear-gradient(135deg, #1976d2 0%, #0d47a1 100%)",
-  color: "white",
-  textAlign: "center",
-  boxShadow: theme.shadows[2],
-  marginBottom: theme.spacing(3),
-}));
+import api from "../api";
+import { AuthContext } from "../context/AuthContext";
+import { hasPermission } from "../helper/function";
 
 const CategoryCard = styled(Card)(({ theme }) => ({
   height: "100%",
@@ -88,8 +84,67 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   },
 }));
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  borderRadius: "12px",
+  position: "relative",
+  maxWidth: 600,
+  margin: "0",
+  boxShadow: theme.shadows[3],
+  transition: "all 0.3s ease",
+  "&:hover": {
+    boxShadow: theme.shadows[6],
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    paddingLeft: "8px",
+    "& fieldset": {
+      borderColor: theme.palette.grey[300],
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+    "&.Mui-focused fieldset": {
+      borderWidth: "1px",
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
+
+const SuggestionsPaper = styled(Paper)(({ theme }) => ({
+  position: "absolute",
+  top: "calc(100% + 8px)",
+  left: 0,
+  right: 0,
+  zIndex: 1300,
+  maxHeight: "400px",
+  overflow: "auto",
+  borderRadius: "12px",
+  boxShadow: theme.shadows[6],
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const AddButton = styled(Button)(({ theme }) => ({
+  borderRadius: "28px",
+  textTransform: "none",
+  fontWeight: 600,
+  padding: "10px 24px",
+  marginTop: "16px",
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+    transform: "translateY(-2px)",
+    boxShadow: theme.shadows[4],
+  },
+  transition: "all 0.3s ease",
+}));
+
 const WeakPoint = () => {
-  // State declarations (keep the same)
+  const { user } = useContext(AuthContext);
+  const theme = useTheme();
   const [categories, setCategories] = useState({
     jtag: [],
     testPin: [],
@@ -109,13 +164,12 @@ const WeakPoint = () => {
   const [modalMode, setModalMode] = useState("add");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [nameError, setNameError] = useState(""); // Thêm state để lưu lỗi tên
+  const [nameError, setNameError] = useState("");
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
-
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -124,8 +178,10 @@ const WeakPoint = () => {
     category: "jtag",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Fetch data (keep the same)
   useEffect(() => {
     setIsLoading(true);
     const endpoints = [
@@ -144,10 +200,11 @@ const WeakPoint = () => {
         const newCategories = { ...categories };
         for (const endpoint of endpoints) {
           try {
-            const response = await axios.get(endpoint.url);
+            const response = await api.get(endpoint.url);
             newCategories[endpoint.key] = response.data.map((item) => ({
               ...item,
               id: item.id || Math.random().toString(36).substr(2, 9),
+              category: endpoint.key,
             }));
           } catch (err) {
             console.error(`Error fetching ${endpoint.key} data:`, err);
@@ -164,12 +221,56 @@ const WeakPoint = () => {
     fetchAllData();
   }, []);
 
+  // Hàm xử lý tìm kiếm
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowSuggestions(value.trim().length > 0);
+    setIsSearching(true);
+
+    if (value.trim().length > 0) {
+      const suggestions = Object.values(categories)
+        .flat()
+        .filter(
+          (item) =>
+            item.name?.toLowerCase().includes(value.toLowerCase()) ||
+            item.description?.toLowerCase().includes(value.toLowerCase())
+        )
+        .slice(0, 10);
+      setSearchSuggestions(suggestions);
+    } else {
+      setSearchSuggestions([]);
+    }
+    setIsSearching(false);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setShowSuggestions(false);
+    setCurrentPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setSearchSuggestions([]);
+    setShowSuggestions(false);
+    setCurrentPage(1);
+  };
+
+  const handleSelectSuggestion = (item) => {
+    setSearchTerm(item.name);
+    setActiveTab(item.category);
+    setShowSuggestions(false);
+    setCurrentPage(1);
+  };
+
   // Filter items based on search term
   const filteredItems = (categories[activeTab] || []).filter(
     (item) =>
       item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   // Calculate pagination
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -182,7 +283,6 @@ const WeakPoint = () => {
     setSnackbar({ open: true, message, severity });
   };
 
-  // CRUD handlers (keep the same)
   const handleAddItem = () => {
     setModalMode("add");
     setFormData({
@@ -191,7 +291,9 @@ const WeakPoint = () => {
       imageURL: "",
       category: activeTab,
     });
-    setNameError(""); // Reset name error when opening modal
+    setNameError("");
+    setImageFile(null);
+    setImagePreview(null);
     setIsModalOpen(true);
   };
 
@@ -233,7 +335,6 @@ const WeakPoint = () => {
     }
   };
 
-  // Hàm kiểm tra tên đã tồn tại chưa
   const checkNameExists = (name, category, currentItemId = null) => {
     return categories[category].some(
       (item) =>
@@ -245,17 +346,14 @@ const WeakPoint = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Xóa khoảng trắng ở đầu và cuối tên
     const trimmedName = formData.name.trim();
 
-    if (modalMode === "add") {
-      // Kiểm tra tên trống
+    if (modalMode === "add" || modalMode === "edit") {
       if (trimmedName === "") {
         setNameError("Tên không được để trống");
         return;
       }
 
-      // Kiểm tra tên đã tồn tại chưa
       const currentItemId = modalMode === "edit" ? selectedItem.id : null;
       if (checkNameExists(trimmedName, formData.category, currentItemId)) {
         setNameError(
@@ -266,10 +364,7 @@ const WeakPoint = () => {
     }
 
     try {
-      let imageUrl = selectedItem?.img || "";
-
       if (modalMode === "add") {
-        // Kiểm tra xem đã chọn hình ảnh chưa
         if (!imageFile) {
           setError("Vui lòng chọn hình ảnh cho thành phần mới");
           return;
@@ -281,7 +376,7 @@ const WeakPoint = () => {
         form.append("description", formData.description || "");
         form.append("category", formData.category);
 
-        const response = await axios.post(
+        const response = await api.post(
           `${REACT_APP_URL_BE}/uploadWeakPoint`,
           form,
           {
@@ -293,16 +388,18 @@ const WeakPoint = () => {
           ...prev,
           [formData.category]: [
             ...prev[formData.category],
-            response.data.newWeakPoint,
+            { ...response.data.newWeakPoint, category: formData.category },
           ],
         }));
       } else if (modalMode === "edit") {
         let form = new FormData();
-        form.append("image", imageFile);
-        form.append("name", formData.name.trim());
-        form.append("description", formData.description);
+        if (imageFile) {
+          form.append("image", imageFile);
+        }
+        form.append("name", trimmedName);
+        form.append("description", formData.description || "");
 
-        const data = await axios.put(
+        const data = await api.put(
           `${REACT_APP_URL_BE}/updateWeakPoint/${selectedItem._id}`,
           form
         );
@@ -310,11 +407,13 @@ const WeakPoint = () => {
         setCategories((prev) => ({
           ...prev,
           [formData.category]: prev[formData.category].map((item) =>
-            item._id === selectedItem._id ? data.data.weakPoint : item
+            item._id === selectedItem._id
+              ? { ...data.data.weakPoint, category: formData.category }
+              : item
           ),
         }));
       } else if (modalMode === "delete") {
-        await axios.delete(
+        await api.delete(
           `${REACT_APP_URL_BE}/deleteWeakPoint/${selectedItem._id}`
         );
         showSnackbar("Xóa mẫu điểm yếu thành công", "success");
@@ -347,7 +446,6 @@ const WeakPoint = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Kiểm tra lỗi tên khi người dùng nhập
     if (name === "name") {
       if (value.trim() === "") {
         setNameError("Tên không được để trống");
@@ -355,7 +453,7 @@ const WeakPoint = () => {
         checkNameExists(
           value,
           formData.category,
-          modalMode === "edit" ? selectedItem.id : null
+          modalMode === "edit" ? selectedItem?.id : null
         )
       ) {
         setNameError(
@@ -367,7 +465,6 @@ const WeakPoint = () => {
     }
   };
 
-  // Category display names
   const categoryNames = {
     jtag: "JTAG",
     testPin: "Test Pin",
@@ -381,21 +478,180 @@ const WeakPoint = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
-      {/* Header with gradient */}
-      <GradientHeader>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          sx={{ fontWeight: 600 }}
+      <Paper
+        elevation={2}
+        sx={{
+          p: 3,
+          mb: 4,
+          borderRadius: 2,
+          background: `linear-gradient(120deg, ${
+            theme.palette.primary.main
+          }, ${alpha(theme.palette.primary.light, 0.8)})`,
+          color: "white",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          Điểm Yếu Trên Bo Mạch
-        </Typography>
-      </GradientHeader>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Memory sx={{ fontSize: 40, mr: 2 }} />
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+              Điểm yếu bo mạch
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+      <Box>
+        {/* Search and Add */}
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 1500,
+            mx: "auto",
+            position: "relative",
+            mb: 4,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              justifyContent: "space-evenly",
+            }}
+          >
+            <StyledPaper
+              elevation={1}
+              component="form"
+              onSubmit={handleSearchSubmit}
+              sx={{ flex: 1 }}
+            >
+              <StyledTextField
+                fullWidth
+                variant="outlined"
+                placeholder="Tìm kiếm vi mạch theo tên hoặc mô tả..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => searchTerm.trim() && setShowSuggestions(true)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon
+                        color="primary"
+                        sx={{ fontSize: "1.25rem" }}
+                      />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <>
+                      {isSearching && (
+                        <CircularProgress size={20} sx={{ mr: 1 }} />
+                      )}
+                      {searchTerm && (
+                        <IconButton
+                          aria-label="clear search"
+                          onClick={clearSearch}
+                          edge="end"
+                          size="small"
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </>
+                  ),
+                }}
+              />
 
-      {/* Main Content */}
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <SuggestionsPaper>
+                  {searchSuggestions.map((item) => (
+                    <MenuItem
+                      key={item._id || item.id}
+                      onClick={() => handleSelectSuggestion(item)}
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: theme.palette.action.hover,
+                        },
+                        py: 1.5,
+                        px: 2,
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        "&:last-child": {
+                          borderBottom: "none",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <CardMedia
+                          component="img"
+                          image={`${REACT_APP_URL_BE}${item.imagePath}`}
+                          alt={item.name || "No name"}
+                          sx={{
+                            width: 48,
+                            height: 48,
+                            mr: 2,
+                            borderRadius: 1,
+                            objectFit: "cover",
+                          }}
+                          onError={(e) => {
+                            e.target.src = "/placeholder-microchip.png";
+                          }}
+                        />
+                        <Box sx={{ overflow: "hidden" }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: 500,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {item.name || "Không có tên"}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {item.description?.substring(0, 60) ||
+                              "Không có mô tả"}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </SuggestionsPaper>
+              )}
+            </StyledPaper>
+
+            {hasPermission(user, "addAccessory") && (
+              <AddButton
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddItem}
+              >
+                Thêm
+              </AddButton>
+            )}
+          </Box>
+        </Box>
+      </Box>
+
       <Paper elevation={2} sx={{ borderRadius: 3, overflow: "hidden", mb: 4 }}>
-        {/* Tabs with improved styling */}
         <Box sx={{ bgcolor: "background.paper" }}>
           <StyledTabs
             value={activeTab}
@@ -425,9 +681,7 @@ const WeakPoint = () => {
           </StyledTabs>
         </Box>
 
-        {/* Content Area */}
         <Box sx={{ p: 3 }}>
-          {/* Action Bar with Search and Add */}
           <Stack
             direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
@@ -443,43 +697,6 @@ const WeakPoint = () => {
                 ({filteredItems.length} items)
               </Box>
             </Typography>
-
-            <Stack
-              direction="row"
-              spacing={2}
-              sx={{ width: { xs: "100%", sm: "auto" } }}
-            >
-              <TextField
-                size="small"
-                placeholder="Tìm kiếm..."
-                InputProps={{
-                  startAdornment: <Search color="action" sx={{ mr: 1 }} />,
-                  endAdornment: searchTerm && (
-                    <IconButton size="small" onClick={() => setSearchTerm("")}>
-                      <Close fontSize="small" />
-                    </IconButton>
-                  ),
-                }}
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                sx={{
-                  width: { xs: "100%", sm: 300 },
-                  "& .MuiOutlinedInput-root": { borderRadius: 2 },
-                }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Add />}
-                onClick={handleAddItem}
-                sx={{ borderRadius: 2 }}
-              >
-                Thêm Mới
-              </Button>
-            </Stack>
           </Stack>
 
           {error && (
@@ -501,103 +718,98 @@ const WeakPoint = () => {
             </Box>
           ) : (
             <>
-              {/* Items Grid */}
               {displayedItems.length > 0 ? (
                 <Grid container spacing={3}>
-                  {displayedItems.map((item, index) => {
-                    return (
-                      <Grid
-                        item
-                        xs={12}
-                        sm={6}
-                        md={4}
-                        lg={3}
-                        key={item.id || index}
-                      >
-                        <CategoryCard>
-                          <Box sx={{ position: "relative" }}>
-                            <CardMedia
-                              component="img"
-                              height="180"
-                              image={`${REACT_APP_URL_BE}${item.imagePath}`}
-                              alt={item.name || `Thành phần ${index + 1}`}
-                              sx={{
-                                objectFit: "contain",
-                                p: 2,
-                                cursor: "pointer",
-                                bgcolor: "background.default",
-                                borderRadius: 1,
-                              }}
-                              onClick={() => handleViewItem(item)}
-                            />
-                            <Chip
-                              label={categoryNames[activeTab]}
-                              size="small"
-                              color="primary"
-                              sx={{
-                                position: "absolute",
-                                top: 8,
-                                left: 8,
-                                fontWeight: 600,
-                                textTransform: "capitalize",
-                              }}
-                            />
-                          </Box>
+                  {displayedItems.map((item, index) => (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      lg={3}
+                      key={item.id || index}
+                    >
+                      <CategoryCard>
+                        <Box sx={{ position: "relative" }}>
+                          <CardMedia
+                            component="img"
+                            height="180"
+                            image={`${REACT_APP_URL_BE}${item.imagePath}`}
+                            alt={item.name || `Thành phần ${index + 1}`}
+                            sx={{
+                              objectFit: "contain",
+                              p: 2,
+                              cursor: "pointer",
+                              bgcolor: "background.default",
+                              borderRadius: 1,
+                            }}
+                            onClick={() => handleViewItem(item)}
+                          />
+                          <Chip
+                            label={categoryNames[activeTab]}
+                            size="small"
+                            color="primary"
+                            sx={{
+                              position: "absolute",
+                              top: 8,
+                              left: 8,
+                              fontWeight: 600,
+                              textTransform: "capitalize",
+                            }}
+                          />
+                        </Box>
 
-                          <CardContent sx={{ flexGrow: 1 }}>
-                            <Typography
-                              variant="h6"
-                              gutterBottom
-                              sx={{
-                                fontWeight: 600,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {item.name || `Thành phần ${index + 1}`}
-                            </Typography>
-
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden",
-                                mb: 1,
-                              }}
-                            >
-                              {item.description || "Không có mô tả"}
-                            </Typography>
-
-                            {item.createdAt && (
-                              <Typography
-                                variant="caption"
-                                color="text.disabled"
-                              >
-                                Tạo lúc:{" "}
-                                {new Date(item.createdAt).toLocaleString()}
-                              </Typography>
-                            )}
-                          </CardContent>
-
-                          <Divider />
-
-                          <CardActions
-                            sx={{ justifyContent: "space-between", p: 1.5 }}
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Typography
+                            variant="h6"
+                            gutterBottom
+                            sx={{
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
                           >
-                            <Tooltip title="Xem chi tiết">
-                              <IconButton
-                                color="info"
-                                onClick={() => handleViewItem(item)}
-                                aria-label="view"
-                              >
-                                <Visibility />
-                              </IconButton>
-                            </Tooltip>
+                            {item.name || `Thành phần ${index + 1}`}
+                          </Typography>
 
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              mb: 1,
+                            }}
+                          >
+                            {item.description || "Không có mô tả"}
+                          </Typography>
+
+                          {item.createdAt && (
+                            <Typography variant="caption" color="text.disabled">
+                              Tạo lúc:{" "}
+                              {new Date(item.createdAt).toLocaleString()}
+                            </Typography>
+                          )}
+                        </CardContent>
+
+                        <Divider />
+
+                        <CardActions
+                          sx={{ justifyContent: "space-between", p: 1.5 }}
+                        >
+                          <Tooltip title="Xem chi tiết">
+                            <IconButton
+                              color="info"
+                              onClick={() => handleViewItem(item)}
+                              aria-label="view"
+                            >
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
+                          {hasPermission(user, "UpdateAndDeleteWeakPoint") && (
                             <Stack direction="row" spacing={1}>
                               <Tooltip title="Sửa">
                                 <IconButton
@@ -618,11 +830,11 @@ const WeakPoint = () => {
                                 </IconButton>
                               </Tooltip>
                             </Stack>
-                          </CardActions>
-                        </CategoryCard>
-                      </Grid>
-                    );
-                  })}
+                          )}
+                        </CardActions>
+                      </CategoryCard>
+                    </Grid>
+                  ))}
                 </Grid>
               ) : (
                 <Box
@@ -634,9 +846,6 @@ const WeakPoint = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Search
-                    sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
-                  />
                   <Typography variant="h6" gutterBottom>
                     {searchTerm
                       ? "Không tìm thấy kết quả"
@@ -654,7 +863,7 @@ const WeakPoint = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    startIcon={<Add />}
+                    startIcon={<AddIcon />}
                     onClick={handleAddItem}
                     sx={{ borderRadius: 2 }}
                   >
@@ -663,7 +872,6 @@ const WeakPoint = () => {
                 </Box>
               )}
 
-              {/* Pagination */}
               {filteredItems.length > 0 && (
                 <Stack
                   direction={{ xs: "column", sm: "row" }}
@@ -733,10 +941,9 @@ const WeakPoint = () => {
             outline: "none",
             display: "flex",
             flexDirection: "column",
-            maxHeight: "90vh", // Giữ nguyên maxHeight nhưng điều chỉnh inner content
+            maxHeight: "90vh",
           }}
         >
-          {/* Header */}
           <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider" }}>
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
               {modalMode === "add"
@@ -749,7 +956,6 @@ const WeakPoint = () => {
             </Typography>
           </Box>
 
-          {/* Content - Sử dụng Box với overflow: hidden và flex để tránh scroll */}
           <Box
             sx={{
               p: 3,
@@ -788,7 +994,6 @@ const WeakPoint = () => {
                   flexDirection: "column",
                 }}
               >
-                {/* Image section with fixed height */}
                 <Box
                   sx={{
                     flexShrink: 0,
@@ -802,23 +1007,25 @@ const WeakPoint = () => {
                   }}
                 >
                   <img
-                    src={`${REACT_APP_URL_BE}${selectedItem.imagePath}`}
+                    src={`${REACT_APP_URL_BE}${selectedItem?.imagePath}`}
                     alt={selectedItem?.name}
                     style={{
                       maxWidth: "100%",
                       maxHeight: "100%",
                       objectFit: "contain",
                     }}
+                    onError={(e) => {
+                      e.target.src = "/placeholder-image.jpg";
+                    }}
                   />
                 </Box>
 
-                {/* Table section with scroll if needed */}
                 <Box
                   sx={{
                     flex: 1,
                     overflow: "auto",
                     "&::-webkit-scrollbar": {
-                      display: "none", // Ẩn scrollbar nhưng vẫn cho phép scroll
+                      display: "none",
                     },
                   }}
                 >
@@ -988,7 +1195,6 @@ const WeakPoint = () => {
             )}
           </Box>
 
-          {/* Footer */}
           <Box
             sx={{
               p: 2,
@@ -1035,6 +1241,7 @@ const WeakPoint = () => {
           </Box>
         </Box>
       </Modal>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

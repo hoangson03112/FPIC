@@ -31,19 +31,22 @@ import {
   Logout,
   Login,
 } from "@mui/icons-material";
-import AccountContext from "./contexts/AccountContext";
+import AccountContext from "./context/AccountContext";
 import StorageIcon from "@mui/icons-material/Storage";
+import { AuthContext } from "./context/AuthContext";
+import { hasPermission } from "./helper/function";
 
 const drawerWidth = 300;
 
 const Layout = ({ children }) => {
+  const { user, logout } = React.useContext(AuthContext);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
-  const [account, setAccount] = useState({});
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [subMenus, setSubMenus] = useState({
@@ -56,12 +59,6 @@ const Layout = ({ children }) => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-    window.location.reload();
-  };
-
   const navigateTo = () => {
     navigate("/auth/login");
   };
@@ -72,22 +69,6 @@ const Layout = ({ children }) => {
       [menu]: !prev[menu],
     }));
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await AccountContext.Authentication();
-
-        setAccount(data.account);
-      } catch (error) {
-        console.error("Error fetching account data: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     if (
@@ -134,14 +115,14 @@ const Layout = ({ children }) => {
           <AdminPanelSettings />
         </Avatar>
         <Box sx={{ flexGrow: 1 }}>
-          {account?.fullName ? (
+          {user?.fullName ? (
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                {account?.fullName}
+                {user?.fullName}
               </Typography>
               <Button
                 startIcon={<Logout />}
-                onClick={handleLogout}
+                onClick={logout}
                 sx={{
                   color: "white",
                   p: 0,
@@ -169,34 +150,34 @@ const Layout = ({ children }) => {
 
       <Divider sx={{ bgcolor: "white", opacity: 0.3, my: 1 }} />
 
-      {/* Danh sách menu */}
       <List sx={{ flexGrow: 1, px: 1 }}>
-        {/* Trang chủ */}
-        <ListItem disablePadding>
-          <ListItemButton
-            component={Link}
-            to="/dashboard"
-            selected={currentPath === "/dashboard"}
-            sx={{
-              borderRadius: 1,
-              mb: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "primary.light",
-                color: "white",
-                "&:hover": { bgcolor: "primary.light" },
-              },
-              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
-            }}
-          >
-            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-              <Home />
-            </ListItemIcon>
-            <ListItemText
-              primary="Trang chủ"
-              primaryTypographyProps={{ fontWeight: 500 }}
-            />
-          </ListItemButton>
-        </ListItem>
+        {hasPermission(user, "dashboard") && (
+          <ListItem disablePadding>
+            <ListItemButton
+              component={Link}
+              to="/dashboard"
+              selected={currentPath === "/dashboard"}
+              sx={{
+                borderRadius: 1,
+                mb: 0.5,
+                "&.Mui-selected": {
+                  bgcolor: "primary.light",
+                  color: "white",
+                  "&:hover": { bgcolor: "primary.light" },
+                },
+                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+              }}
+            >
+              <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+                <Home />
+              </ListItemIcon>
+              <ListItemText
+                primary="Trang chủ"
+                primaryTypographyProps={{ fontWeight: 500 }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
 
         {/* Xây dựng dữ liệu */}
         <ListItem disablePadding>
@@ -292,84 +273,62 @@ const Layout = ({ children }) => {
           </List>
         </Collapse>
 
-        {/* Quản trị */}
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => toggleSubMenu("menu3")}
-            sx={{
-              borderRadius: 1,
-              mb: 0.5,
-              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
-            }}
-          >
-            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-              <AdminPanelSettings />
-            </ListItemIcon>
-            <ListItemText
-              primary="Quản trị"
-              primaryTypographyProps={{ fontWeight: 500 }}
-            />
-            {subMenus.menu3 ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
-        </ListItem>
-        <Collapse in={subMenus.menu3} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {[
-              { text: "Admin", path: "/admin/manager-account/admin" },
-              {
-                text: "Đánh giá viên",
-                path: "/admin/manager-account/assessor",
-              },
-              { text: "Khách hàng", path: "/admin/manager-account/user" },
-            ].map((item) => (
+        {hasPermission(user, "manageUser") && (
+          <>
+            <ListItem disablePadding>
               <ListItemButton
-                key={item.path}
-                component={Link}
-                to={item.path}
-                selected={currentPath.includes(item.path)}
+                onClick={() => toggleSubMenu("menu3")}
                 sx={{
-                  pl: 6,
                   borderRadius: 1,
                   mb: 0.5,
-                  "&.Mui-selected": {
-                    bgcolor: "white",
-                    color: "primary.main",
-                    "&:hover": { bgcolor: "grey.200" },
-                  },
                   "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
                 }}
               >
-                <ListItemText primary={item.text} />
+                <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+                  <AdminPanelSettings />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Quản trị"
+                  primaryTypographyProps={{ fontWeight: 500 }}
+                />
+                {subMenus.menu3 ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
-            ))}
-          </List>
-        </Collapse>
-
-        {/* <ListItem disablePadding>
-          <ListItemButton
-            component={Link}
-            to="/charts"
-            selected={currentPath === "/charts"}
-            sx={{
-              borderRadius: 1,
-              mb: 0.5,
-              "&.Mui-selected": {
-                bgcolor: "primary.light",
-                color: "white",
-                "&:hover": { bgcolor: "primary.light" },
-              },
-              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
-            }}
-          >
-            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-              <BarChart />
-            </ListItemIcon>
-            <ListItemText
-              primary="Biểu đồ"
-              primaryTypographyProps={{ fontWeight: 500 }}
-            />
-          </ListItemButton>
-        </ListItem> */}
+            </ListItem>
+            <Collapse in={subMenus.menu3} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {[
+                  { text: "Admin", path: "/admin/manager-account/admin" },
+                  {
+                    text: "Đánh giá viên",
+                    path: "/admin/manager-account/assessor",
+                  },
+                  { text: "Khách hàng", path: "/admin/manager-account/user" },
+                ].map((item) => (
+                  <ListItemButton
+                    key={item.path}
+                    component={Link}
+                    to={item.path}
+                    selected={currentPath.includes(item.path)}
+                    sx={{
+                      pl: 6,
+                      borderRadius: 1,
+                      mb: 0.5,
+                      "&.Mui-selected": {
+                        bgcolor: "white",
+                        color: "primary.main",
+                        "&:hover": { bgcolor: "grey.200" },
+                      },
+                      "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+                    }}
+                  >
+                    <ListItemText primary={item.text} />
+                  </ListItemButton>
+                ))}
+              </List>
+            </Collapse>
+          </>
+        )}
+        {/* Quản trị */}
       </List>
 
       {/* Footer (optional) */}
