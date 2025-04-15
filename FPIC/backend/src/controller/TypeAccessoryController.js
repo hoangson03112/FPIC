@@ -25,8 +25,6 @@ exports.getTypesAccessory = async (req, res) => {
           ? Buffer.from(type.image, "base64").toString("utf-8")
           : null,
       }));
-      console.log(totalItem);
-
       res.status(200).json({
         status: 200,
         message: "get types successfully",

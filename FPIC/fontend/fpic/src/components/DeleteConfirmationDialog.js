@@ -93,7 +93,7 @@ export default function DeleteConfirmationDialog({
               lineHeight: 1.6,
             }}
           >
-            Bạn có chắc chắn muốn xoá phụ kiện này không?
+            Bạn có chắc chắn muốn xoá không?
             <br />
             <Typography
               component="span"

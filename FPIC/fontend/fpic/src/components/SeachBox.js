@@ -137,7 +137,7 @@ export default function SearchBox({
             display: "flex",
             gap: 2,
             alignItems: "center",
-            justifyContent: "space-evenly",
+            justifyContent: "start",
           }}
         >
           <StyledPaper
@@ -273,16 +273,6 @@ export default function SearchBox({
               </SuggestionsPaper>
             )}
           </StyledPaper>
-
-          {hasPermission(user, "addAccessory") && (
-            <AddButton
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setShowModal(true)}
-            >
-              Thêm
-            </AddButton>
-          )}
         </Box>
       </Box>
     </>

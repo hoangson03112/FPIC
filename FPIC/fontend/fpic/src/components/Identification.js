@@ -472,33 +472,32 @@ const Identification = () => {
                 Nhận diện OCR
               </Button>
 
-              {/* Autocomplete for selecting labels */}
               <Autocomplete
                 multiple
                 sx={{
-                  width: "25%", // Tăng chiều rộng để dễ nhìn hơn
+                  width: "25%",
                   marginLeft: "20px",
                   "& .MuiOutlinedInput-root": {
-                    padding: "5px 10px", // Thêm padding bên trong input
-                    borderRadius: "8px", // Bo góc cho đẹp hơn
-                    borderColor: "#3892ee", // Đổi màu viền
+                    padding: "5px 10px",
+                    borderRadius: "8px",
+                    borderColor: "#3892ee",
                     "&:hover": {
-                      borderColor: "#2a73d3", // Đổi màu viền khi rê chuột
+                      borderColor: "#2a73d3",
                     },
                   },
                   "& .MuiChip-root": {
-                    backgroundColor: "#f5f5f5", // Màu nền sáng cho các chip đã chọn
-                    fontSize: "0.85rem", // Giảm kích thước font của chip
-                    color: "#333", // Màu chữ tối hơn
+                    backgroundColor: "#f5f5f5",
+                    fontSize: "0.85rem",
+                    color: "#333",
                     "& .MuiChip-deleteIcon": {
-                      color: "#888", // Màu biểu tượng xóa trên chip
+                      color: "#888",
                     },
                   },
                   "& .MuiAutocomplete-clearIndicator": {
-                    color: "#666", // Màu nút xóa nội dung
+                    color: "#666",
                   },
                   "& .MuiAutocomplete-popupIndicator": {
-                    color: "#3892ee", // Màu của mũi tên dropdown
+                    color: "#3892ee",
                   },
                 }}
                 id="tags-outlined"

@@ -1,58 +1,40 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useTheme, alpha } from "@mui/material";
+
 import {
   Alert,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
   Pagination,
   Snackbar,
-  Stack,
-  TextField,
   Fade,
-  Autocomplete,
   Box,
   Typography,
-  Grid,
 } from "@mui/material";
 
-// Icons
 import {
   Search as SearchIcon,
   Close as CloseIcon,
-  ChevronLeft,
-  ChevronRight,
   Save as SaveIcon,
   ImageNotSupported as ImageNotSupportedIcon,
-  Memory,
-  Add as AddIcon,
 } from "@mui/icons-material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
-// Components and utils
 import "./Accessory.css";
-import { Col, Row, Card, Container } from "react-bootstrap";
+import { Col, Row, Card } from "react-bootstrap";
 import { AccessoryDetailDialog } from "./components/AccessoryDetailDialog";
 import { REACT_APP_URL_BE } from "./config";
 import api from "./api";
 import SeachBox from "./components/SeachBox";
-import RenderActionBar from "./components/renderActionBar";
+import AddAccessoryDialog from "./components/AddAccessoryDialog";
 
 const Transition = React.forwardRef((props, ref) => (
   <Fade ref={ref} {...props} timeout={700} />
 ));
 
 function Accessory() {
-  // Pagination states
   const [page, setPage] = useState(1);
   const [limit] = useState(18);
   const [pageAccessory, setPageAccessory] = useState(1);
   const [limitAccessory] = useState(12);
-
+  const [typeSelected, setTypeSelected] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showModalDesc, setShowModalDesc] = useState(false);
 
@@ -100,7 +82,6 @@ function Accessory() {
     fetchData();
   }, [page, limit, search]);
 
-  // Update accessory page data when pageAccessory changes
   useEffect(() => {
     if (data.accessories.length > 0 && formAccessory.type) {
       fetchAccessories(formAccessory.type);
@@ -137,7 +118,7 @@ function Accessory() {
           params: { page, limit, query: search },
         }
       );
-      console.log(response);
+
       setData((prev) => ({
         ...prev,
         typesAccessories: response.data.data || [],
@@ -149,7 +130,6 @@ function Accessory() {
         isLoading: false,
       }));
 
-      // Ensure page state matches response
       if (response.data.pagination?.currentPage) {
         setPage(response.data.pagination.currentPage);
       }
@@ -181,7 +161,6 @@ function Accessory() {
           isLoading: false,
         }));
 
-        // Update current page state to match response
         if (response.data.pagination?.currentPage) {
           setPageAccessory(response.data.pagination.currentPage);
         }
@@ -233,11 +212,10 @@ function Accessory() {
 
   const handleCreateAccessory = async () => {
     setIsLoadingButton(true);
-
     const form = new FormData();
     form.append("title", formData.title);
     form.append("description", formData.description ?? "");
-    form.append("type", formData.type);
+    form.append("type", typeSelected._id);
     form.append("file", formData.image);
 
     try {
@@ -246,8 +224,9 @@ function Accessory() {
       });
 
       if (response) {
-        showNotification(response.data.message, "success");
-        fetchData();
+        showNotification("Thêm thành công!", "success");
+
+        await fetchAccessories(typeSelected._id);
         resetFormData();
         setShowModal(false);
       }
@@ -261,7 +240,6 @@ function Accessory() {
     }
   };
 
-  // Helper Functions
   const showNotification = (message, severity) => {
     setSnackBar({
       open: true,
@@ -296,15 +274,11 @@ function Accessory() {
     };
   }, []);
 
-  // Event Handlers
   const handlePageChange = (_, newPage) => {
-    // Update page state - this will trigger the useEffect to fetch data
     setPage(newPage);
   };
 
-  // Handler for accessory pagination
   const handleAccessoryPageChange = (_, newPage) => {
-    // Update pageAccessory state - this will trigger the useEffect to fetch accessories
     setPageAccessory(newPage);
   };
 
@@ -329,7 +303,7 @@ function Accessory() {
     e?.preventDefault();
     setSearch(searchTerm);
     setShowSuggestions(false);
-    // Reset to page 1 when submitting a new search
+
     setPage(1);
   };
 
@@ -337,7 +311,7 @@ function Accessory() {
     setSearchTerm(accessory.title);
     setSearch(accessory.title);
     setShowSuggestions(false);
-    // Reset to page 1 when selecting a suggestion
+
     setPage(1);
 
     if (accessory.type) {
@@ -350,13 +324,13 @@ function Accessory() {
     setSearchTerm("");
     setSearch("");
     clearSearchState();
-    // Reset to page 1 when clearing search
+
     setPage(1);
     fetchData();
   };
 
   const handleClickItem = (type) => {
-    // Reset accessory pagination when viewing a new type
+    setTypeSelected(type);
     setPageAccessory(1);
     fetchAccessories(type._id);
     handleClickModalDesc(true);
@@ -455,181 +429,6 @@ function Accessory() {
     );
   };
 
-  const renderAddAccessoryDialog = () => (
-    <Dialog
-      open={showModal}
-      onClose={() => setShowModal(false)}
-      maxWidth="md"
-      fullWidth
-      TransitionComponent={Transition}
-      sx={{
-        "& .MuiDialog-paper": {
-          borderRadius: "12px",
-          overflow: "hidden",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          bgcolor: "primary.main",
-          color: "white",
-          py: 2,
-          px: 3,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-          Thêm linh kiện mới
-        </Typography>
-        <IconButton
-          edge="end"
-          color="inherit"
-          onClick={() => setShowModal(false)}
-          sx={{
-            "&:hover": {
-              backgroundColor: "rgba(255,255,255,0.1)",
-            },
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent sx={{ py: 3 }}>
-        <Stack spacing={3}>
-          <Grid container spacing={2} sx={{ py: 3 }}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                name="title"
-                label="Tên linh kiện"
-                variant="outlined"
-                value={formData.title || ""}
-                onChange={handleInputChange}
-                error={!!errors.title}
-                helperText={errors.title}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                  },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Autocomplete
-                options={data.typesAccessories || []}
-                getOptionLabel={(option) => option.title}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Loại linh kiện"
-                    error={!!errors.type}
-                    helperText={errors.type}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
-                    }}
-                  />
-                )}
-                onChange={(event, newValue) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    type: newValue?._id || "",
-                  }));
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          <TextField
-            fullWidth
-            name="description"
-            label="Mô tả"
-            variant="outlined"
-            multiline
-            rows={4}
-            value={formData.description || ""}
-            onChange={handleInputChange}
-            error={!!errors.description}
-            helperText={errors.description}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-          />
-
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ mb: 1 }}>
-              Hình ảnh linh kiện
-            </Typography>
-            <Button
-              component="label"
-              variant="outlined"
-              startIcon={<CloudUploadIcon />}
-              fullWidth
-              sx={{
-                py: 2,
-                borderRadius: "8px",
-                borderStyle: "dashed",
-                "&:hover": {
-                  borderStyle: "dashed",
-                },
-              }}
-            >
-              Tải lên hình ảnh
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={handleInputChange}
-                hidden
-              />
-            </Button>
-            {formData.image && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 1, display: "block" }}
-              >
-                Đã chọn: {formData.image.name || "Ảnh linh kiện"}
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button
-              variant="contained"
-              onClick={handleCreateAccessory}
-              disabled={isLoadingButton}
-              startIcon={
-                isLoadingButton ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <SaveIcon />
-                )
-              }
-              sx={{
-                px: 4,
-                py: 1,
-                borderRadius: "8px",
-                textTransform: "none",
-                fontSize: "1rem",
-              }}
-            >
-              {isLoadingButton ? "Đang thêm..." : "Lưu linh kiện"}
-            </Button>
-          </Box>
-        </Stack>
-      </DialogContent>
-    </Dialog>
-  );
-
-  // Main Render
   return (
     <div className="bg-image">
       <Box>
@@ -650,12 +449,6 @@ function Accessory() {
         <Row>
           <Col className="main-content">
             <div className="app">
-              <RenderActionBar
-                search={search}
-                clearSearch={clearSearch}
-                setShowModal={setShowModal}
-              />
-
               <div className="table">
                 <div>{renderAccessoryGrid()}</div>
               </div>
@@ -690,6 +483,7 @@ function Accessory() {
       </Box>
 
       <AccessoryDetailDialog
+        setShowModal={setShowModal}
         showModalDesc={showModalDesc}
         handleClickModalDesc={handleClickModalDesc}
         formAccessory={formAccessory}
@@ -706,12 +500,23 @@ function Accessory() {
         setIsLoadingButton={setIsLoadingButton}
         setSnackBar={setSnackBar}
         setData={setData}
-        // Add these props for the AccessoryDetailDialog pagination
         pageAccessory={pageAccessory}
         handleAccessoryPageChange={handleAccessoryPageChange}
       />
 
-      {renderAddAccessoryDialog()}
+      <AddAccessoryDialog
+        setShowModal={setShowModal}
+        Transition={Transition}
+        data={data}
+        showModal={showModal}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        errors={errors}
+        handleCreateAccessory={handleCreateAccessory}
+        isLoadingButton={isLoadingButton}
+        typeSelected={typeSelected}
+        setFormData={setFormData}
+      />
 
       <Snackbar
         open={snackBar.open}

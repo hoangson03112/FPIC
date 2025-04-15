@@ -57,6 +57,7 @@ export const AccessoryDetailDialog = ({
   setIsLoadingButton,
   setSnackBar,
   setData,
+  setShowModal,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
@@ -73,7 +74,6 @@ export const AccessoryDetailDialog = ({
     form.append("title", formDataUpdate.title);
     form.append("description", formDataUpdate.description);
     form.append("type", formAccessory.type);
-    // Nếu có hình ảnh mới, thêm vào form
     if (formDataUpdate.image instanceof File) {
       form.append("file", formDataUpdate.image);
     }
@@ -108,8 +108,7 @@ export const AccessoryDetailDialog = ({
       (item) => item._id === formAccessory._id
     );
 
-    const nextAccessory =
-      data.accessories[deletedIndex + 1] || data.accessories[deletedIndex - 1];
+    const nextAccessory = data.accessories[deletedIndex - 1];
 
     setData((prev) => ({
       ...prev,
@@ -126,7 +125,6 @@ export const AccessoryDetailDialog = ({
         severity: "success",
       });
 
-      // Nếu còn phụ kiện khác, hiển thị nó
       if (nextAccessory) {
         setFormDataUpdate({
           title: nextAccessory.title,
@@ -136,7 +134,6 @@ export const AccessoryDetailDialog = ({
           data.accessories.findIndex((a) => a._id === nextAccessory._id)
         );
       } else {
-        // Nếu không còn phụ kiện nào, hiển thị trạng thái trống
         setFormDataUpdate({});
       }
     } catch (error) {
@@ -306,7 +303,6 @@ export const AccessoryDetailDialog = ({
                       </IconButton>
                     </Box>
 
-                    {/* Gallery Thumbnails */}
                     <Box
                       sx={{
                         p: 2,
@@ -345,6 +341,28 @@ export const AccessoryDetailDialog = ({
                           },
                         }}
                       >
+                        <Box
+                          onClick={() => setShowModal(true)}
+                          sx={{
+                            width: "90px",
+                            height: "90px",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            borderRadius: "6px",
+                            border: "1px dashed #bdbdbd",
+                            backgroundColor: "#f5f5f5",
+                            flexShrink: 0,
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              backgroundColor: "#e0e0e0",
+                              borderColor: "#9e9e9e",
+                            },
+                          }}
+                        >
+                          <AddIcon sx={{ color: "#757575" }} />
+                        </Box>
                         {data.accessories.map((image, index) => (
                           <Box
                             key={index}
@@ -406,27 +424,6 @@ export const AccessoryDetailDialog = ({
                               )}
                           </Box>
                         ))}
-                        <Box
-                          sx={{
-                            width: "90px",
-                            height: "90px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            cursor: "pointer",
-                            borderRadius: "6px",
-                            border: "1px dashed #bdbdbd",
-                            backgroundColor: "#f5f5f5",
-                            flexShrink: 0,
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              backgroundColor: "#e0e0e0",
-                              borderColor: "#9e9e9e",
-                            },
-                          }}
-                        >
-                          <AddIcon sx={{ color: "#757575" }} />
-                        </Box>
                       </Box>
                     </Box>
                   </>
@@ -438,7 +435,7 @@ export const AccessoryDetailDialog = ({
               handleDeleteAccessory={handleDeleteAccessory}
               openConfirmDelete={openConfirmDelete}
             />
-            {/* Form and Info Panel */}
+
             <Grid item xs={12} md={4} lg={3}>
               {formAccessory && (
                 <Paper
