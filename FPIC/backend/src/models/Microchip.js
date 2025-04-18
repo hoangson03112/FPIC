@@ -17,6 +17,11 @@ const microchipSchema = new Schema(
       type: String,
       default: "",
     },
+    device: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   {
     timestamps: true,

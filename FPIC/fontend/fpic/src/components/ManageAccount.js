@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import AccountContext from "../context/AccountContext";
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
   FiEdit2,
@@ -90,6 +90,7 @@ const AddButton = styled(Button)(({ theme }) => ({
 
 const ManageAccount = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState([]);
 
   const [search, setSearch] = useState("");
@@ -122,16 +123,34 @@ const ManageAccount = () => {
     user: "Người dùng",
   };
 
+  // Handle token expiration
+  const handleTokenExpiration = (status) => {
+    if (status === 401) {
+      // Clear user data from localStorage
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      
+      // Show alert about session expiration
+      Swal.fire({
+        icon: "warning",
+        title: "Phiên đăng nhập hết hạn",
+        text: "Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.",
+        confirmButtonText: "Đăng nhập lại",
+      }).then(() => {
+        // Redirect to login page
+        navigate("/login");
+      });
+      return true; // Token is expired
+    }
+    return false; // Token is valid
+  };
+
   const fetchAccounts = async () => {
     try {
       const response = await AccountContext.getAllAccounts();
 
-      if (response.status === 401) {
-        Swal.fire({
-          icon: "error",
-          title: "Bạn chưa đăng nhập...",
-          text: "Vui lòng đăng nhập!",
-        });
+      if (handleTokenExpiration(response.status)) {
+        return; // Stop execution if token expired
       } else if (response.status === 403) {
         setErrorMessage("Bạn không có quyền truy cập tài nguyên này.");
       } else if (response.status === "success" && response.accounts) {
@@ -169,7 +188,9 @@ const ManageAccount = () => {
         role: type,
       });
 
-      if (response.status === 201) {
+      if (handleTokenExpiration(response.status)) {
+        return; // Stop execution if token expired
+      } else if (response.status === 201) {
         const updatedAccounts = [...accounts, response.data.account];
         setAccounts(updatedAccounts);
         setFilteredAccounts(updatedAccounts);
@@ -208,7 +229,10 @@ const ManageAccount = () => {
         accountToUpdate._id,
         accountUpdated
       );
-      if (response.status === 200) {
+      
+      if (handleTokenExpiration(response.status)) {
+        return; // Stop execution if token expired
+      } else if (response.status === 200) {
         const updatedAccounts = accounts.map((account) =>
           account._id === accountUpdated._id ? accountUpdated : account
         );
@@ -243,7 +267,9 @@ const ManageAccount = () => {
     try {
       const response = await AccountContext.deleteAccount(accountToDelete._id);
 
-      if (response.status === 200) {
+      if (handleTokenExpiration(response.status)) {
+        return; // Stop execution if token expired
+      } else if (response.status === 200) {
         const updatedAccounts = accounts.filter(
           (account) => account._id !== accountToDelete._id
         );
@@ -281,7 +307,7 @@ const ManageAccount = () => {
   }, [search, accounts]);
 
   return (
-    <Container fluid className="px-4 py-3">
+    <Container fluid className="">
       <Row className="mb-4 align-items-center">
         <Paper
           elevation={2}
@@ -304,7 +330,7 @@ const ManageAccount = () => {
           >
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Memory sx={{ fontSize: 40, mr: 2 }} />
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+              <Typography variant="h6" component="h1" sx={{ fontWeight: 700 }}>
                 Quản lý tài khoản{" "}
                 {type && `(${roleTranslations[type] || type})`}
               </Typography>
@@ -459,8 +485,16 @@ const ManageAccount = () => {
                                     setAccountUpdated({ ...account });
                                     setShowUpdateModal(true);
                                   }}
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: "32px",
+                                    height: "32px",
+                                    padding: "0",
+                                  }}
                                 >
-                                  <FiEdit2 className="me-1" />
+                                  <FiEdit2 />
                                 </Button>
                                 <Button
                                   variant="outline-danger"
@@ -469,8 +503,16 @@ const ManageAccount = () => {
                                     setAccountToDelete(account);
                                     setShowDeleteModal(true);
                                   }}
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: "32px",
+                                    height: "32px",
+                                    padding: "0",
+                                  }}
                                 >
-                                  <FiTrash2 className="me-1" />
+                                  <FiTrash2 />
                                 </Button>
                               </>
                             )}

@@ -1,65 +1,57 @@
 const path = require("path");
 const fs = require("fs");
 const WeakPoint = require("../models/WeakPoint");
-const IMAGES_JTAG = path.join(__dirname, "../../jtag");
-const IMAGES_TESTPIN = path.join(__dirname, "../../testpin");
-const IMAGES_LPC = path.join(__dirname, "../../LPC");
-const IMAGES_FOOTPRINT = path.join(__dirname, "../../footprint");
-const IMAGES_UNUSEDPORT = path.join(__dirname, "../../unused_port");
-const IMAGES_VIAS = path.join(__dirname, "../../vias");
-const IMAGES_SMB = path.join(__dirname, "../../SMB");
-const IMAGES_SPI = path.join(__dirname, "../../SPI");
 
-exports.getJTAG = async (req, res) => {
+exports.getJTAG = async (_req, res) => {
   const listJtag = await WeakPoint.find({ category: "jtag" });
   if (!listJtag) {
     return res.status(404).json({ message: "Không tìm thấy JTAG" });
   }
   res.json(listJtag);
 };
-exports.getTestPin = async (req, res) => {
+exports.getTestPin = async (_req, res) => {
   const listTestPin = await WeakPoint.find({ category: "testPin" });
   if (!listTestPin) {
     return res.status(404).json({ message: "Không tìm thấy JTAG" });
   }
   res.json(listTestPin);
 };
-exports.getLPC = async (req, res) => {
+exports.getLPC = async (_req, res) => {
   const listLPC = await WeakPoint.find({ category: "lpc" });
   if (!listLPC) {
     return res.status(404).json({ message: "Không tìm thấy JTAG" });
   }
   res.json(listLPC);
 };
-exports.getFootPrint = async (req, res) => {
+exports.getFootPrint = async (_req, res) => {
   const listFootPrint = await WeakPoint.find({ category: "footprint" });
   if (!listFootPrint) {
     return res.status(404).json({ message: "Không tìm thấy JTAG" });
   }
   res.json(listFootPrint);
 };
-exports.getUnusedPort = async (req, res) => {
+exports.getUnusedPort = async (_req, res) => {
   const listUnusedPort = await WeakPoint.find({ category: "unusedPort" });
   if (!listUnusedPort) {
     return res.status(404).json({ message: "Không tìm thấy JTAG" });
   }
   res.json(listUnusedPort);
 };
-exports.getVias = async (req, res) => {
+exports.getVias = async (_req, res) => {
   const listVias = await WeakPoint.find({ category: "vias" });
   if (!listVias) {
     return res.status(404).json({ message: "Không tìm thấy JTAG" });
   }
   res.json(listVias);
 };
-exports.getSPI = async (req, res) => {
+exports.getSPI = async (_req, res) => {
   const listSPI = await WeakPoint.find({ category: "spi" });
   if (!listSPI) {
     return res.status(404).json({ message: "Không tìm thấy SPI" });
   }
   res.json(listSPI);
 };
-exports.getSMB = async (req, res) => {
+exports.getSMB = async (_req, res) => {
   const listSMB = await WeakPoint.find({ category: "smb" });
   if (!listSMB) {
     return res.status(404).json({ message: "Không tìm thấy SPI" });
@@ -69,14 +61,13 @@ exports.getSMB = async (req, res) => {
 
 exports.postWeakPoint = async (req, res) => {
   try {
-    const { name, description, category } = req.body;
+    const { name, description, category, device } = req.body;
     const file = req.file;
 
-    if (!file || !category || !name) {
+    if (!file || !category || !name || !device) {
       return res.status(400).json({ error: "Thiếu file, category hoặc name" });
     }
 
-    // Tạo thư mục lưu trữ nếu chưa có
     const folderPath = path.join(__dirname, "../../", category);
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath, { recursive: true });
@@ -110,6 +101,7 @@ exports.postWeakPoint = async (req, res) => {
       description,
       imagePath,
       category,
+      device,
     });
 
     await newWeakPoint.save();
@@ -150,7 +142,7 @@ exports.deleteWeakPoint = async (req, res) => {
 exports.updateWeakPoint = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, device } = req.body;
     const file = req.file;
 
     // Kiểm tra ID hợp lệ
@@ -168,7 +160,7 @@ exports.updateWeakPoint = async (req, res) => {
     if (!file) {
       const updatedWeakPoint = await WeakPoint.findByIdAndUpdate(
         id,
-        { name, description },
+        { name, description, device },
         { new: true }
       );
       return res.status(200).json({
@@ -237,6 +229,69 @@ exports.updateWeakPoint = async (req, res) => {
     res.status(500).json({
       status: 500,
       message: `Server error: ${error.message}`,
+    });
+  }
+};
+exports.getDashboardDataWeakPoint = async (_req, res) => {
+  try {
+    const deviceTypes = [
+      "Router",
+      "PC",
+      "USB",
+      "Access Point",
+      "Switch",
+      "Server",
+      "FPJA",
+    ];
+
+    const weakPointTypes = [
+      { display: "SMB", category: "smb" },
+      { display: "JTAG", category: "jtag" },
+      { display: "TestPin", category: "testPin" },
+      { display: "SPI", category: "spi" },
+      { display: "LPC", category: "lpc" },
+      { display: "Unused ports", category: "unusedPort" },
+      { display: "Vias", category: "vias" },
+      { display: "Footprint", category: "footprint" },
+    ];
+
+    const deviceData = await Promise.all(
+      deviceTypes.map(async (deviceType) => {
+        // Lấy tổng số điểm yếu cho thiết bị này
+        const totalCount = await WeakPoint.countDocuments({
+          device: deviceType,
+        });
+
+        // Lấy số lượng cho từng loại điểm yếu
+        const weakPointCounts = {};
+        await Promise.all(
+          weakPointTypes.map(async ({ display, category }) => {
+            const count = await WeakPoint.countDocuments({
+              device: deviceType,
+              category,
+            });
+            weakPointCounts[display] = count;
+          })
+        );
+
+        // Kết hợp dữ liệu
+        return {
+          name: deviceType,
+          count: totalCount,
+          ...weakPointCounts,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      message: "Dashboard data retrieved successfully",
+      data: deviceData,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    return res.status(500).json({
+      message: "Error fetching dashboard data",
+      error: error.message,
     });
   }
 };

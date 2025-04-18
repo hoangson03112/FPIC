@@ -4,7 +4,8 @@ const Microchip = require("../models/Microchip");
 
 exports.postMicrochip = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, device } = req.body;
+    console.log(req.body);
 
     const file = req.file;
 
@@ -15,6 +16,7 @@ exports.postMicrochip = async (req, res) => {
     const newMicrochip = new Microchip({
       name,
       description,
+      device,
       imagePath: "/microchip/" + req.file.filename,
     });
 
@@ -96,6 +98,39 @@ exports.updateMicrochip = async (req, res) => {
   } catch (error) {
     console.error("Server error:", error);
     return res.status(500).json({
+      status: 500,
+      message: `Server error: ${error.message}`,
+    });
+  }
+};
+
+exports.getDashboarData = async (req, res) => {
+  try {
+    const deviceTypes = [
+      "Router",
+      "PC",
+      "USB",
+      "Access Point",
+      "Switch",
+      "Server",
+      "FPJA",
+    ];
+
+    const deviceCounts = [];
+    await Promise.all(
+      deviceTypes.map(async (deviceType) => {
+        const count = await Microchip.countDocuments({ device: deviceType });
+        deviceCounts.push({ name: deviceType, value: count });
+      })
+    );
+
+    res.status(200).json({
+      message: "Dashboard data retrieved successfully",
+      data: deviceCounts,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    res.status(500).json({
       status: 500,
       message: `Server error: ${error.message}`,
     });

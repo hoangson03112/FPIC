@@ -175,6 +175,7 @@ const WeakPoint = () => {
     name: "",
     description: "",
     imageURL: "",
+    device: "",
     category: "jtag",
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -301,6 +302,7 @@ const WeakPoint = () => {
       name: item.name || "",
       description: item.description || "",
       category: item.category || activeTab,
+      device: item.device || "",
     });
     setNameError("");
     setImagePreview(`${REACT_APP_URL_BE}${item.imagePath}`);
@@ -371,6 +373,7 @@ const WeakPoint = () => {
         form.append("name", trimmedName);
         form.append("description", formData.description || "");
         form.append("category", formData.category);
+        form.append("device", formData.device);
 
         const response = await api.post(
           `${REACT_APP_URL_BE}/uploadWeakPoint`,
@@ -392,8 +395,10 @@ const WeakPoint = () => {
         if (imageFile) {
           form.append("image", imageFile);
         }
+
         form.append("name", trimmedName);
         form.append("description", formData.description || "");
+        form.append("device", formData.device);
 
         const data = await api.put(
           `${REACT_APP_URL_BE}/updateWeakPoint/${selectedItem._id}`,
@@ -1120,6 +1125,26 @@ const WeakPoint = () => {
                     rows={3}
                     sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                   />
+
+                  <TextField
+                    fullWidth
+                    select
+                    label="Thiết bị"
+                    name="device"
+                    value={formData.device}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                  >
+                    <MenuItem value="Router">Router</MenuItem>
+                    <MenuItem value="PC">PC</MenuItem>
+                    <MenuItem value="USB">USB</MenuItem>
+                    <MenuItem value="Access Point">Access Point</MenuItem>
+                    <MenuItem value="Switch">Switch</MenuItem>
+                    <MenuItem value="Server">Server</MenuItem>
+                    <MenuItem value="FPJA">FPJA</MenuItem>
+                  </TextField>
+
                   <Box sx={{ flexShrink: 0 }}>
                     <Button
                       variant="outlined"

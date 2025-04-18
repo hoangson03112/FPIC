@@ -37,12 +37,14 @@ const {
   postWeakPoint,
   deleteWeakPoint,
   updateWeakPoint,
+  getDashboardDataWeakPoint,
 } = require("./controller/WeakPointController");
 const {
   postMicrochip,
   getMicrochips,
   deleteMicrochip,
   updateMicrochip,
+  getDashboarData,
 } = require("./controller/MicrochipController");
 db.connect();
 app.use(cors());
@@ -232,6 +234,19 @@ app.delete(
   authorize(["admin"]),
   deleteMicrochip
 );
+app.get(
+  "/microchips/dashboard-data",
+  verifyToken,
+  authorize(["admin"]),
+  getDashboarData
+);
+app.get(
+  "/weakpoint/dashboard-data",
+  verifyToken,
+  authorize(["admin"]),
+  getDashboardDataWeakPoint
+);
+
 app.put(
   "/microchips/:id",
   verifyToken,
@@ -246,18 +261,21 @@ app.get(
   authorize(["admin", "assessor", "user"]),
   getJTAG
 );
+
 app.get(
   "/images-test-pin",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getTestPin
 );
+
 app.get(
   "/images-lpc",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getLPC
 );
+
 app.get(
   "/images-footprint",
   verifyToken,

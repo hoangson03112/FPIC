@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  Container,
   Grid,
   Typography,
   Button,
@@ -31,11 +30,9 @@ import {
 } from "@mui/material";
 import {
   Add,
-  Search,
   Edit,
   Delete,
   Memory,
-  Close,
   Upload,
   Image,
   Visibility,
@@ -44,7 +41,6 @@ import {
   Add as AddIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import axios from "axios";
 import { REACT_APP_URL_BE } from "../config";
 import api from "../api";
 import { AuthContext } from "../context/AuthContext";
@@ -132,12 +128,13 @@ const MicrochipList = () => {
     name: "",
     description: "",
     image: null,
+    device: "",
   });
 
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
+  const rowsPerPage = 8;
 
   const filteredMicrochips = microchips.filter(
     (microchip) =>
@@ -187,6 +184,7 @@ const MicrochipList = () => {
     const fetchData = async () => {
       try {
         const response = await api.get(`${REACT_APP_URL_BE}/microchips`);
+
         setMicrochips(response.data.microchips);
       } catch (error) {
         showSnackbar("Lỗi khi tải dữ liệu", "error");
@@ -208,6 +206,7 @@ const MicrochipList = () => {
       setFormData({
         name: microchip.name,
         description: microchip.description,
+        device: microchip.device,
         image: null,
       });
       setPreviewImage(microchip.imagePath);
@@ -261,14 +260,13 @@ const MicrochipList = () => {
       const submitData = new FormData();
       submitData.append("name", formData.name);
       submitData.append("description", formData.description);
+      submitData.append("device", formData.device);
 
       if (formData.image) {
         submitData.append("image", formData.image);
       }
 
       if (currentMicrochip) {
-        // Update
-
         const response = await api.put(
           `${REACT_APP_URL_BE}/microchips/${currentMicrochip._id}`,
           submitData,
@@ -744,7 +742,18 @@ const MicrochipList = () => {
                   <Typography variant="h5" gutterBottom fontWeight="500">
                     {currentMicrochip.name}
                   </Typography>
+                  <Divider sx={{ my: 2 }} />
 
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    fontWeight="bold"
+                  >
+                    Thiết bị
+                  </Typography>
+                  <Typography variant="body1">
+                    {currentMicrochip.device || "Không có thiết bị"}
+                  </Typography>
                   <Divider sx={{ my: 2 }} />
 
                   <Typography
@@ -754,7 +763,7 @@ const MicrochipList = () => {
                   >
                     Mô tả
                   </Typography>
-                  <Typography variant="body1" paragraph>
+                  <Typography variant="body1">
                     {currentMicrochip.description}
                   </Typography>
 
@@ -826,6 +835,26 @@ const MicrochipList = () => {
                 required
                 variant="outlined"
               />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                select
+                label="Thiết bị"
+                name="device"
+                value={formData.device}
+                onChange={handleInputChange}
+                required
+                variant="outlined"
+              >
+                <MenuItem value="Router">Router</MenuItem>
+                <MenuItem value="PC">PC</MenuItem>
+                <MenuItem value="USB">USB</MenuItem>
+                <MenuItem value="Access Point">Access Point</MenuItem>
+                <MenuItem value="Switch">Switch</MenuItem>
+                <MenuItem value="Server">Server</MenuItem>
+                <MenuItem value="FPJA">FPJA</MenuItem>
+              </TextField>
             </Grid>
             <Grid item xs={12}>
               <TextField
