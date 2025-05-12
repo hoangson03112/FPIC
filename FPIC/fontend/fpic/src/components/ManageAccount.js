@@ -9,7 +9,6 @@ import {
   Badge,
 } from "react-bootstrap";
 import AccountContext from "../context/AccountContext";
-
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
@@ -129,7 +128,7 @@ const ManageAccount = () => {
       // Clear user data from localStorage
       localStorage.removeItem("user");
       localStorage.removeItem("token");
-      
+
       // Show alert about session expiration
       Swal.fire({
         icon: "warning",
@@ -229,7 +228,7 @@ const ManageAccount = () => {
         accountToUpdate._id,
         accountUpdated
       );
-      
+
       if (handleTokenExpiration(response.status)) {
         return; // Stop execution if token expired
       } else if (response.status === 200) {

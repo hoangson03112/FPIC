@@ -55,7 +55,7 @@ const Layout = ({ children }) => {
     menu2: false,
     menu3: false,
   });
-  
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };

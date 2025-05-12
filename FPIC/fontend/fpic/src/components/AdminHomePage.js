@@ -139,7 +139,6 @@ const GradientHeader = styled(Box)(({ theme, color }) => ({
 }));
 
 const DashboardWrapper = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
   backgroundColor: alpha(theme.palette.background.default, 0.7),
   borderRadius: theme.shape.borderRadius * 2,
   minHeight: "100vh",
@@ -325,6 +324,13 @@ const AdminDashboard = () => {
             severity: "error",
           });
           setIsLoading(false);
+          if (error.response && error.response.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            // window.location.href = "/login";
+            return;
+          }
         }
       }
     };
@@ -376,6 +382,10 @@ const AdminDashboard = () => {
             error.response?.data?.message || "Không thể tải dữ liệu biểu đồ"
           );
           setChartLoading(false);
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+          return;
         }
       }
     };
@@ -408,85 +418,6 @@ const AdminDashboard = () => {
   const switchChartType = (type) => {
     setActiveChartType(type);
   };
-
-  const StatCard = ({ title, count, Icon, color, linkTo }) => (
-    <AnimatedCard>
-      <GradientHeader color={color}>
-        <Box />
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-          }}
-        >
-          <Icon sx={{ fontSize: 28, mr: 1 }} />
-          <Typography variant="h6" sx={{ fontWeight: 600, height: "42px" }}>
-            {title}
-          </Typography>
-        </Box>
-        <MuiTooltip title="Xem thông tin">
-          <Box sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
-            width: 28, 
-            height: 28 
-          }}>
-            <Info sx={{ fontSize: 20, opacity: 0.8, cursor: "pointer" }} />
-          </Box>
-        </MuiTooltip>
-      </GradientHeader>
-      <CardContent
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          p: 3,
-        }}
-      >
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: "bold",
-            mb: 3,
-            color,
-            fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-            animation: animateChart ? "countUp 2s ease-out" : "none",
-            "@keyframes countUp": {
-              "0%": { opacity: 0, transform: "translateY(20px)" },
-              "100%": { opacity: 1, transform: "translateY(0)" },
-            },
-          }}
-        >
-          {count.toLocaleString()}
-        </Typography>
-        <Button
-          variant="contained"
-          href={linkTo}
-          sx={{
-            bgcolor: color,
-            "&:hover": {
-              bgcolor: color,
-              opacity: 0.9,
-              transform: "translateY(-2px)",
-            },
-            transition: "all 0.3s ease",
-            textTransform: "none",
-            fontWeight: "bold",
-            px: 4,
-            py: 1,
-            borderRadius: 2,
-            boxShadow: `0 4px 10px ${alpha(color, 0.4)}`,
-          }}
-        >
-          Xem chi tiết
-        </Button>
-      </CardContent>
-    </AnimatedCard>
-  );
 
   const renderWeakPointChart = () => {
     if (chartLoading) return <StatSkeleton />;
@@ -829,7 +760,7 @@ const AdminDashboard = () => {
         sx={{
           p: { xs: 2, sm: 3 },
           mb: 4,
-          background: `linear-gradient(120deg, ${
+          background: `linear-gradient(135deg, ${
             theme.palette.primary.main
           }, ${alpha(theme.palette.primary.light, 0.8)})`,
           color: "#fff",
@@ -838,15 +769,48 @@ const AdminDashboard = () => {
           alignItems: "center",
           flexWrap: "wrap",
           gap: 2,
+          borderRadius: 3,
+          boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.2)}`,
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `radial-gradient(circle at top right, ${alpha(
+              "#fff",
+              0.1
+            )}, transparent)`,
+          },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Memory sx={{ fontSize: 40, mr: 2 }} />
-          <Typography variant="h6" component="h1" sx={{ fontWeight: 700 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <Memory
+            sx={{
+              fontSize: 40,
+              mr: 2,
+              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+            }}
+          />
+          <Typography
+            variant="h6"
+            component="h1"
+            sx={{ fontWeight: 700, textShadow: "0 2px 4px rgba(0,0,0,0.1)" }}
+          >
             Thống kê dữ liệu
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2, position: "relative", zIndex: 1 }}>
           <MuiTooltip title="Làm mới dữ liệu">
             <IconButton
               color="inherit"
@@ -854,10 +818,12 @@ const AdminDashboard = () => {
               disabled={refreshing}
               sx={{
                 backgroundColor: alpha("#fff", 0.1),
-                "&:hover": { backgroundColor: alpha("#fff", 0.2) },
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                "&:hover": {
+                  backgroundColor: alpha("#fff", 0.2),
+                  transform: "rotate(180deg)",
+                  transition: "transform 0.5s ease",
+                },
+                transition: "all 0.3s ease",
               }}
             >
               <Refresh />
@@ -867,33 +833,139 @@ const AdminDashboard = () => {
       </Paper>
 
       {isLoading ? (
-        <Box sx={{ textAlign: "center", py: 5 }}>
-          <CircularProgress size={60} thickness={4} />
-          <Typography variant="body1" sx={{ mt: 2 }}>
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 5,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "50vh",
+          }}
+        >
+          <CircularProgress
+            size={60}
+            thickness={4}
+            sx={{
+              color: theme.palette.primary.main,
+              animation: "pulse 2s infinite",
+              "@keyframes pulse": {
+                "0%": { transform: "scale(1)" },
+                "50%": { transform: "scale(1.1)" },
+                "100%": { transform: "scale(1)" },
+              },
+            }}
+          />
+          <Typography
+            variant="body1"
+            sx={{ mt: 2, color: theme.palette.text.secondary }}
+          >
             Đang tải dữ liệu...
           </Typography>
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {STAT_CARDS.map((card) => (
-            <Grid item xs={12} sm={6} md={2.4} key={card.title}>
-              <StatCard
-                title={card.title}
-                count={stats[card.key]}
-                Icon={card.icon}
-                color={card.color}
-                linkTo={card.linkTo}
-              />
+          <Grid item xs={12}>
+            <Grid container spacing={3}>
+              {STAT_CARDS.map((card) => (
+                <Grid item xs={12} sm={6} md={2.4} key={card.title}>
+                  <AnimatedCard
+                    sx={{
+                      background: `linear-gradient(135deg, ${alpha(
+                        card.color,
+                        0.1
+                      )}, ${alpha(card.color, 0.05)})`,
+                      border: `1px solid ${alpha(card.color, 0.2)}`,
+                      "&:hover": {
+                        transform: "translateY(-5px)",
+                        boxShadow: `0 8px 24px ${alpha(card.color, 0.2)}`,
+                      },
+                    }}
+                  >
+                    <GradientHeader color={card.color}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <card.icon
+                          sx={{
+                            fontSize: 24,
+                            mr: 1,
+                            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+                          }}
+                        />
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {card.title}
+                        </Typography>
+                      </Box>
+                    </GradientHeader>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: "bold",
+                          mb: 2,
+                          color: card.color,
+                          textAlign: "center",
+                          fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                          textShadow: `0 2px 4px ${alpha(card.color, 0.2)}`,
+                        }}
+                      >
+                        {stats[card.key].toLocaleString()}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        href={card.linkTo}
+                        sx={{
+                          bgcolor: card.color,
+                          "&:hover": {
+                            bgcolor: card.color,
+                            opacity: 0.9,
+                            transform: "translateY(-2px)",
+                          },
+                          transition: "all 0.3s ease",
+                          textTransform: "none",
+                          fontWeight: "bold",
+                          width: "100%",
+                          borderRadius: 2,
+                          boxShadow: `0 4px 12px ${alpha(card.color, 0.3)}`,
+                        }}
+                      >
+                        Xem chi tiết
+                      </Button>
+                    </CardContent>
+                  </AnimatedCard>
+                </Grid>
+              ))}
             </Grid>
-          ))}
+          </Grid>
 
           <Grid item xs={12} md={8}>
-            <AnimatedCard>
+            <AnimatedCard
+              sx={{
+                background: `linear-gradient(135deg, ${alpha(
+                  theme.palette.background.paper,
+                  0.8
+                )}, ${alpha(theme.palette.background.paper, 0.6)})`,
+                backdropFilter: "blur(10px)",
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              }}
+            >
               <GradientHeader color={theme.palette.primary.main}>
                 <Box
                   sx={{ display: "flex", alignItems: "center", width: "100%" }}
                 >
-                  <Memory sx={{ fontSize: 24, mr: 1 }} />
+                  <Memory
+                    sx={{
+                      fontSize: 24,
+                      mr: 1,
+                      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+                    }}
+                  />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Phân bố mẫu bản mạch
                   </Typography>
@@ -903,11 +975,12 @@ const AdminDashboard = () => {
                     <IconButton
                       size="small"
                       onClick={handleRefresh}
-                      sx={{ 
-                        color: "#fff", 
-                        display: "flex", 
-                        alignItems: "center", 
-                        justifyContent: "center" 
+                      sx={{
+                        color: "#fff",
+                        "&:hover": {
+                          transform: "rotate(180deg)",
+                          transition: "transform 0.5s ease",
+                        },
                       }}
                     >
                       <Refresh fontSize="small" />
@@ -1143,135 +1216,24 @@ const AdminDashboard = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <AnimatedCard>
-              <GradientHeader color={theme.palette.primary.dark}>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", width: "100%" }}
-                >
-                  <Dashboard sx={{ fontSize: 24, mr: 1 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Tổng quan dữ liệu
-                  </Typography>
-                </Box>
-                <Box />
-              </GradientHeader>
-              <CardContent>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 600,
-                          mb: 1,
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Memory sx={{ fontSize: 20, mr: 1 }} />
-                        Phân bố theo loại thiết bị
-                      </Typography>
-                      <Box
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: alpha(theme.palette.background.default, 0.7),
-                          height: 150,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={componentTypes}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={30}
-                              outerRadius={60}
-                              fill="#8884d8"
-                              dataKey="value"
-                              animationBegin={200}
-                              animationDuration={1500}
-                            >
-                              {componentTypes.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={COLORS[index % COLORS.length]}
-                                />
-                              ))}
-                            </Pie>
-                            <Tooltip />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </Box>
-                    </Box>
-                  </Grid>
-                </Grid>
-                <Box sx={{ mt: 2 }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: 600, mb: 2 }}
-                  >
-                    Tổng hợp thông tin
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {STAT_CARDS.map((card) => (
-                      <Grid
-                        item
-                        xs={6}
-                        sm={4}
-                        md={2.4}
-                        key={`summary-${card.key}`}
-                      >
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: 2,
-                            bgcolor: alpha(card.color, 0.1),
-                            border: `1px solid ${alpha(card.color, 0.2)}`,
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            textAlign: "center",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              transform: "translateY(-5px)",
-                              boxShadow: `0 5px 15px ${alpha(card.color, 0.2)}`,
-                              bgcolor: alpha(card.color, 0.15),
-                            },
-                          }}
-                        >
-                          <card.icon
-                            sx={{ color: card.color, fontSize: 24, mb: 1 }}
-                          />
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary", mb: 1 }}
-                          >
-                            {card.title}
-                          </Typography>
-                          <Typography
-                            variant="h6"
-                            sx={{ color: card.color, fontWeight: "bold" }}
-                          >
-                            {stats[card.key].toLocaleString()}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              </CardContent>
-            </AnimatedCard>
-          </Grid>
-
-          <Grid item xs={12}>
-            <AnimatedCard>
+            <AnimatedCard
+              sx={{
+                background: `linear-gradient(135deg, ${alpha(
+                  "#FF8042",
+                  0.05
+                )}, ${alpha("#FF8042", 0.02)})`,
+                border: `1px solid ${alpha("#FF8042", 0.1)}`,
+              }}
+            >
               <GradientHeader color="#FF8042">
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Schema sx={{ fontSize: 24, mr: 1 }} />
+                  <Schema
+                    sx={{
+                      fontSize: 24,
+                      mr: 1,
+                      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+                    }}
+                  />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Phân bố mẫu điểm yếu
                   </Typography>
@@ -1281,8 +1243,9 @@ const AdminDashboard = () => {
                     sx={{
                       display: "flex",
                       bgcolor: alpha("#fff", 0.1),
-                      borderRadius: 1,
+                      borderRadius: 2,
                       p: 0.5,
+                      backdropFilter: "blur(5px)",
                     }}
                   >
                     <MuiTooltip title="Xem biểu đồ cột">
@@ -1298,12 +1261,6 @@ const AdminDashboard = () => {
                             activeChartType === "bar"
                               ? alpha("#fff", 0.2)
                               : "transparent",
-                          mr: 0.5,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: 28,
-                          height: 28,
                         }}
                       >
                         <ViewList fontSize="small" />
@@ -1322,12 +1279,6 @@ const AdminDashboard = () => {
                             activeChartType === "line"
                               ? alpha("#fff", 0.2)
                               : "transparent",
-                          mr: 0.5,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: 28,
-                          height: 28,
                         }}
                       >
                         <Timeline fontSize="small" />
@@ -1346,64 +1297,33 @@ const AdminDashboard = () => {
                             activeChartType === "table"
                               ? alpha("#fff", 0.2)
                               : "transparent",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: 28,
-                          height: 28,
                         }}
                       >
                         <TableView fontSize="small" />
                       </IconButton>
                     </MuiTooltip>
                   </Box>
-                  <MuiTooltip title="Làm mới dữ liệu">
-                    <IconButton
-                      size="small"
-                      onClick={handleRefresh}
-                      sx={{ 
-                        color: "#fff", 
-                        display: "flex", 
-                        alignItems: "center", 
-                        justifyContent: "center" 
-                      }}
-                    >
-                      <Refresh fontSize="small" />
-                    </IconButton>
-                  </MuiTooltip>
                 </Box>
               </GradientHeader>
               <CardContent>
                 {renderWeakPointChart()}
-                <Box
-                  sx={{
-                    mt: 3,
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 2,
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
+                <Box sx={{ mt: 3 }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 600, mb: 2 }}
+                  >
+                    Lọc theo loại điểm yếu
+                  </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 500,
-                        mr: 1,
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <FilterAlt sx={{ fontSize: 18, mr: 0.5 }} />
-                      Lọc theo:
-                    </Typography>
                     {WEAK_POINT_TYPES.map((type) => (
                       <StyledChip
                         key={type}
                         label={type}
                         size="small"
                         active={type === selectedType}
+                        onClick={() =>
+                          setSelectedType(type === selectedType ? null : type)
+                        }
                         sx={{
                           bgcolor: alpha(
                             COLORS[
@@ -1416,19 +1336,17 @@ const AdminDashboard = () => {
                               WEAK_POINT_TYPES.indexOf(type) % COLORS.length
                             ],
                           fontWeight: type === selectedType ? 600 : 400,
-                          border:
-                            type === selectedType
-                              ? `1px solid ${
-                                  COLORS[
-                                    WEAK_POINT_TYPES.indexOf(type) %
-                                      COLORS.length
-                                  ]
-                                }`
-                              : `1px solid transparent`,
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 4px 8px ${alpha(
+                              COLORS[
+                                WEAK_POINT_TYPES.indexOf(type) % COLORS.length
+                              ],
+                              0.2
+                            )}`,
+                          },
                         }}
-                        onClick={() =>
-                          setSelectedType(type === selectedType ? null : type)
-                        }
                       />
                     ))}
                   </Box>
@@ -1449,7 +1367,12 @@ const AdminDashboard = () => {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: "100%", boxShadow: 3 }}
+          sx={{
+            width: "100%",
+            boxShadow: 3,
+            backdropFilter: "blur(10px)",
+            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+          }}
           variant="filled"
         >
           {snackbar.message}

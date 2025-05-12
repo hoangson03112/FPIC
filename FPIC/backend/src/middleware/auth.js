@@ -6,8 +6,6 @@ export const authorize = (roles = []) => {
   }
 
   return (req, res, next) => {
- 
-
     if (roles.length && !roles.includes(req?.user?.role)) {
       return res.status(403).json({ message: "Forbidden" });
     }
@@ -44,9 +42,8 @@ export const verifyToken = (req, res, next) => {
   }
 
   try {
-    // Verify với cùng secret "sown"
     const decoded = jwt.verify(token, "sown");
-    req.user = decoded; // Lưu thông tin user vào request
+    req.user = decoded;
     next();
   } catch (err) {
     console.error("Token verification error:", err);

@@ -188,6 +188,15 @@ const MicrochipList = () => {
         setMicrochips(response.data.microchips);
       } catch (error) {
         showSnackbar("Lỗi khi tải dữ liệu", "error");
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+  
+
+  
+          window.location.href = "/login";
+          return;
+        }
       } finally {
         setLoading(false);
       }
@@ -299,6 +308,15 @@ const MicrochipList = () => {
       handleCloseDialog();
     } catch (error) {
       showSnackbar("Lỗi khi lưu vi mạch", "error");
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+
+
+        window.location.href = "/login";
+        return;
+      }
     }
   };
 
@@ -326,6 +344,15 @@ const MicrochipList = () => {
       setIsDeleteConfirmOpen(false);
     } catch (error) {
       showSnackbar("Lỗi khi xóa vi mạch", "error");
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+
+
+        window.location.href = "/login";
+        return;
+      }
     }
   };
 

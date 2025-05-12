@@ -123,6 +123,7 @@ app.post("/login", async (req, res) => {
     });
   }
 });
+
 app.get("/authentication", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -147,11 +148,7 @@ app.get("/authentication", async (req, res) => {
 });
 
 app.use(bodyParse.json());
-app.use(
-  "/",
-
-  AccessoryRouter
-);
+app.use("/", AccessoryRouter);
 app.get(
   "/images",
   verifyToken,

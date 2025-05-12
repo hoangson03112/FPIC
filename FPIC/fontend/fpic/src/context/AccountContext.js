@@ -5,10 +5,10 @@ class AccountContext {
   async Authentication() {
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
+
       const response = await axios.get(`${REACT_APP_URL_BE}/authentication`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -17,6 +17,22 @@ class AccountContext {
 
       return response.data;
     } catch (error) {
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 403)
+      ) {
+        localStorage.removeItem("token");
+
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+
+        return {
+          message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          status: 401,
+        };
+      }
+
       return error;
     }
   }
@@ -71,6 +87,23 @@ class AccountContext {
       );
       return response;
     } catch (error) {
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 403)
+      ) {
+        localStorage.removeItem("token");
+
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+
+        return {
+          message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          status: 401,
+        };
+      }
+
+ 
       console.error("Error creating account:", error);
       return error.response || { message: "Có lỗi xảy ra khi tạo tài khoản" };
     }
@@ -96,6 +129,23 @@ class AccountContext {
 
       return response.data;
     } catch (error) {
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 403)
+      ) {
+        localStorage.removeItem("token");
+
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+
+        return {
+          message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          status: 401,
+        };
+      }
+
+    
       console.error("Error creating account:", error);
       return error.response || { message: "Có lỗi xảy ra khi tạo tài khoản" };
     }
@@ -128,6 +178,23 @@ class AccountContext {
         data: response.data,
       };
     } catch (error) {
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 403)
+      ) {
+        localStorage.removeItem("token");
+
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+
+        return {
+          message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          status: 401,
+        };
+      }
+
+  
       console.error("Error updating account:", error);
       return (
         error.response || { message: "Có lỗi xảy ra khi cập nhật tài khoản" }
@@ -146,6 +213,23 @@ class AccountContext {
         data: response.data,
       };
     } catch (error) {
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 403)
+      ) {
+        localStorage.removeItem("token");
+
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+
+        return {
+          message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          status: 401,
+        };
+      }
+
+   
       console.error("Error updating account:", error);
       return error.response || { message: "Có lỗi xảy ra " };
     }

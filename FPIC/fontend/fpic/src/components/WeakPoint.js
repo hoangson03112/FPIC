@@ -209,6 +209,9 @@ const WeakPoint = () => {
             }));
           } catch (err) {
             console.error(`Error fetching ${endpoint.key} data:`, err);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "/login";
           }
         }
         setCategories(newCategories);
@@ -216,6 +219,10 @@ const WeakPoint = () => {
       } catch (err) {
         setError("Không thể tải dữ liệu. Vui lòng thử lại.");
         setIsLoading(false);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        return;
       }
     };
 
@@ -434,7 +441,13 @@ const WeakPoint = () => {
       setNameError("");
     } catch (err) {
       console.error("Operation failed:", err);
-      setError("Thao tác thất bại. Vui lòng thử lại.");
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+        return;
+      }
     }
   };
 

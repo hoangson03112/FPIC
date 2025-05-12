@@ -139,6 +139,18 @@ function Accessory() {
         error.response?.data?.message || "Lỗi hệ thống",
         "error"
       );
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        showNotification(
+          "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          "error"
+        );
+
+        window.location.href = "/login";
+        return;
+      }
     }
   };
 
@@ -172,12 +184,22 @@ function Accessory() {
         }
       }
     } catch (error) {
-      if (!axios.isCancel(error)) {
-        setData((prev) => ({ ...prev, error, isLoading: false }));
+      setData((prev) => ({ ...prev, error, isLoading: false }));
+      showNotification(
+        error.response?.data?.message || "Lỗi hệ thống",
+        "error"
+      );
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
         showNotification(
-          error.response?.data?.message || "Lỗi hệ thống",
+          "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
           "error"
         );
+
+        window.location.href = "/login";
+        return;
       }
     }
 
@@ -202,9 +224,21 @@ function Accessory() {
       setSearchSuggestions(response.data.data || []);
       setShowSuggestions(true);
     } catch (error) {
-      console.error("Search error:", error);
+     
       setSearchSuggestions([]);
       showNotification("Không thể tìm kiếm. Vui lòng thử lại sau.", "error");
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        showNotification(
+          "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          "error"
+        );
+
+        window.location.href = "/login";
+        return;
+      }
     } finally {
       setIsSearching(false);
     }
@@ -235,6 +269,18 @@ function Accessory() {
         error.response?.data?.message || `Lỗi máy chủ: ${error}`,
         "error"
       );
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        showNotification(
+          "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
+          "error"
+        );
+
+        window.location.href = "/login";
+        return;
+      }
     } finally {
       setIsLoadingButton(false);
     }

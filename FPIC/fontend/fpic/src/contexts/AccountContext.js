@@ -5,7 +5,6 @@ class AccountContext {
   async Authentication() {
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         return { message: "Chưa đăng nhập", status: 401 };
       }
