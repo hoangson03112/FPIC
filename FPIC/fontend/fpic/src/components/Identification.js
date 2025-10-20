@@ -1,9 +1,3 @@
-import MDBox from "components/MDBox";
-import MDButton from "components/MDButton";
-// Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
 import { Typography, Modal, IconButton, Box, Button, Table, TableBody, TableCell, TableRow, TableHead, Paper, TableContainer } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Input } from "@mui/material";
@@ -17,54 +11,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MemoryIcon from '@mui/icons-material/Memory';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import {REACT_APP_URL_PYTHON} from '../config'
 
-
-// import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
-
-
-// const labels_R = [
-//   "R", "C", "U", "Q", "J", "L", "RA", "D", "RN", "TP", "IC", "P", "CR",
-//   "M", "BTN", "FB", "CRA", "SW", "T", "F", "V", "LED", "S", "QA", "JP","LPC","JTAG"
-// ];
-// const labels_R = [
-//   "FP", "VIAS", "TP", "JTAG", "LPC"
-// ];
 const labels_R = [
   "FP", "VIAS", "TP", "LPC", "UP", "JTAG", "SMB", "SPI", "WP"
 ];
-
-
-
-
-// const labels = [
-//   { symbol: "R", description: "Resistor" },
-//   { symbol: "C", description: "Capacitor" },
-//   { symbol: "U", description: "Integrated Circuit" },
-//   { symbol: "Q", description: "Discrete Transistor" },
-//   { symbol: "J", description: "Connector" },
-//   { symbol: "L", description: "Inductor" },
-//   { symbol: "RA", description: "Resistor Coil" },
-//   { symbol: "D", description: "Diode" },
-//   { symbol: "RN", description: "Resistor Network" },
-//   { symbol: "TP", description: "Test Point" },
-//   { symbol: "IC", description: "Integrated Circuit" },
-//   { symbol: "P", description: "Plug" },
-//   { symbol: "CR", description: "Thyristor" },
-//   { symbol: "M", description: "Motor" },
-//   { symbol: "BTN", description: "Button" },
-//   { symbol: "FB", description: "Ferrite Bead" },
-//   { symbol: "CRA", description: "CRA" },
-//   { symbol: "SW", description: "Switch" },
-//   { symbol: "T", description: "Transformer" },
-//   { symbol: "F", description: "Fuse" },
-//   { symbol: "V", description: "Vaccum Tube" },
-//   { symbol: "LED", description: "Light Emitting Diode" },
-//   { symbol: "S", description: "Switch" },
-//   { symbol: "QA", description: "QA" },
-//   { symbol: "JP", description: "Jumper Link" },
-//   { symbol: "LPC", description: "Low Pin Count" },
-//   { symbol: "JTAG", description: "Joint Test Action Group" },
-// ];
 
 const labels = [
   { symbol: "FP", description: "Footprint" },
@@ -80,73 +31,46 @@ const ocr_lables = [
   { symbol: "SPI", description: "SPI Bus" }
 ];
 
+// ✅ Danh sách các label cần dùng OCR
+const OCR_CLASSES = ["JTAG", "LPC", "SMB", "SPI"];
+
 function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageUrlOld, setImageUrlOld] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
-  const [modalImage, setModalImage] = useState(null); // Ảnh để phóng to
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
   const [status, setStatus] = useState(false);
   const [statusNew, setStatusNew] = useState(false);
   const [size, setSize] = useState(49);
   const [contLabel, setCountLabel] = useState();
-  const [selectLables, setSelectLables] = useState(labels_R);
+  const [selectLables, setSelectLables] = useState([]);
   const [open, setOpen] = useState(false);
   const [icList, setIcList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [icChecked, setICChecked] = useState(false);
   const [rowStates, setRowStates] = useState({});
   const [showResult, setShowResult] = useState(false);
   const [showOcrResult, setShowOcrResult] = useState(false);
-  const [countJtag, setCountJtag] = useState(0)
-  // console.log('contLabel:', contLabel)
-  const handleOnChange = (event, value) => {
-    if (value[0] === "JTAG" || value[0] === "LPC") {
-      const btn = document.querySelector('.predictBtn');
-      const ocrBtn = document.querySelector('.predictOcrBtn');
-      if (btn) {
-        btn.style.display = 'none';
-      }
-      if (ocrBtn) {
-        ocrBtn.style.display = 'flex';
-      }
-      setSelectLables(value);
-    } else if (value[0] !== "JTAG" && value[0] !== "LPC" && value[0]) {
-      const btn = document.querySelector('.predictOcrBtn');
-      const predictBtn = document.querySelector('.predictBtn');
-      if (btn) {
-        btn.style.display = 'none';
-      }
-      if (predictBtn) {
-        predictBtn.style.display = 'flex';
-      }
-      setSelectLables(value);
-    } else {
-      const btn = document.querySelector('.predictOcrBtn');
-      const predictBtn = document.querySelector('.predictBtn');
-      if (btn) {
-        btn.style.display = 'none';
-      }
-      if (predictBtn) {
-        predictBtn.style.display = 'none';
-      }
-      setSelectLables(value);
-    }
-  };
-  const handleGetCount = async (formData) => {
-    try {
-      const result = await axios.post("http://localhost:8000/api/v1/predict", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      // console.log('result?.data?.appearances:', result?.data?.appearances)
-      setCountLabel(result?.data?.appearances);
-      setShowResult(true)
-    } catch (error) {
-      console.error("Error:", error.response ? error.response.data : error.message);
-    }
-  };
+  
+  // ✅ State để quản lý hiển thị button
+  const [showPredictBtn, setShowPredictBtn] = useState(false);
+
   const fileInputRef = useRef(null);
+
+  // ✅ Cải tiến hàm handleOnChange
+  const handleOnChange = (event, value) => {
+    // Kiểm tra xem có chứa OCR class không
+    const hasOcrClass = value.some(v => OCR_CLASSES.includes(v));
+    
+    if (value.length > 0) {
+      setShowPredictBtn(true);
+    } else {
+      setShowPredictBtn(false);
+    }
+    
+    setSelectLables(value);
+  };
+
   const handleFileChange = (event) => {
     setStatus(true);
     const file = event.target.files[0];
@@ -154,7 +78,7 @@ function Dashboard() {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImageUrlOld(reader.result); // Ảnh đã chọn
+      setImageUrlOld(reader.result);
       setStatus(false);
     };
 
@@ -164,187 +88,174 @@ function Dashboard() {
       setImageUrlOld(null);
     }
   };
-  const handleUpload = () => {
+
+  const handleUpload = async () => {
     setStatusNew(true);
-    setShowResult(false)
+    setShowResult(false);
+    setShowOcrResult(false);
+    
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("img_size", 1280);
     formData.append("show_conf", false);
     formData.append("show_labels", true);
     formData.append("show_boxes", true);
-    formData.append("classes", selectLables.length === 0 ? labels_R : selectLables);
-    handleGetCount(formData);
+    formData.append("line_width", 2);
+    formData.append("show_ocr", true);
+    
+    // ✅ Chuyển đổi mảng thành chuỗi
+    const classesString = selectLables.length === 0 
+      ? labels_R.join(',') 
+      : selectLables.join(',');
+    
+    formData.append("classes", classesString);
 
-    axios
-      .post("http://localhost:8000/api/v1/predict-png", formData, {
-        responseType: "arraybuffer",
-        headers: { "Content-Type": "multipart/form-data" }
-      })
-      .then((response) => {
-        const base64 = btoa(
-          new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), "")
-        );
-        setImageUrl(`data:image/png;base64,${base64}`);
-        setStatusNew(false);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
-  const handleUploadocr = () => {
-    setShowResult(false)
-    setStatusNew(true)
-    const formData = new FormData();
-    formData.append('file', selectedFile);
+    try {
+      console.log("Đang gửi request với classes:", classesString);
+      
+      const response = await axios.post(
+        `${REACT_APP_URL_PYTHON}/api/v1/predict-combined`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          timeout: 30000 
+        }
+      );
 
-    axios
-      .post('http://localhost:8000/api/v1/predict-ocr', formData, {
-        responseType: 'arraybuffer', // To handle the binary response (image)
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      .then((response) => {
-        // Convert the binary data to base64
-        const base64 = btoa(
-          new Uint8Array(response.data).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ''
-          )
-        );
-        // Set the image URL to display it in the frontend
-        setImageUrl(`data:image/png;base64,${base64}`);
-        setStatusNew(false)
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+      console.log("Nhận được response:", response.data);
+
+      setImageUrl(response.data.image);
+      setCountLabel(response.data.appearances);
+      
+      // ✅ Xác định loại kết quả để hiển thị
+      const yoloClasses = ["FP", "VIAS", "TP", "UP"];
+      const ocrClasses = ["JTAG", "LPC", "SMB", "SPI"];
+      
+      const hasYoloResults = yoloClasses.some(
+        cls => response.data.appearances[cls] > 0
+      );
+      
+      const hasOcrResults = ocrClasses.some(
+        cls => response.data.appearances[cls] > 0
+      );
+      
+      setShowResult(hasYoloResults);
+      setShowOcrResult(hasOcrResults);
+      
+      setStatusNew(false);
+      
+      console.log("✅ Nhận diện thành công");
+
+    } catch (error) {
+      console.error("❌ Lỗi:", error.response ? error.response.data : error.message);
+      setStatusNew(false);
+      alert("Lỗi khi nhận diện. Vui lòng kiểm tra lại!");
+    }
   };
-  // Hàm để mở file dialog khi bấm button
+
   const handleUploadButtonClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click(); // Trigger click vào input file
+      fileInputRef.current.click();
     }
   };
+
   const handleDownload = () => {
-    // Kiểm tra nếu URL hình ảnh đã tồn tại
     if (imageUrl) {
-      // Tạo một thẻ link (a) để kích hoạt việc tải xuống
       const link = document.createElement('a');
-      link.href = imageUrl;  // Đường dẫn hình ảnh base64 đã được thiết lập
-      link.download = 'PCBimage-predict.png'; // Tên file mà bạn muốn lưu
-      document.body.appendChild(link);
-      link.click();  // Kích hoạt việc tải xuống
-      document.body.removeChild(link);  // Xóa thẻ link sau khi hoàn thành
-    }
-  }
-  const handleDownloadJS = async (selectedFile) => { // Thêm selectedFile như tham số
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile); // Gửi tệp hình ảnh
-
-      const response = await axios.post('http://localhost:8000/api/v1/predict', formData, {
-        responseType: 'blob', // Để nhận dữ liệu dưới dạng blob
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      // Tạo một đối tượng URL từ blob
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-
-      // Tạo thẻ a để tải tệp
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'PCB-predict-bb.json'); // Tên tệp khi tải về
-
-      // Thêm thẻ a vào document và kích hoạt click
+      link.href = imageUrl;
+      link.download = 'PCBimage-predict.png';
       document.body.appendChild(link);
       link.click();
-
-      // Xóa thẻ a sau khi tải xong
       document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error downloading the JSON file:', error);
     }
   };
 
+  const handleDownloadJS = async (selectedFile) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
 
+      const response = await axios.post(
+        `${REACT_APP_URL_PYTHON}/api/v1/predict`, 
+        formData, 
+        {
+          responseType: 'blob',
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'PCB-predict-bb.json');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Lỗi khi tải file JSON:', error);
+    }
+  };
 
   const fetchCroppedImages = async () => {
     try {
-      setLoading(true); // Set loading to true before API call
+      setLoading(true);
       const formData = new FormData();
-      formData.append('file', selectedFile);  // 'selectedFile' là file ảnh bạn muốn gửi lên
+      formData.append('file', selectedFile);
 
-      const response = await axios.post('http://localhost:8000/api/v1/crop-u-ocr', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await axios.post(
+        `${REACT_APP_URL_PYTHON}/api/v1/crop-u-ocr`, 
+        formData, 
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
 
-      // Tạo danh sách dữ liệu IC từ phản hồi, bao gồm cả ảnh và kết quả OCR
       const croppedImages = response.data.cropped_images_with_ocr.map((item, index) => ({
         id: index + 1,
         name: `IC ${index + 1}`,
         description: 'Cropped image of IC component',
-        imageSrc: item.cropped_image,  // Đường dẫn base64 của ảnh
-        ocrData: item.ocr_data  // Dữ liệu OCR (văn bản và confidence)
+        imageSrc: item.cropped_image,
+        ocrData: item.ocr_data
       }));
 
-      setIcList(croppedImages);  // Set the IC list with cropped images
+      setIcList(croppedImages);
     } catch (error) {
-      console.error('Error fetching cropped images:', error);
+      console.error('Lỗi khi lấy ảnh cropped:', error);
     } finally {
-      setLoading(false); // Always set loading to false after the API call
+      setLoading(false);
     }
   };
 
   const openModal = (imageSrc) => {
-    setModalImage(imageSrc); // Đặt ảnh vào modal
-    setIsModalOpen(true); // Mở modal
+    setModalImage(imageSrc);
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false); // Đóng modal
+    setIsModalOpen(false);
   };
-  // Gọi API khi bấm mở danh sách IC
+
   const handleOpen = () => {
-    setOpen(true);    // Open modal
-    fetchCroppedImages(); // Gọi API lấy dữ liệu
+    setOpen(true);
+    fetchCroppedImages();
   };
 
   const handleClose = () => {
-    setOpen(false);    // Close modal
-    setIcList([]);     // Clear IC list on modal close if necessary
+    setOpen(false);
+    setIcList([]);
   };
-
-  const customTexts = {
-    1: "431ADQ30LF1 REV:1H\nH05A095000794\nM1M35",
-    2: "UTC\nUZI084L\n3JATD0A",
-    3: "FNA0SS\n4SS",
-    4: " ",
-    5: "APL1117\nPI40433",
-    6: "APL1117\GHC8V18",
-    7: "TPA6011\n62T\nCVYV",
-    // Thêm các nội dung khác nếu cần
-  };
-  const [verified, setVerified] = useState(false);
 
   const handleCheckClick = (id) => {
-    // Đặt trạng thái loading cho hàng được chọn
     setRowStates((prevState) => ({
       ...prevState,
       [id]: { isLoading: true },
     }));
 
-    // Hiển thị "Đang kiểm tra" trong 3 giây, sau đó hiển thị "IC tin cậy"
     setTimeout(() => {
       setRowStates((prevState) => ({
         ...prevState,
         [id]: { isVerified: true },
       }));
 
-      // Sau 2 giây, quay lại hiển thị nút "Kiểm tra"
       setTimeout(() => {
         setRowStates((prevState) => ({
           ...prevState,
@@ -355,87 +266,69 @@ function Dashboard() {
   };
 
   return (
-    <DashboardLayout>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          marginBottom: '10px'
-        }}
-      >
+    <>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
         <MemoryIcon sx={{ fontSize: 40, color: '#1976d2' }} />
-        <p>{'Phát hiện điểm yếu'}</p>
+        <p>Phát hiện điểm yếu</p>
       </Box>
 
-
       <Box sx={{ marginBottom: "10px", display: "flex", flexDirection: "row", gap: "10px", alignItems: 'center', justifyContent: 'space-between' }}>
-        {/* First Row: Button for selecting image */}
         <Box sx={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
           <Button
             startIcon={<UploadOutlined />}
             sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }}
             size="small"
-            onClick={handleUploadButtonClick} // Open file dialog
+            onClick={handleUploadButtonClick}
           >
             Chọn ảnh
           </Button>
           <input
             type="file"
-            ref={fileInputRef} // Reference to input
-            style={{ display: 'none' }} // Hide input
-            onChange={handleFileChange} // File selected
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
           />
 
-          {/* Nhận diện button */}
           {imageUrlOld && (
             <>
-              <Button
-                className="predictBtn"
-                startIcon={<RightSquareOutlined />}
-                sx={{ background: "#3892ee7d", padding: '6px 12px', fontSize: '12px', display: 'none' }}
-                size="small"
-                onClick={handleUpload}
-              >
-                Nhận diện
-              </Button>
-              <Button
-                className="predictOcrBtn"
-                startIcon={<RightSquareOutlined />}
-                sx={{ background: "#3892ee7d", padding: '6px 12px', fontSize: '12px', display: 'none' }}
-                size="small"
-                onClick={handleUploadocr}
-              >
-                Nhận diện OCR
-              </Button>
+              {/* ✅ Hiển thị button dựa trên state */}
+              {showPredictBtn && (
+                <Button
+                  startIcon={<RightSquareOutlined />}
+                  sx={{ background: "#3892ee7d", padding: '6px 12px', fontSize: '12px' }}
+                  size="small"
+                  onClick={handleUpload}
+                >
+                  Nhận diện
+                </Button>
+              )}
 
-              {/* Autocomplete for selecting labels */}
               <Autocomplete
                 multiple
                 sx={{
-                  width: '25%', // Tăng chiều rộng để dễ nhìn hơn
+                  width: '25%',
                   marginLeft: '20px',
                   '& .MuiOutlinedInput-root': {
-                    padding: '5px 10px', // Thêm padding bên trong input
-                    borderRadius: '8px', // Bo góc cho đẹp hơn
-                    borderColor: '#3892ee', // Đổi màu viền
+                    padding: '5px 10px',
+                    borderRadius: '8px',
+                    borderColor: '#3892ee',
                     '&:hover': {
-                      borderColor: '#2a73d3', // Đổi màu viền khi rê chuột
+                      borderColor: '#2a73d3',
                     },
                   },
                   '& .MuiChip-root': {
-                    backgroundColor: '#f5f5f5', // Màu nền sáng cho các chip đã chọn
-                    fontSize: '0.85rem', // Giảm kích thước font của chip
-                    color: '#333', // Màu chữ tối hơn
+                    backgroundColor: '#f5f5f5',
+                    fontSize: '0.85rem',
+                    color: '#333',
                     '& .MuiChip-deleteIcon': {
-                      color: '#888', // Màu biểu tượng xóa trên chip
+                      color: '#888',
                     },
                   },
                   '& .MuiAutocomplete-clearIndicator': {
-                    color: '#666', // Màu nút xóa nội dung
+                    color: '#666',
                   },
                   '& .MuiAutocomplete-popupIndicator': {
-                    color: '#3892ee', // Màu của mũi tên dropdown
+                    color: '#3892ee',
                   },
                 }}
                 id="tags-outlined"
@@ -451,53 +344,62 @@ function Dashboard() {
                     size="small"
                     sx={{
                       '& label.Mui-focused': {
-                        color: '#3892ee', // Đổi màu label khi focus
+                        color: '#3892ee',
                       },
                       '& .MuiOutlinedInput-root': {
                         '& fieldset': {
-                          borderColor: '#3892ee', // Màu viền mặc định
+                          borderColor: '#3892ee',
                         },
                         '&:hover fieldset': {
-                          borderColor: '#2a73d3', // Màu viền khi hover
+                          borderColor: '#2a73d3',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: '#1a5bbd', // Màu viền khi focus
+                          borderColor: '#1a5bbd',
                         },
                       },
                     }}
                   />
                 )}
               />
-
-
             </>
           )}
         </Box>
 
-        {/* Second Row: Display buttons and prediction result after image upload */}
         {imageUrl && (
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: '10px', marginTop: '10px' }}>
-            {/* Button row */}
             <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {/* Danh sách IC button */}
-              <Button startIcon={<UnorderedListOutlined />} sx={{ background: "#3892ee7d", fontSize: '12px', padding: '6px 12px' }} size="small" onClick={handleOpen}>
+              <Button 
+                startIcon={<UnorderedListOutlined />} 
+                sx={{ background: "#3892ee7d", fontSize: '12px', padding: '6px 12px' }} 
+                size="small" 
+                onClick={handleOpen}
+              >
                 Danh sách IC
               </Button>
-              <Button startIcon={<DownloadOutlined />} sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }} size="small" onClick={handleDownload}>
+              <Button 
+                startIcon={<DownloadOutlined />} 
+                sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }} 
+                size="small" 
+                onClick={handleDownload}
+              >
                 Tải ảnh
               </Button>
-              <Button startIcon={<DownloadOutlined />} sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }} size="small" onClick={() => handleDownloadJS(selectedFile)}>
+              <Button 
+                startIcon={<DownloadOutlined />} 
+                sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }} 
+                size="small" 
+                onClick={() => handleDownloadJS(selectedFile)}
+              >
                 Tải JSON
               </Button>
 
-              {/* Modal for IC list */}
+              {/* Modal danh sách IC */}
               <Modal
                 open={open}
                 onClose={handleClose}
                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <Box sx={{ position: 'relative', width: '60%', maxHeight: '70%', overflowY: 'auto', bgcolor: 'background.paper', p: 4, borderRadius: 2 }}>
-                  {/* Close Button */}
                   <IconButton onClick={handleClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
                     <CloseIcon />
                   </IconButton>
@@ -506,7 +408,6 @@ function Dashboard() {
                     DANH SÁCH IC NHẬN DIỆN
                   </Typography>
 
-                  {/* Loading Spinner */}
                   {loading ? (
                     <Box sx={{ width: "100%", height: "300px", display: "flex", justifyContent: "center", alignItems: "center" }}>
                       <CircularProgress />
@@ -549,7 +450,6 @@ function Dashboard() {
                                 )}
                               </TableCell>
                               <TableCell align="center" style={{ verticalAlign: 'middle' }}>
-                                {/* Kiểm tra trạng thái của hàng */}
                                 {rowStates[ic.id]?.isLoading ? (
                                   <CircularProgress size={24} />
                                 ) : rowStates[ic.id]?.isVerified ? (
@@ -571,20 +471,14 @@ function Dashboard() {
                           ))}
                         </TableBody>
                       </Table>
-
                     </TableContainer>
                   )}
                 </Box>
               </Modal>
-
-
-
             </Box>
           </Box>
-        )
-        }
-      </Box >
-
+        )}
+      </Box>
 
       <Box sx={{ display: "flex", width: "100%", justifyContent: "space-between" }}>
         {status ? (
@@ -598,7 +492,7 @@ function Dashboard() {
                 src={imageUrlOld}
                 alt="ảnh ban đầu"
                 style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "pointer" }}
-                onClick={() => openModal(imageUrlOld)} // Khi nhấn vào ảnh sẽ phóng to
+                onClick={() => openModal(imageUrlOld)}
               />
             )}
           </Box>
@@ -615,7 +509,7 @@ function Dashboard() {
                 src={imageUrl}
                 alt="Predicted"
                 style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "pointer" }}
-                onClick={() => openModal(imageUrl)} // Khi nhấn vào ảnh sẽ phóng to
+                onClick={() => openModal(imageUrl)}
               />
             )}
           </Box>
@@ -635,12 +529,12 @@ function Dashboard() {
         </Box>
       </Modal>
 
-      {/* Danh sách các label và số lượng */}
+      {/* Kết quả nhận diện YOLO */}
       {imageUrl && showResult && (
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
             <CheckCircleOutlinedIcon sx={{ color: 'green', fontSize: '40px' }} />
-            <p>{'Kết quả nhận diện bằng mô hình'}</p>
+            <p>Kết quả nhận diện bằng mô hình</p>
           </Box>
           <Box sx={{ marginTop: "5px", display: "flex" }}>
             <Box sx={{ display: "flex", flexWrap: "wrap" }}>
@@ -679,19 +573,18 @@ function Dashboard() {
                     {contLabel ? contLabel[label.symbol] : ""}
                   </Typography>
                 </Box>
-
               ))}
             </Box>
           </Box>
         </Box>
-
       )}
 
+      {/* Kết quả nhận diện OCR */}
       {showOcrResult && (
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
             <CheckCircleOutlinedIcon sx={{ color: 'green', fontSize: '40px' }} />
-            <p>{'Kết quả nhận diện bằng OCR'}</p>
+            <p>Kết quả nhận diện bằng OCR</p>
           </Box>
           <Box sx={{ marginTop: "5px", display: "flex" }}>
             <Box sx={{ display: "flex", flexWrap: "wrap" }}>
@@ -730,18 +623,12 @@ function Dashboard() {
                     {contLabel ? contLabel[label.symbol] : ""}
                   </Typography>
                 </Box>
-
               ))}
             </Box>
           </Box>
         </Box>
-
       )}
-
-
-
-
-    </DashboardLayout >
+    </>
   );
 }
 

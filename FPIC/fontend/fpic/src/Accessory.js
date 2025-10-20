@@ -91,10 +91,36 @@ function Accessory() {
   useEffect(() => {
     const item = data.accessories[currentIndex];
     if (item) {
+      console.log("Setting form data with item:", item);
       setFormAccessory({ ...item });
       setFormDataUpdate({ ...item });
+    } else {
+      console.log("No item found at index:", currentIndex);
     }
   }, [currentIndex, data.accessories]);
+
+  // Add additional effect to handle data changes
+  useEffect(() => {
+    if (data.accessories && data.accessories.length > 0) {
+      console.log("Accessories updated, current index:", currentIndex);
+      const currentItem = data.accessories[currentIndex];
+      if (currentItem) {
+        setFormAccessory({ ...currentItem });
+        setFormDataUpdate({ ...currentItem });
+      }
+    }
+  }, [data.accessories]);
+
+  // Đồng bộ dữ liệu khi accessories hoặc currentIndex thay đổi
+  useEffect(() => {
+    if (data.accessories && data.accessories.length > 0) {
+      const currentAccessory = data.accessories[currentIndex];
+      if (currentAccessory) {
+        setFormAccessory(currentAccessory);
+        setFormDataUpdate(currentAccessory);
+      }
+    }
+  }, [data.accessories, currentIndex]);
 
   useEffect(() => {
     const delaySearch = setTimeout(() => {
@@ -286,6 +312,29 @@ function Accessory() {
     }
   };
 
+  // NEW: cập nhật item trong state sau khi update thành công
+  const handleAccessoryUpdated = (updatedAccessory) => {
+    if (!updatedAccessory || !updatedAccessory._id) return;
+
+    // Cập nhật trong danh sách accessories
+    setData((prevData) => {
+      const newAccessories = prevData.accessories.map((acc) =>
+        acc._id === updatedAccessory._id ? updatedAccessory : acc
+      );
+
+      return {
+        ...prevData,
+        accessories: newAccessories,
+      };
+    });
+
+    // Cập nhật form data hiện tại nếu đang xem item được cập nhật
+    if (formAccessory._id === updatedAccessory._id) {
+      setFormAccessory(updatedAccessory);
+      setFormDataUpdate(updatedAccessory);
+    }
+  };
+
   const showNotification = (message, severity) => {
     setSnackBar({
       open: true,
@@ -310,15 +359,18 @@ function Accessory() {
     setSearch("");
   };
 
-  const isBase64 = React.useMemo((str) => {
-    return (str) => {
-      try {
-        return btoa(atob(str)) === str;
-      } catch (err) {
-        return false;
-      }
-    };
-  }, []);
+  const isBase64 = React.useMemo(
+    (str) => {
+      return (str) => {
+        try {
+          return btoa(atob(str)) === str;
+        } catch (err) {
+          return false;
+        }
+      };
+    },
+    []
+  );
 
   const handlePageChange = (_, newPage) => {
     setPage(newPage);
@@ -533,9 +585,9 @@ function Accessory() {
         showModalDesc={showModalDesc}
         handleClickModalDesc={handleClickModalDesc}
         formAccessory={formAccessory}
-        data={data}
         formDataUpdate={formDataUpdate}
         setFormDataUpdate={setFormDataUpdate}
+        data={data}
         errors={errors}
         isLoadingButton={isLoadingButton}
         handleClickOnAnotherImage={handleClickOnAnotherImage}
@@ -548,6 +600,8 @@ function Accessory() {
         setData={setData}
         pageAccessory={pageAccessory}
         handleAccessoryPageChange={handleAccessoryPageChange}
+        onAccessoryUpdated={handleAccessoryUpdated}
+        currentIndex={currentIndex}
       />
 
       <AddAccessoryDialog

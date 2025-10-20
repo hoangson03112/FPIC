@@ -186,14 +186,14 @@ const WeakPoint = () => {
   useEffect(() => {
     setIsLoading(true);
     const endpoints = [
-      { key: "jtag", url: "http://localhost:9999/images-jtag" },
-      { key: "testPin", url: "http://localhost:9999/images-test-pin" },
-      { key: "lpc", url: "http://localhost:9999/images-lpc" },
-      { key: "footprint", url: "http://localhost:9999/images-footprint" },
-      { key: "unusedPort", url: "http://localhost:9999/images-unused-port" },
-      { key: "vias", url: "http://localhost:9999/images-vias" },
-      { key: "spi", url: "http://localhost:9999/images-spi" },
-      { key: "smb", url: "http://localhost:9999/images-smb" },
+      { key: "jtag", url: `${REACT_APP_URL_BE}/images-jtag` },
+      { key: "testPin", url: `${REACT_APP_URL_BE}/images-test-pin` },
+      { key: "lpc", url: `${REACT_APP_URL_BE}/images-lpc` },
+      { key: "footprint", url: `${REACT_APP_URL_BE}/images-footprint` },
+      { key: "unusedPort", url: `${REACT_APP_URL_BE}/images-unused-port` },
+      { key: "vias", url: `${REACT_APP_URL_BE}/images-vias` },
+      { key: "spi", url: `${REACT_APP_URL_BE}/images-spi` },
+      { key: "smb", url: `${REACT_APP_URL_BE}/images-smb` },
     ];
 
     const fetchAllData = async () => {
@@ -1142,20 +1142,33 @@ const WeakPoint = () => {
                   <TextField
                     fullWidth
                     select
-                    label="Thiết bị"
                     name="device"
                     value={formData.device}
                     onChange={handleInputChange}
                     required
                     variant="outlined"
+                    SelectProps={{
+                      displayEmpty: true,
+                      renderValue: (selected) =>
+                        selected ? (
+                          selected
+                        ) : (
+                          <span style={{ color: theme.palette.text.secondary }}>
+                            Chọn thiết bị
+                          </span>
+                        ),
+                    }}
                   >
+                    <MenuItem value="">
+                   
+                    </MenuItem>
                     <MenuItem value="Router">Router</MenuItem>
                     <MenuItem value="PC">PC</MenuItem>
                     <MenuItem value="USB">USB</MenuItem>
                     <MenuItem value="Access Point">Access Point</MenuItem>
                     <MenuItem value="Switch">Switch</MenuItem>
                     <MenuItem value="Server">Server</MenuItem>
-                    <MenuItem value="FPJA">FPJA</MenuItem>
+                    <MenuItem value="FPGA">FPGA</MenuItem>
                   </TextField>
 
                   <Box sx={{ flexShrink: 0 }}>

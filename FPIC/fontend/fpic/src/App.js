@@ -3,6 +3,7 @@ import axios from "axios";
 import ZoomableImage from "./ZoomableImage";
 import "./App.css";
 import CustomButtonGroup from "./ButtonColor";
+import { REACT_APP_URL_BE } from "./config";
 
 function App() {
   const [images, setImages] = useState([]);
@@ -12,9 +13,10 @@ function App() {
   const [fileData, setFileData] = useState(null);
   const [classes, setClasses] = useState([]);
 
+
   useEffect(() => {
     axios
-      .get("http://localhost:9999/images")
+      .get(`${REACT_APP_URL_BE}/images`)
       .then((response) => {
         setImages(response.data);
       })
@@ -23,7 +25,7 @@ function App() {
       });
 
     axios
-      .get("http://localhost:9999/get-classes")
+      .get(`${REACT_APP_URL_BE}/get-classes`)
       .then((response) => {
         setClasses(response.data.jsonData.classes);
       })
@@ -60,7 +62,7 @@ function App() {
   useEffect(() => {
     if (selectedImage) {
       axios
-        .post("http://localhost:9999/get-json-file", {
+        .post(`${REACT_APP_URL_BE}/get-json-file`, {
           fileName: selectedImage.name,
         })
         .then((response) => {

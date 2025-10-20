@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Grid,
   Typography,
@@ -103,12 +103,14 @@ const AddButton = styled(Button)(({ theme }) => ({
   },
   transition: "all 0.3s ease",
 }));
+
 const MicrochipList = () => {
   const theme = useTheme();
   const fileInputRef = useRef(null);
 
   const [microchips, setMicrochips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
   const [openDialog, setOpenDialog] = useState(false);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [currentMicrochip, setCurrentMicrochip] = useState(null);
@@ -117,7 +119,6 @@ const MicrochipList = () => {
     message: "",
     severity: "success",
   });
-  const [isSearching, setIsSearching] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [microchipToDelete, setMicrochipToDelete] = useState(null);
@@ -180,38 +181,68 @@ const MicrochipList = () => {
     setShowSuggestions(false);
   };
 
+  // ✅ Fetch microchips - không set loading khi refresh background
+  const fetchMicrochips = useCallback(async (isBackgroundRefresh = false) => {
+    try {
+      if (!isBackgroundRefresh) {
+        setLoading(true);
+      }
+      
+      const response = await api.get(`${REACT_APP_URL_BE}/microchips`);
+      
+      console.log("📥 Fetched microchips:", response.data.microchips?.length, "items");
+      
+      setMicrochips(response.data.microchips);
+      setLastUpdateTime(Date.now());
+      
+      return response.data.microchips;
+    } catch (error) {
+      console.error("❌ Fetch error:", error);
+      setSnackbar({ 
+        open: true, 
+        message: "Lỗi khi tải dữ liệu", 
+        severity: "error" 
+      });
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        return;
+      }
+      throw error;
+    } finally {
+      if (!isBackgroundRefresh) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  // Initial fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(`${REACT_APP_URL_BE}/microchips`);
-
-        setMicrochips(response.data.microchips);
+        await fetchMicrochips(false);
       } catch (error) {
-        showSnackbar("Lỗi khi tải dữ liệu", "error");
-        if (error.response && error.response.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-  
-
-  
-          window.location.href = "/login";
-          return;
-        }
-      } finally {
-        setLoading(false);
+        console.error("Error fetching microchips:", error);
       }
     };
     fetchData();
+  }, [fetchMicrochips]);
+
+  // ✅ Debug: Track state changes
+  useEffect(() => {
+    console.log("🔄 State changed - Microchips count:", microchips.length);
+    console.log("⏰ Last update time:", new Date(lastUpdateTime).toLocaleTimeString());
+  }, [microchips, lastUpdateTime]);
+
+  const showSnackbar = useCallback((message, severity) => {
+    setSnackbar({ open: true, message, severity });
   }, []);
 
-  const showSnackbar = (message, severity) => {
-    setSnackbar({ open: true, message, severity });
-  };
-
   const handleOpenDialog = (microchip = null) => {
-    setCurrentMicrochip(microchip);
-
     if (microchip) {
+      console.log("✏️ Opening edit dialog for:", microchip.name);
+      setCurrentMicrochip(microchip);
       setFormData({
         name: microchip.name,
         description: microchip.description,
@@ -220,10 +251,13 @@ const MicrochipList = () => {
       });
       setPreviewImage(microchip.imagePath);
     } else {
+      console.log("➕ Opening add dialog");
+      setCurrentMicrochip(null);
       setFormData({
         name: "",
         description: "",
         image: null,
+        device: "",
       });
       setPreviewImage(null);
     }
@@ -231,19 +265,29 @@ const MicrochipList = () => {
   };
 
   const handleCloseDialog = () => {
+    console.log("❌ Closing dialog");
     setOpenDialog(false);
     setPreviewImage(null);
+    setCurrentMicrochip(null);
+    setFormData({
+      name: "",
+      description: "",
+      image: null,
+      device: "",
+    });
   };
 
   const handleOpenDetailsDialog = (microchip) => {
+    console.log("👁️ Opening details for:", microchip.name);
     setCurrentMicrochip(microchip);
-
-    setPreviewImage(microchip.imageURL);
+    setPreviewImage(microchip.imagePath);
     setOpenDetailsDialog(true);
   };
 
   const handleCloseDetailsDialog = () => {
+    console.log("❌ Closing details dialog");
     setOpenDetailsDialog(false);
+    setCurrentMicrochip(null);
   };
 
   const handleInputChange = (e) => {
@@ -254,6 +298,7 @@ const MicrochipList = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      console.log("📁 File selected:", file.name);
       setFormData((prev) => ({ ...prev, image: file }));
 
       const reader = new FileReader();
@@ -264,6 +309,7 @@ const MicrochipList = () => {
     }
   };
 
+  // ✅ GIẢI PHÁP HOÀN CHỈNH: Handle submit với error handling đầy đủ
   const handleSubmit = async () => {
     try {
       const submitData = new FormData();
@@ -276,6 +322,9 @@ const MicrochipList = () => {
       }
 
       if (currentMicrochip) {
+        // ============= UPDATE MODE =============
+        console.log("💾 Updating microchip:", currentMicrochip._id);
+        
         const response = await api.put(
           `${REACT_APP_URL_BE}/microchips/${currentMicrochip._id}`,
           submitData,
@@ -286,14 +335,49 @@ const MicrochipList = () => {
           }
         );
 
-        setMicrochips(
-          microchips.map((item) =>
-            item._id === currentMicrochip._id ? response.data.microchip : item
-          )
-        );
+        console.log("📤 API Response:", response.data);
+        console.log("📋 Response keys:", Object.keys(response.data));
+
+        // Lấy updated microchip từ response (thử nhiều cấu trúc response)
+        const updatedMicrochip = 
+          response.data.microchip || 
+          response.data.updatedMicrochip ||
+          response.data.data ||
+          response.data;
+
+        console.log("✅ Updated microchip:", updatedMicrochip);
+
+        // Đóng dialog trước để tránh UI lag
+        handleCloseDialog();
+
+        // Cập nhật state với data mới
+        setMicrochips((prevMicrochips) => {
+          const newState = prevMicrochips.map((item) =>
+            item._id === currentMicrochip._id 
+              ? { ...item, ...updatedMicrochip } // Merge để giữ các field
+              : item
+          );
+          console.log("🔄 Updated state, total items:", newState.length);
+          return newState;
+        });
+
+        // Force update timestamp để bust cache
+        const newTimestamp = Date.now();
+        console.log("⏰ Setting new timestamp:", newTimestamp);
+        setLastUpdateTime(newTimestamp);
+
+        // Fetch lại sau 300ms để đảm bảo đồng bộ 100%
+        setTimeout(async () => {
+          console.log("🔃 Background refresh...");
+          await fetchMicrochips(true);
+        }, 300);
+
         showSnackbar("Cập nhật vi mạch thành công", "success");
+
       } else {
-        // Create
+        // ============= CREATE MODE =============
+        console.log("➕ Creating new microchip");
+        
         const response = await api.post(
           `${REACT_APP_URL_BE}/microchips`,
           submitData,
@@ -302,18 +386,46 @@ const MicrochipList = () => {
           }
         );
 
-        setMicrochips([...microchips, response.data.newMicrochip]);
+        console.log("📤 Create response:", response.data);
+
+        const newMicrochip = response.data.newMicrochip || response.data;
+
+        // Đóng dialog trước
+        handleCloseDialog();
+
+        // Thêm vào state
+        setMicrochips((prev) => {
+          console.log("➕ Adding new item, total will be:", prev.length + 1);
+          return [...prev, newMicrochip];
+        });
+
+        setLastUpdateTime(Date.now());
+
+        // Fetch lại để đảm bảo
+        setTimeout(async () => {
+          await fetchMicrochips(true);
+        }, 300);
+
         showSnackbar("Thêm vi mạch thành công", "success");
       }
-      handleCloseDialog();
+
     } catch (error) {
-      showSnackbar("Lỗi khi lưu vi mạch", "error");
+      console.error("❌ Submit error:", error);
+      console.error("📋 Error response:", error.response?.data);
+      
+      let errorMessage = "Lỗi khi lưu vi mạch";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showSnackbar(errorMessage, "error");
+
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
-
-
         window.location.href = "/login";
         return;
       }
@@ -327,29 +439,46 @@ const MicrochipList = () => {
   };
 
   const handleDeleteConfirm = (microchip) => {
+    console.log("🗑️ Delete confirm for:", microchip.name);
     setMicrochipToDelete(microchip);
     setIsDeleteConfirmOpen(true);
   };
 
   const handleDelete = async () => {
     try {
+      console.log("🗑️ Deleting microchip:", microchipToDelete._id);
+      
       await api.delete(
         `${REACT_APP_URL_BE}/microchips/${microchipToDelete._id}`
       );
-      setMicrochips(
-        microchips.filter((item) => item._id !== microchipToDelete._id)
-      );
+
+      // Cập nhật state ngay lập tức
+      setMicrochips((prevMicrochips) => {
+        const newState = prevMicrochips.filter(
+          (item) => item._id !== microchipToDelete._id
+        );
+        console.log("✅ Deleted, remaining items:", newState.length);
+        return newState;
+      });
+
+      setLastUpdateTime(Date.now());
       setPage(1);
-      showSnackbar("Xóa vi mạch thành công", "success");
       setIsDeleteConfirmOpen(false);
+      
+      showSnackbar("Xóa vi mạch thành công", "success");
+
+      // Fetch lại để đảm bảo
+      setTimeout(async () => {
+        await fetchMicrochips(true);
+      }, 300);
+
     } catch (error) {
+      console.error("❌ Delete error:", error);
       showSnackbar("Lỗi khi xóa vi mạch", "error");
+      
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
-
-
         window.location.href = "/login";
         return;
       }
@@ -453,9 +582,6 @@ const MicrochipList = () => {
                   ),
                   endAdornment: (
                     <>
-                      {isSearching && (
-                        <CircularProgress size={20} sx={{ mr: 1 }} />
-                      )}
                       {searchTerm && (
                         <IconButton
                           aria-label="clear search"
@@ -498,7 +624,7 @@ const MicrochipList = () => {
                       >
                         <CardMedia
                           component="img"
-                          image={`${REACT_APP_URL_BE}${item.imagePath}`}
+                          image={`${REACT_APP_URL_BE}${item.imagePath}?t=${lastUpdateTime}`}
                           alt={item.name || "No name"}
                           sx={{
                             width: 48,
@@ -612,7 +738,13 @@ const MicrochipList = () => {
 
       <Grid container spacing={3}>
         {paginatedMicrochips.map((microchip) => (
-          <Grid item xs={6} sm={4} md={3} key={microchip._id}>
+          <Grid 
+            item 
+            xs={6} 
+            sm={4} 
+            md={3} 
+            key={`microchip-${microchip._id}-${microchip.updatedAt || lastUpdateTime}`}
+          >
             <Card
               elevation={1}
               sx={{
@@ -629,8 +761,9 @@ const MicrochipList = () => {
               <CardMedia
                 component="img"
                 height="140"
-                image={`${REACT_APP_URL_BE}${microchip.imagePath}`}
+                image={`${REACT_APP_URL_BE}${microchip.imagePath}?t=${lastUpdateTime}`}
                 alt={microchip.name}
+                sx={{ objectFit: "cover" }}
                 onError={(e) => {
                   e.target.src = "/placeholder-microchip.png";
                 }}
@@ -653,6 +786,15 @@ const MicrochipList = () => {
                 >
                   {microchip.description}
                 </Typography>
+                {microchip.device && (
+                  <Chip 
+                    label={microchip.device} 
+                    size="small" 
+                    color="primary" 
+                    variant="outlined"
+                    sx={{ mb: 1 }}
+                  />
+                )}
                 {microchip.createdAt && (
                   <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
                     <CalendarToday
@@ -751,7 +893,7 @@ const MicrochipList = () => {
                   >
                     <CardMedia
                       component="img"
-                      image={`${REACT_APP_URL_BE}${currentMicrochip.imagePath}`}
+                      image={`${REACT_APP_URL_BE}${currentMicrochip.imagePath}?t=${lastUpdateTime}`}
                       alt={currentMicrochip.name}
                       sx={{
                         height: 300,
@@ -778,9 +920,11 @@ const MicrochipList = () => {
                   >
                     Thiết bị
                   </Typography>
-                  <Typography variant="body1">
-                    {currentMicrochip.device || "Không có thiết bị"}
-                  </Typography>
+                  <Chip 
+                    label={currentMicrochip.device || "Không có thiết bị"} 
+                    color="primary"
+                    sx={{ mb: 2 }}
+                  />
                   <Divider sx={{ my: 2 }} />
 
                   <Typography
@@ -880,7 +1024,7 @@ const MicrochipList = () => {
                 <MenuItem value="Access Point">Access Point</MenuItem>
                 <MenuItem value="Switch">Switch</MenuItem>
                 <MenuItem value="Server">Server</MenuItem>
-                <MenuItem value="FPJA">FPJA</MenuItem>
+                <MenuItem value="FPGA">FPGA</MenuItem>
               </TextField>
             </Grid>
             <Grid item xs={12}>
@@ -951,7 +1095,7 @@ const MicrochipList = () => {
                         formData.image
                           ? previewImage
                           : currentMicrochip
-                          ? `${REACT_APP_URL_BE}${previewImage}`
+                          ? `${REACT_APP_URL_BE}${previewImage}?t=${lastUpdateTime}`
                           : previewImage
                       }
                       alt="Preview"
@@ -1029,6 +1173,7 @@ const MicrochipList = () => {
             disabled={
               !formData.name ||
               !formData.description ||
+              !formData.device ||
               (!formData.image && !currentMicrochip)
             }
           >
