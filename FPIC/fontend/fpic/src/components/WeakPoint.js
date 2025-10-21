@@ -309,7 +309,7 @@ const WeakPoint = () => {
       name: item.name || "",
       description: item.description || "",
       category: item.category || activeTab,
-      device: item.device || "",
+      device: item.device || "Chọn thiết bị",
     });
     setNameError("");
     setImagePreview(`${REACT_APP_URL_BE}${item.imagePath}`);
@@ -1066,7 +1066,7 @@ const WeakPoint = () => {
                             Thiết bị
                           </TableCell>
                           <TableCell>
-                            {selectedItem?.device ? (
+                            {selectedItem?.device && selectedItem.device !== 'undefined' ? (
                               <Chip
                                 label={selectedItem.device}
                                 color="secondary"
