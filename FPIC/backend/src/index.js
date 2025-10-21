@@ -596,6 +596,308 @@ app.get(
   }
 );
 
+// ==================== IMPORT IMAGES BATCH WITH WEAKPOINT ====================
+// Mapping giữa tên thư mục và category để tự động nhận diện
+const FOLDER_CATEGORY_MAPPING = {
+  'jtag': 'jtag',
+  'testpin': 'testPin', 
+  'test-pin': 'testPin',
+  'lpc': 'lpc',
+  'footprint': 'footprint',
+  'unusedport': 'unusedPort',
+  'unused-port': 'unusedPort',
+  'up': 'unusedPort',  // Mapping cho "up" → "unusedPort"
+  'vias': 'vias',
+  'spi': 'spi',
+  'smb': 'smb'
+};
+
+// Hàm tự động nhận diện category từ tên thư mục
+function detectCategoryFromFolder(folderName) {
+  const normalizedName = folderName.toLowerCase()
+    .replace(/[^a-z0-9]/g, '') // Bỏ ký tự đặc biệt
+    .replace(/\s+/g, ''); // Bỏ khoảng trắng
+  
+  // Tìm kiếm exact match trước
+  if (FOLDER_CATEGORY_MAPPING[normalizedName]) {
+    return FOLDER_CATEGORY_MAPPING[normalizedName];
+  }
+  
+  // Tìm kiếm partial match
+  for (const [key, category] of Object.entries(FOLDER_CATEGORY_MAPPING)) {
+    if (normalizedName.includes(key) || key.includes(normalizedName)) {
+      return category;
+    }
+  }
+  
+  return null; // Không tìm thấy
+}
+
+// Endpoint import ảnh hàng loạt với tự động nhận diện category
+app.post(
+  "/import-images-batch-weakpoint",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const { 
+        sourceFolder, 
+        customCategory = null,
+        namePrefix = "UP mẫu",
+        device = "" // Default là chuỗi rỗng, không bắt buộc
+      } = req.body;
+      
+      if (!sourceFolder) {
+        return res.status(400).json({ 
+          message: "Vui lòng cung cấp đường dẫn thư mục nguồn" 
+        });
+      }
+
+      // Kiểm tra thư mục có tồn tại không (hỗ trợ đường dẫn tuyệt đối)
+      if (!fs.existsSync(sourceFolder)) {
+        return res.status(404).json({ 
+          message: "Thư mục không tồn tại",
+          providedPath: sourceFolder
+        });
+      }
+
+      // Tự động nhận diện category từ tên thư mục
+      const folderName = path.basename(sourceFolder);
+      let detectedCategory = detectCategoryFromFolder(folderName);
+      
+      // Ưu tiên customCategory nếu được cung cấp
+      const finalCategory = customCategory || detectedCategory;
+      
+      if (!finalCategory) {
+        return res.status(400).json({ 
+          message: `Không thể nhận diện hạng mục từ thư mục "${folderName}". Vui lòng cung cấp customCategory.`,
+          availableCategories: Object.values(FOLDER_CATEGORY_MAPPING)
+        });
+      }
+
+      // Đọc tất cả file ảnh từ thư mục nguồn
+      const images = fs
+        .readdirSync(sourceFolder)
+        .filter((file) => {
+          const ext = path.extname(file).toLowerCase();
+          return ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.jfif'].includes(ext);
+        })
+        .sort(); // Sắp xếp để đảm bảo thứ tự nhất quán
+
+      if (images.length === 0) {
+        return res.status(404).json({ 
+          message: "Không tìm thấy file ảnh nào trong thư mục" 
+        });
+      }
+
+      // Tạo thư mục đích nếu chưa có (trong thư mục gốc backend)
+      const targetDir = path.join(__dirname, "../", finalCategory);
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+
+      // Import từng ảnh với tên mới theo thứ tự
+      const results = [];
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < images.length; i++) {
+        try {
+          const originalFile = path.join(sourceFolder, images[i]);
+          const fileExt = path.extname(images[i]);
+          const newFileName = `${namePrefix} ${i + 1}${fileExt}`; // Bỏ timestamp
+          const targetFile = path.join(targetDir, newFileName);
+          
+          // Kiểm tra file gốc có tồn tại không
+          if (!fs.existsSync(originalFile)) {
+            throw new Error(`File gốc không tồn tại: ${originalFile}`);
+          }
+          
+          // Copy file với tên mới
+          fs.copyFileSync(originalFile, targetFile);
+          
+          // Kiểm tra file đã được copy thành công
+          if (!fs.existsSync(targetFile)) {
+            throw new Error(`Không thể copy file: ${targetFile}`);
+          }
+          
+          // Tạo đường dẫn cho database
+          const imagePath = `/${finalCategory}/${newFileName}`;
+
+          // Lưu vào database WeakPoint
+          const newWeakPoint = new WeakPoint({
+            name: `${namePrefix} ${i + 1}`,
+            description: "", // Để trống như yêu cầu
+            imagePath: imagePath,
+            category: finalCategory,
+            device: device || ""
+          });
+
+          await newWeakPoint.save();
+          results.push({
+            original: images[i],
+            newName: newFileName,
+            category: finalCategory,
+            device: device || "Không xác định",
+            success: true
+          });
+          successCount++;
+          
+        } catch (error) {
+          console.error(`Lỗi khi xử lý ${images[i]}:`, error);
+          results.push({
+            original: images[i],
+            error: error.message,
+            success: false
+          });
+          errorCount++;
+        }
+      }
+
+      res.json({
+        message: `Import hoàn thành! Thành công: ${successCount}, Lỗi: ${errorCount}`,
+        folderName: folderName,
+        sourcePath: sourceFolder,
+        detectedCategory: detectedCategory,
+        finalCategory: finalCategory,
+        device: device || "Không xác định",
+        total: images.length,
+        success: successCount,
+        errors: errorCount,
+        results: results
+      });
+
+    } catch (error) {
+      console.error("Lỗi import:", error);
+      res.status(500).json({ 
+        message: `Lỗi server: ${error.message}` 
+      });
+    }
+  }
+);
+
+// Endpoint để xem danh sách thư mục có ảnh và gợi ý category
+app.get(
+  "/scan-folders-with-images",
+  verifyToken,
+  authorize(["admin"]),
+  (req, res) => {
+    try {
+      const { rootPath = "C:\\" } = req.query;
+      
+      const scanDirectory = (dir, maxDepth = 3, currentDepth = 0) => {
+        if (currentDepth >= maxDepth) return [];
+        
+        const items = [];
+        try {
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+          
+          entries.forEach(entry => {
+            if (entry.isDirectory()) {
+              const fullPath = path.join(dir, entry.name);
+              const hasImages = fs.readdirSync(fullPath).some(file => {
+                const ext = path.extname(file).toLowerCase();
+                return ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.jfif'].includes(ext);
+              });
+              
+              if (hasImages) {
+                const detectedCategory = detectCategoryFromFolder(entry.name);
+                items.push({
+                  name: entry.name,
+                  path: fullPath,
+                  detectedCategory: detectedCategory,
+                  imageCount: fs.readdirSync(fullPath).filter(file => {
+                    const ext = path.extname(file).toLowerCase();
+                    return ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.jfif'].includes(ext);
+                  }).length
+                });
+              }
+              
+              // Đệ quy tìm trong thư mục con
+              items.push(...scanDirectory(fullPath, maxDepth, currentDepth + 1));
+            }
+          });
+        } catch (err) {
+          // Bỏ qua thư mục không thể đọc
+        }
+        
+        return items;
+      };
+
+      const foldersWithImages = scanDirectory(rootPath);
+      
+      res.json({
+        message: `Danh sách thư mục có ảnh trong ${rootPath}`,
+        total: foldersWithImages.length,
+        folders: foldersWithImages,
+        availableCategories: Object.values(FOLDER_CATEGORY_MAPPING)
+      });
+      
+    } catch (error) {
+      res.status(500).json({ 
+        message: `Lỗi quét thư mục: ${error.message}` 
+      });
+    }
+  }
+);
+
+// Endpoint để xem mapping category hiện tại
+app.get(
+  "/category-mapping",
+  verifyToken,
+  authorize(["admin"]),
+  (req, res) => {
+    res.json({
+      message: "Mapping giữa tên thư mục và category",
+      mapping: FOLDER_CATEGORY_MAPPING,
+      availableCategories: Object.values(FOLDER_CATEGORY_MAPPING)
+    });
+  }
+);
+
+// Endpoint để xóa tất cả WeakPoint theo category
+app.delete(
+  "/clear-weakpoints-by-category/:category",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const { category } = req.params;
+      
+      // Lấy danh sách WeakPoint để xóa files
+      const weakPoints = await WeakPoint.find({ category });
+      
+      // Xóa files trong thư mục (trong thư mục gốc backend)
+      const targetDir = path.join(__dirname, "../", category);
+      if (fs.existsSync(targetDir)) {
+        const files = fs.readdirSync(targetDir);
+        files.forEach(file => {
+          const filePath = path.join(targetDir, file);
+          try {
+            fs.unlinkSync(filePath);
+          } catch (error) {
+            console.error(`Lỗi xóa file ${file}:`, error);
+          }
+        });
+      }
+      
+      // Xóa records trong database
+      const result = await WeakPoint.deleteMany({ category });
+      
+      res.json({
+        message: `Đã xóa ${result.deletedCount} records và files trong category ${category}`,
+        deletedCount: result.deletedCount,
+        category: category
+      });
+    } catch (error) {
+      console.error("Lỗi xóa category:", error);
+      res.status(500).json({ 
+        message: `Lỗi xóa category: ${error.message}` 
+      });
+    }
+  }
+);
+
 app.get(
   "/fpic/sodokhoi",
   verifyToken,
