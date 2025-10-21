@@ -12,13 +12,6 @@ import {
   Button,
   CircularProgress,
   Dialog,
-  DialogTitle,
-  Fade,
-  DialogContent,
-  DialogActions,
-  Divider,
-  Stack,
-  alpha,
 } from "@mui/material";
 import {
   Close as CloseIcon,
@@ -33,7 +26,6 @@ import {
 } from "@mui/icons-material";
 import ZoomableImage from "../ZoomableImage";
 import { REACT_APP_URL_BE } from "../config";
-import axios from "axios";
 
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import api from "../api";
@@ -58,6 +50,7 @@ export const AccessoryDetailDialog = ({
   setSnackBar,
   setData,
   setShowModal,
+  onAccessoryUpdated,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
@@ -74,6 +67,8 @@ export const AccessoryDetailDialog = ({
     form.append("title", formDataUpdate.title);
     form.append("description", formDataUpdate.description);
     form.append("type", formAccessory.type);
+    
+    // Chỉ append file nếu user chọn file mới
     if (formDataUpdate.image instanceof File) {
       form.append("file", formDataUpdate.image);
     }
@@ -84,11 +79,33 @@ export const AccessoryDetailDialog = ({
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+      
+      // ← FIX CUỐI CÙNG: Lấy accessory từ data.accessories (có image URL đúng)
+      const currentAccessoryInList = data.accessories.find(
+        acc => acc._id === formAccessory._id
+      );
+      
+      const updatedAccessory = {
+        ...currentAccessoryInList, // Lấy TOÀN BỘ data từ list gốc (bao gồm image)
+        title: formDataUpdate.title, // Chỉ update title
+        description: formDataUpdate.description, // Chỉ update description
+        // Chỉ update image nếu có upload file mới VÀ API trả về image mới
+        ...(formDataUpdate.image instanceof File && response.data.data?.image && {
+          image: response.data.data.image
+        })
+      };
+      
+      // Gọi callback để cập nhật state ở component cha
+      if (onAccessoryUpdated) {
+        onAccessoryUpdated(updatedAccessory);
+      }
+      
       setSnackBar({
         open: true,
-        message: response.data.message,
+        message: response.data.message || "Cập nhật thành công!",
         severity: "success",
       });
+      
       setIsEditing(false);
     } catch (error) {
       setSnackBar({
@@ -100,6 +117,7 @@ export const AccessoryDetailDialog = ({
       setIsLoadingButton(false);
     }
   };
+
   const handleDeleteAccessory = async () => {
     setIsLoadingButton(true);
 
@@ -172,7 +190,10 @@ export const AccessoryDetailDialog = ({
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
               edge="start"
-              onClick={() => handleClickModalDesc(false)}
+              onClick={() => {
+                handleClickModalDesc(false);
+                setIsEditing(false);
+              }}
               sx={{ color: "#fff" }}
             >
               <CloseIcon />

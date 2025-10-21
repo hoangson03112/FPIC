@@ -380,7 +380,7 @@ const WeakPoint = () => {
         form.append("name", trimmedName);
         form.append("description", formData.description || "");
         form.append("category", formData.category);
-        form.append("device", formData.device);
+        form.append("device", formData.device || "");
 
         const response = await api.post(
           `${REACT_APP_URL_BE}/uploadWeakPoint`,
@@ -1059,6 +1059,23 @@ const WeakPoint = () => {
                           </TableCell>
                           <TableCell>
                             {selectedItem?.description || "Không có mô tả"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: "bold" }}>
+                            Thiết bị
+                          </TableCell>
+                          <TableCell>
+                            {selectedItem?.device ? (
+                              <Chip
+                                label={selectedItem.device}
+                                color="secondary"
+                                size="small"
+                                icon={<Memory fontSize="small" />}
+                              />
+                            ) : (
+                              "Không có thiết bị"
+                            )}
                           </TableCell>
                         </TableRow>
                         <TableRow>

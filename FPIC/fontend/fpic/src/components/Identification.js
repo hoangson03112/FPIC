@@ -261,8 +261,8 @@ function Dashboard() {
           ...prevState,
           [id]: {},
         }));
-      }, 3000);
-    }, 3000);
+      }, 30000);
+    }, 30000);
   };
 
   return (

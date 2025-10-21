@@ -88,36 +88,13 @@ function Accessory() {
     }
   }, [pageAccessory, limitAccessory]);
 
+  // ← SỬA: Chỉ giữ 1 useEffect duy nhất để đồng bộ data
   useEffect(() => {
-    const item = data.accessories[currentIndex];
-    if (item) {
-      console.log("Setting form data with item:", item);
-      setFormAccessory({ ...item });
-      setFormDataUpdate({ ...item });
-    } else {
-      console.log("No item found at index:", currentIndex);
-    }
-  }, [currentIndex, data.accessories]);
-
-  // Add additional effect to handle data changes
-  useEffect(() => {
-    if (data.accessories && data.accessories.length > 0) {
-      console.log("Accessories updated, current index:", currentIndex);
+    if (data.accessories && data.accessories.length > 0 && currentIndex < data.accessories.length) {
       const currentItem = data.accessories[currentIndex];
-      if (currentItem) {
+      if (currentItem && currentItem._id) {
         setFormAccessory({ ...currentItem });
         setFormDataUpdate({ ...currentItem });
-      }
-    }
-  }, [data.accessories]);
-
-  // Đồng bộ dữ liệu khi accessories hoặc currentIndex thay đổi
-  useEffect(() => {
-    if (data.accessories && data.accessories.length > 0) {
-      const currentAccessory = data.accessories[currentIndex];
-      if (currentAccessory) {
-        setFormAccessory(currentAccessory);
-        setFormDataUpdate(currentAccessory);
       }
     }
   }, [data.accessories, currentIndex]);
@@ -250,7 +227,6 @@ function Accessory() {
       setSearchSuggestions(response.data.data || []);
       setShowSuggestions(true);
     } catch (error) {
-     
       setSearchSuggestions([]);
       showNotification("Không thể tìm kiếm. Vui lòng thử lại sau.", "error");
       if (error.response && error.response.status === 401) {
@@ -312,14 +288,14 @@ function Accessory() {
     }
   };
 
-  // NEW: cập nhật item trong state sau khi update thành công
+  // ← SỬA: Cập nhật callback để handle update từ child component
   const handleAccessoryUpdated = (updatedAccessory) => {
     if (!updatedAccessory || !updatedAccessory._id) return;
 
-    // Cập nhật trong danh sách accessories
+    // Cập nhật trong danh sách accessories với mảng mới hoàn toàn
     setData((prevData) => {
       const newAccessories = prevData.accessories.map((acc) =>
-        acc._id === updatedAccessory._id ? updatedAccessory : acc
+        acc._id === updatedAccessory._id ? { ...updatedAccessory } : acc
       );
 
       return {
@@ -330,8 +306,8 @@ function Accessory() {
 
     // Cập nhật form data hiện tại nếu đang xem item được cập nhật
     if (formAccessory._id === updatedAccessory._id) {
-      setFormAccessory(updatedAccessory);
-      setFormDataUpdate(updatedAccessory);
+      setFormAccessory({ ...updatedAccessory });
+      setFormDataUpdate({ ...updatedAccessory });
     }
   };
 
@@ -551,7 +527,6 @@ function Accessory() {
                 <div>{renderAccessoryGrid()}</div>
               </div>
 
-              {/* Main pagination for types of accessories */}
               {data.pagination.totalPages > 1 && (
                 <Box
                   sx={{
