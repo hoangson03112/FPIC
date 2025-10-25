@@ -41,6 +41,13 @@ import {
 } from "recharts";
 import axios from "axios";
 import { REACT_APP_URL_BE } from "../config";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import html2pdf from 'html2pdf.js';
 
 // Danh mục và màu Pie cố định
 const PCB_TYPES = [
@@ -62,7 +69,7 @@ const PCB_COLORS = {
   FPGA: "#F4C20D",
 };
 
-// Màu cho biểu đồ cột điểm yếu
+// Màu cho biểu đồ cột điểm yếu (sửa typo cho JTAG)
 const WEAK_COLORS = [
   "#7E57C2",
   "#00A86B",
@@ -301,23 +308,172 @@ const AdminDashboard = () => {
 
   const handleCloseSnackbar = () => setSnackbar((s) => ({ ...s, open: false }));
 
-  const exportExcel = () => {
-    const header = ["Device", ...WEAK_POINT_TYPES].join(",");
-    const rows = weakPointData.map((row) =>
-      [row.name, ...WEAK_POINT_TYPES.map((k) => row[k] || 0)].join(",")
-    );
-    const csv = [header, ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "phan_bo_mau_diem_yeu.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportExcel = async () => {
+    try {
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet("Phân bố điểm yếu");
+
+      // Tiêu đề báo cáo
+      ws.mergeCells("A1:I1");
+      const titleCell = ws.getCell("A1");
+      titleCell.value = "BÁO CÁO THỐNG KÊ PHÂN BỐ MẪU ĐIỂM YẾU";
+      titleCell.font = { size: 16, bold: true };
+      titleCell.alignment = { vertical: "middle", horizontal: "center" };
+      ws.getRow(1).height = 35;
+
+      // Thêm ngày xuất báo cáo
+      ws.mergeCells("A2:I2");
+      const dateCell = ws.getCell("A2");
+      dateCell.value = `Ngày xuất báo cáo: ${new Date().toLocaleDateString("vi-VN")}`;
+      dateCell.font = { size: 11, italic: true };
+      dateCell.alignment = { horizontal: "center" };
+      ws.getRow(2).height = 25;
+
+      // Header của bảng
+      const headerRow = ws.getRow(4);
+      const headers = ["Thiết bị", ...WEAK_POINT_TYPES];
+      headers.forEach((text, i) => {
+        const cell = headerRow.getCell(i + 1);
+        cell.value = text;
+        cell.font = { bold: true, size: 11 };
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" }
+        };
+      });
+      headerRow.height = 30;
+
+      // Dữ liệu
+      weakPointData.forEach((row, index) => {
+        const dataRow = ws.getRow(index + 5);
+        const values = [row.name, ...WEAK_POINT_TYPES.map(k => Number(row[k] || 0))];
+
+        values.forEach((value, colIndex) => {
+          const cell = dataRow.getCell(colIndex + 1);
+          cell.value = value;
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" }
+          };
+
+          // Căn giữa cho số, căn trái cho tên thiết bị
+          if (colIndex === 0) {
+            cell.alignment = { vertical: "middle", horizontal: "left" };
+          } else {
+            cell.alignment = { vertical: "middle", horizontal: "center" };
+          }
+        });
+
+        dataRow.height = 25;
+      });
+
+      // Tổng số liệu
+      const totalRow = ws.getRow(weakPointData.length + 5);
+      const totals = ["TỔNG", ...WEAK_POINT_TYPES.map(type =>
+        weakPointData.reduce((sum, row) => sum + Number(row[type] || 0), 0)
+      )];
+
+      totals.forEach((value, i) => {
+        const cell = totalRow.getCell(i + 1);
+        cell.value = value;
+        cell.font = { bold: true };
+        cell.border = {
+          top: { style: "double" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" }
+        };
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+      });
+      totalRow.height = 30;
+
+      // Điều chỉnh độ rộng cột
+      ws.getColumn(1).width = 35; // Cột tên thiết bị
+      for (let i = 2; i <= headers.length; i++) {
+        ws.getColumn(i).width = 15;
+      }
+
+      // Xuất file
+      const buf = await wb.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `bao_cao_phan_bo_diem_yeu_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: "Không thể tạo file Excel",
+        severity: "error",
+      });
+    }
   };
 
   const exportPDF = () => {
-    window.print();
+    try {
+      // Tạo element tạm thời để render PDF
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="padding: 20px;">
+          <h1 style="text-align: center; font-size: 20px; margin-bottom: 10px;">
+            BÁO CÁO THỐNG KÊ PHÂN BỐ MẪU ĐIỂM YẾU
+          </h1>
+          <p style="text-align: center; margin-bottom: 20px;">
+            Ngày xuất báo cáo: ${new Date().toLocaleDateString('vi-VN')}
+          </p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="border: 1px solid #ddd; padding: 8px;">Thiết bị</th>
+                ${WEAK_POINT_TYPES.map(type =>
+        `<th style="border: 1px solid #ddd; padding: 8px;">${type}</th>`
+      ).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${weakPointData.map(row => `
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${row.name}</td>
+                  ${WEAK_POINT_TYPES.map(type =>
+        `<td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                      ${Number(row[type] || 0)}
+                    </td>`
+      ).join('')}
+                </tr>
+              `).join('')}
+              <tr style="font-weight: bold;">
+                <td style="border: 1px solid #ddd; padding: 8px;">TỔNG</td>
+                ${WEAK_POINT_TYPES.map(type =>
+        `<td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                    ${weakPointData.reduce((sum, row) => sum + Number(row[type] || 0), 0)}
+                  </td>`
+      ).join('')}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      const opt = {
+        margin: 1,
+        filename: `bao_cao_phan_bo_diem_yeu_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      };
+
+      html2pdf().from(element).set(opt).save();
+
+    } catch (err) {
+      console.error('PDF Error:', err);
+      setSnackbar({
+        open: true,
+        message: "Không thể tạo file PDF: " + err.message,
+        severity: "error"
+      });
+    }
   };
 
   return (
@@ -334,9 +490,8 @@ const AdminDashboard = () => {
           sx={{
             p: { xs: 2, sm: 3 },
             mb: 3,
-            background: `linear-gradient(135deg, ${
-              theme.palette.primary.main
-            }, ${alpha(theme.palette.primary.light, 0.85)})`,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main
+              }, ${alpha(theme.palette.primary.light, 0.85)})`,
             color: "#fff",
             display: "flex",
             alignItems: "center",
