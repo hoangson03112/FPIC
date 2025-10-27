@@ -69,14 +69,13 @@ const PCB_COLORS = {
   FPGA: "#F4C20D",
 };
 
-// Màu cho biểu đồ cột điểm yếu (sửa typo cho JTAG)
 const WEAK_COLORS = [
   "#7E57C2",
   "#00A86B",
   "#F4C20D",
   "#1E88E5",
   "#FB8C00",
-  "#26A69A",
+  "#FF6B6B",
   "#8D6E63",
   "#29B6F6",
 ];
@@ -123,7 +122,7 @@ const STAT_CARDS = [
 const WEAK_POINT_TYPES = [
   "SMB",
   "JTAG",
-  "TestPin",
+  "Test Pin",
   "SPI",
   "LPC",
   "Unused ports",

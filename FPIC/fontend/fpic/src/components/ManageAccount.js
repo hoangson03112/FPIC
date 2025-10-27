@@ -359,7 +359,7 @@ const ManageAccount = () => {
                 <StyledTextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Tìm kiếm vi mạch theo tên hoặc mô tả..."
+                  placeholder="Tìm kiếm theo tên hoặc email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   InputProps={{

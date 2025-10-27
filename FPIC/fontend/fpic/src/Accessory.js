@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
-
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Pagination,
@@ -10,12 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  Search as SearchIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-  ImageNotSupported as ImageNotSupportedIcon,
-} from "@mui/icons-material";
+import { ImageNotSupported as ImageNotSupportedIcon } from "@mui/icons-material";
 
 import "./Accessory.css";
 import { Col, Row, Card } from "react-bootstrap";
@@ -33,7 +26,7 @@ function Accessory() {
   const [page, setPage] = useState(1);
   const [limit] = useState(18);
   const [pageAccessory, setPageAccessory] = useState(1);
-  const [limitAccessory] = useState(12);
+  const [limitAccessory] = useState(9999);
   const [typeSelected, setTypeSelected] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showModalDesc, setShowModalDesc] = useState(false);
@@ -53,6 +46,7 @@ function Accessory() {
     _id: "",
     title: "",
     image: "",
+    imagePath: "", // ← THÊM
     type: "",
     description: "",
   });
@@ -88,9 +82,12 @@ function Accessory() {
     }
   }, [pageAccessory, limitAccessory]);
 
-  // ← SỬA: Chỉ giữ 1 useEffect duy nhất để đồng bộ data
   useEffect(() => {
-    if (data.accessories && data.accessories.length > 0 && currentIndex < data.accessories.length) {
+    if (
+      data.accessories &&
+      data.accessories.length > 0 &&
+      currentIndex < data.accessories.length
+    ) {
       const currentItem = data.accessories[currentIndex];
       if (currentItem && currentItem._id) {
         setFormAccessory({ ...currentItem });
@@ -145,12 +142,10 @@ function Accessory() {
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
         showNotification(
           "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
           "error"
         );
-
         window.location.href = "/login";
         return;
       }
@@ -169,6 +164,9 @@ function Accessory() {
       });
 
       if (response) {
+        console.log("✅ Fetched accessories:", response.data.data);
+        console.log("✅ First accessory:", response.data.data[0]);
+        console.log("✅ ImagePath:", response.data.data[0]?.imagePath);
         setData((prev) => ({
           ...prev,
           accessories: response.data.data,
@@ -195,12 +193,10 @@ function Accessory() {
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
         showNotification(
           "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
           "error"
         );
-
         window.location.href = "/login";
         return;
       }
@@ -232,12 +228,10 @@ function Accessory() {
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
         showNotification(
           "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
           "error"
         );
-
         window.location.href = "/login";
         return;
       }
@@ -261,7 +255,6 @@ function Accessory() {
 
       if (response) {
         showNotification("Thêm thành công!", "success");
-
         await fetchAccessories(typeSelected._id);
         resetFormData();
         setShowModal(false);
@@ -274,12 +267,10 @@ function Accessory() {
       if (error.response && error.response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
         showNotification(
           "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại",
           "error"
         );
-
         window.location.href = "/login";
         return;
       }
@@ -288,11 +279,9 @@ function Accessory() {
     }
   };
 
-  // ← SỬA: Cập nhật callback để handle update từ child component
   const handleAccessoryUpdated = (updatedAccessory) => {
     if (!updatedAccessory || !updatedAccessory._id) return;
 
-    // Cập nhật trong danh sách accessories với mảng mới hoàn toàn
     setData((prevData) => {
       const newAccessories = prevData.accessories.map((acc) =>
         acc._id === updatedAccessory._id ? { ...updatedAccessory } : acc
@@ -304,7 +293,6 @@ function Accessory() {
       };
     });
 
-    // Cập nhật form data hiện tại nếu đang xem item được cập nhật
     if (formAccessory._id === updatedAccessory._id) {
       setFormAccessory({ ...updatedAccessory });
       setFormDataUpdate({ ...updatedAccessory });
@@ -335,25 +323,25 @@ function Accessory() {
     setSearch("");
   };
 
-  const isBase64 = React.useMemo(
-    (str) => {
-      return (str) => {
-        try {
-          return btoa(atob(str)) === str;
-        } catch (err) {
-          return false;
-        }
-      };
-    },
-    []
-  );
+  const isBase64 = React.useMemo(() => {
+    return (str) => {
+      if (!str) return false;
+      try {
+        return btoa(atob(str)) === str;
+      } catch (err) {
+        return false;
+      }
+    };
+  }, []);
 
   const handlePageChange = (_, newPage) => {
     setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleAccessoryPageChange = (_, newPage) => {
     setPageAccessory(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleInputChange = (event) => {
@@ -377,7 +365,6 @@ function Accessory() {
     e?.preventDefault();
     setSearch(searchTerm);
     setShowSuggestions(false);
-
     setPage(1);
   };
 
@@ -385,7 +372,6 @@ function Accessory() {
     setSearchTerm(accessory.title);
     setSearch(accessory.title);
     setShowSuggestions(false);
-
     setPage(1);
 
     if (accessory.type) {
@@ -398,7 +384,6 @@ function Accessory() {
     setSearchTerm("");
     setSearch("");
     clearSearchState();
-
     setPage(1);
     fetchData();
   };
@@ -439,6 +424,26 @@ function Accessory() {
     }
   };
 
+  // ← SỬA: Hàm hiển thị ảnh xử lý cả imagePath và image (base64)
+  const getImageSource = (item) => {
+    if (!item) return "/placeholder-microchip.png";
+
+    // Ưu tiên imagePath (ảnh mới)
+    if (item.imagePath) {
+      return `${REACT_APP_URL_BE}${item.imagePath}`;
+    }
+
+    // Fallback sang image (base64 - ảnh cũ)
+    if (item.image) {
+      if (isBase64(item.image)) {
+        return `${REACT_APP_URL_BE}${atob(item.image)}`;
+      }
+      return `${REACT_APP_URL_BE}${item.image}`;
+    }
+
+    return "/placeholder-microchip.png";
+  };
+
   const renderAccessoryGrid = () => {
     if (data.isLoading) {
       return (
@@ -470,35 +475,39 @@ function Accessory() {
 
     return (
       <div className="image-grid">
-        {data.typesAccessories.map((type, index) => (
-          <Card
-            key={type._id || index}
-            className="m-2"
-            style={{ cursor: "pointer" }}
-            onClick={() => handleClickItem(type)}
-          >
-            <Card.Img
-              variant="top"
-              src={`${REACT_APP_URL_BE}${
-                type.image && isBase64(type.image)
-                  ? atob(type.image)
-                  : type.image
-              }`}
-              alt={type?.title}
-              style={{
-                width: "100%",
-                height: "200px",
-                objectFit: "cover",
-              }}
-              onError={(e) => {
-                e.target.src = "/placeholder-microchip.png";
-              }}
-            />
-            <Card.Body>
-              <Card.Title>{type?.title || "Không có tiêu đề"}</Card.Title>
-            </Card.Body>
-          </Card>
-        ))}
+        {data.typesAccessories.map((type, index) => {
+          const imageSrc = getImageSource(type);
+
+          return (
+            <Card
+              key={type._id || index}
+              className="m-2"
+              style={{ cursor: "pointer" }}
+              onClick={() => handleClickItem(type)}
+            >
+              <Card.Img
+                variant="top"
+                src={imageSrc}
+                alt={type?.title || "Linh kiện"}
+                style={{
+                  width: "100%",
+                  height: "200px",
+                  objectFit: "cover",
+                }}
+                onError={(e) => {
+                  console.error(
+                    `Failed to load image for ${type?.title}:`,
+                    imageSrc
+                  );
+                  e.target.src = "/placeholder-microchip.png";
+                }}
+              />
+              <Card.Body>
+                <Card.Title>{type?.title || "Không có tiêu đề"}</Card.Title>
+              </Card.Body>
+            </Card>
+          );
+        })}
       </div>
     );
   };
@@ -570,6 +579,7 @@ function Accessory() {
         hanldeClickNextImage={hanldeClickNextImage}
         Transition={Transition}
         isBase64={isBase64}
+        getImageSource={getImageSource}
         setIsLoadingButton={setIsLoadingButton}
         setSnackBar={setSnackBar}
         setData={setData}
@@ -607,4 +617,5 @@ function Accessory() {
     </div>
   );
 }
+
 export default Accessory;

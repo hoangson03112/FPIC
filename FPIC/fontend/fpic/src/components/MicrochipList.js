@@ -1221,7 +1221,7 @@ const MicrochipList = () => {
             Xóa
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> 
 
       {/* Snackbar for notifications */}
       <Snackbar
