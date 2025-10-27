@@ -241,13 +241,13 @@ exports.getDashboardDataWeakPoint = async (_req, res) => {
       "Access Point",
       "Switch",
       "Server",
-      "FPJA",
+      "FPGA",
     ];
 
     const weakPointTypes = [
       { display: "SMB", category: "smb" },
       { display: "JTAG", category: "jtag" },
-      { display: "TestPin", category: "testPin" },
+      { display: "Test Pin", category: "testPin" },
       { display: "SPI", category: "spi" },
       { display: "LPC", category: "lpc" },
       { display: "Unused ports", category: "unusedPort" },

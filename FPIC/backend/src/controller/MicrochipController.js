@@ -113,7 +113,7 @@ exports.getDashboarData = async (req, res) => {
       "Access Point",
       "Switch",
       "Server",
-      "FPJA",
+      "FPGA",
     ];
 
     const deviceCounts = [];

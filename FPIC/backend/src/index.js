@@ -46,6 +46,10 @@ const {
   updateMicrochip,
   getDashboarData,
 } = require("./controller/MicrochipController");
+const Microchip = require("./models/Microchip");
+const WeakPoint = require("./models/WeakPoint");
+const type = require("./routers/TypeAccessoryRouter");
+
 db.connect();
 app.use(cors());
 app.use(express.json());
@@ -62,7 +66,6 @@ app.use("/unusedPort", express.static("unusedPort"));
 app.use("/vias", express.static("vias"));
 app.use("/spi", express.static("SPI"));
 app.use("/smb", express.static("SMB"));
-app.use("/smb", express.static("SMB"));
 
 app.post("/login", async (req, res) => {
   try {
@@ -76,13 +79,11 @@ app.post("/login", async (req, res) => {
 
     const account = await Account.findOne({ email });
 
-    const permissions = await getUserPermissions(account.role);
-
     if (!account) {
       return res.status(401).json({ message: "Email không tồn tại" });
     }
 
-    const isMatch = bcrypt.compare(password, account.password);
+    const isMatch = await bcrypt.compare(password, account.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Mật khẩu không đúng" });
     }
@@ -93,6 +94,8 @@ app.post("/login", async (req, res) => {
         message: "Tài khoản chưa được kích hoạt",
       });
     }
+
+    const permissions = await getUserPermissions(account.role);
 
     const token = jwt.sign(
       {
@@ -149,6 +152,7 @@ app.get("/authentication", async (req, res) => {
 
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
+
 app.get(
   "/images",
   verifyToken,
@@ -172,6 +176,7 @@ app.get(
     });
   }
 );
+
 app.get(
   "/images/count",
   verifyToken,
@@ -192,12 +197,14 @@ app.get(
     });
   }
 );
+
 app.get(
   "/microchips",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getMicrochips
 );
+
 app.post(
   "/microchips",
   verifyToken,
@@ -205,6 +212,7 @@ app.post(
   uploadMicrochip.single("image"),
   postMicrochip
 );
+
 app.get(
   "/images-microchip/count",
   verifyToken,
@@ -225,18 +233,21 @@ app.get(
     });
   }
 );
+
 app.delete(
   "/microchips/:id",
   verifyToken,
   authorize(["admin"]),
   deleteMicrochip
 );
+
 app.get(
   "/microchips/dashboard-data",
   verifyToken,
   authorize(["admin"]),
   getDashboarData
 );
+
 app.get(
   "/weakpoint/dashboard-data",
   verifyToken,
@@ -279,30 +290,35 @@ app.get(
   authorize(["admin", "assessor", "user"]),
   getFootPrint
 );
+
 app.get(
   "/images-unused-port",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getUnusedPort
 );
+
 app.get(
   "/images-vias",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getVias
 );
+
 app.get(
   "/images-spi",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getSPI
 );
+
 app.get(
   "/images-smb",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
   getSMB
 );
+
 app.post(
   "/uploadWeakPoint",
   verifyToken,
@@ -310,6 +326,7 @@ app.post(
   uploadWeakPoint.single("image"),
   postWeakPoint
 );
+
 app.delete(
   "/deleteWeakPoint/:id",
   verifyToken,
@@ -317,6 +334,7 @@ app.delete(
   uploadWeakPoint.single("image"),
   deleteWeakPoint
 );
+
 app.put(
   "/updateWeakPoint/:id",
   verifyToken,
@@ -366,11 +384,11 @@ app.post(
     });
   }
 );
+
 app.get(
   "/get-classes",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
-
   (req, res) => {
     const filePath = path.join(__dirname, "meta.json");
 
@@ -439,6 +457,7 @@ app.post(
     }
   }
 );
+
 app.delete(
   "/admin/delete-account",
   verifyToken,
@@ -465,6 +484,7 @@ app.delete(
     }
   }
 );
+
 app.put(
   "/admin/update-account/:id",
   verifyToken,
@@ -507,12 +527,10 @@ app.get(
   }
 );
 
-const type = require("./routers/TypeAccessoryRouter");
-const Microchip = require("./models/Microchip");
-const WeakPoint = require("./models/WeakPoint");
 app.use("/", verifyToken, authorize(["admin", "assessor", "user"]), type);
 
 const DIR_TYPE = path.join(__dirname, "public/images");
+
 app.get("/import-types", async (req, res) => {
   try {
     const subfolders = fs
@@ -549,10 +567,11 @@ app.get("/import-types", async (req, res) => {
       message: `Lưu thành công ${results.filter(Boolean).length} Loại`,
     });
   } catch (error) {
-    console.log(`Luwu thất bại: ${error}`);
+    console.log(`Lưu thất bại: ${error}`);
     res.json({ message: "Lưu thất bại" });
   }
 });
+
 const DIR_IMAGE = path.join(__dirname, "public/images/C");
 
 app.get(
@@ -587,17 +606,495 @@ app.get(
 
       const results = await Promise.all(saveAccessories);
       res.json({
-        message: `Luwu thành công ${results.filter(Boolean).length} file`,
+        message: `Lưu thành công ${results.filter(Boolean).length} file`,
       });
     } catch (error) {
       console.log("Lưu thất bại", error);
-      res.json({ message: `Luwu thất bại` });
+      res.json({ message: `Lưu thất bại` });
     }
   }
 );
 
-// ==================== IMPORT IMAGES BATCH WITH WEAKPOINT ====================
-// Mapping giữa tên thư mục và category để tự động nhận diện
+// ==================== ACCESSORIES BATCH IMPORT APIs ====================
+
+app.get(
+  "/accessories/folders-status",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const baseDir = path.join(__dirname, "public/images");
+      
+      const folders = fs
+        .readdirSync(baseDir)
+        .filter((item) => {
+          const fullPath = path.join(baseDir, item);
+          return fs.statSync(fullPath).isDirectory();
+        })
+        .sort();
+      
+      const status = [];
+      
+      for (const folder of folders) {
+        const folderPath = path.join(baseDir, folder);
+        const imageFiles = fs
+          .readdirSync(folderPath)
+          .filter((file) => /\.(jpg|jpeg|png|gif|bmp|jfif)$/i.test(file));
+        
+        const type = await TypeModel.findOne({ title: folder });
+        
+        let importedCount = 0;
+        if (type) {
+          importedCount = await AccessoryModel.countDocuments({ 
+            type: type._id 
+          });
+        }
+        
+        status.push({
+          folder: folder,
+          hasType: !!type,
+          typeId: type?._id || null,
+          imagesInFolder: imageFiles.length,
+          importedToDB: importedCount,
+          remaining: imageFiles.length - importedCount,
+          progress: imageFiles.length > 0 
+            ? `${Math.round((importedCount / imageFiles.length) * 100)}%`
+            : "0%",
+          needImport: imageFiles.length > importedCount
+        });
+      }
+      
+      const summary = {
+        totalFolders: folders.length,
+        foldersWithType: status.filter(s => s.hasType).length,
+        foldersNeedImport: status.filter(s => s.needImport).length,
+        totalImagesInFolders: status.reduce((sum, s) => sum + s.imagesInFolder, 0),
+        totalImportedToDB: status.reduce((sum, s) => sum + s.importedToDB, 0)
+      };
+      
+      res.json({
+        message: "Trạng thái import của các thư mục",
+        summary: summary,
+        folders: status
+      });
+      
+    } catch (error) {
+      console.error("Lỗi kiểm tra trạng thái:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.post(
+  "/accessories/import-all-folders",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const baseDir = path.join(__dirname, "public/images");
+      
+      const folders = fs
+        .readdirSync(baseDir)
+        .filter((item) => {
+          const fullPath = path.join(baseDir, item);
+          return fs.statSync(fullPath).isDirectory();
+        })
+        .sort();
+      
+      let totalSuccess = 0;
+      let totalError = 0;
+      let totalSkipped = 0;
+      const results = [];
+      
+      console.log(`🚀 Bắt đầu import ${folders.length} thư mục...`);
+      
+      for (const folder of folders) {
+        try {
+          const type = await TypeModel.findOne({ title: folder });
+          
+          if (!type) {
+            console.log(`⚠️ Thư mục ${folder}: Không tìm thấy Type`);
+            results.push({
+              folder: folder,
+              status: "error",
+              message: "Type không tồn tại trong database"
+            });
+            totalError++;
+            continue;
+          }
+          
+          const folderPath = path.join(baseDir, folder);
+          const images = fs
+            .readdirSync(folderPath)
+            .filter((file) => /\.(jpg|jpeg|png|gif|bmp|jfif)$/i.test(file))
+            .sort();
+          
+          if (images.length === 0) {
+            results.push({
+              folder: folder,
+              status: "warning",
+              message: "Thư mục rỗng"
+            });
+            continue;
+          }
+          
+          let folderSuccess = 0;
+          let folderSkipped = 0;
+          
+          for (const image of images) {
+            const imagePath = `/public/images/${folder}/${image}`;
+            
+            const exists = await AccessoryModel.findOne({ 
+              imagePath: imagePath 
+            });
+            
+            if (!exists) {
+              const newAccessory = new AccessoryModel({
+                title: "",
+                description: "",
+                imagePath: imagePath,
+                type: type._id
+              });
+              
+              await newAccessory.save();
+              folderSuccess++;
+              totalSuccess++;
+            } else {
+              folderSkipped++;
+              totalSkipped++;
+            }
+          }
+          
+          console.log(`✅ ${folder}: Import ${folderSuccess}, Skip ${folderSkipped}`);
+          
+          results.push({
+            folder: folder,
+            typeId: type._id,
+            totalImages: images.length,
+            imported: folderSuccess,
+            skipped: folderSkipped,
+            status: "success"
+          });
+          
+        } catch (error) {
+          console.error(`❌ Lỗi thư mục ${folder}:`, error);
+          totalError++;
+          results.push({
+            folder: folder,
+            status: "error",
+            message: error.message
+          });
+        }
+      }
+      
+      res.json({
+        message: `✅ Import hoàn thành! Thêm mới ${totalSuccess} accessories, Skip ${totalSkipped} đã có`,
+        totalFolders: folders.length,
+        totalSuccess: totalSuccess,
+        totalSkipped: totalSkipped,
+        totalErrors: totalError,
+        results: results
+      });
+      
+    } catch (error) {
+      console.error("Lỗi import:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.post(
+  "/accessories/import-folder",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const { folderName } = req.body;
+      
+      if (!folderName) {
+        return res.status(400).json({ 
+          message: "Vui lòng cung cấp folderName" 
+        });
+      }
+      
+      const type = await TypeModel.findOne({ title: folderName });
+      
+      if (!type) {
+        return res.status(404).json({ 
+          message: `Không tìm thấy Type "${folderName}"` 
+        });
+      }
+      
+      const folderPath = path.join(__dirname, `public/images/${folderName}`);
+      
+      if (!fs.existsSync(folderPath)) {
+        return res.status(404).json({ 
+          message: `Thư mục ${folderName} không tồn tại` 
+        });
+      }
+      
+      const images = fs
+        .readdirSync(folderPath)
+        .filter((file) => /\.(jpg|jpeg|png|gif|bmp|jfif)$/i.test(file))
+        .sort();
+      
+      if (images.length === 0) {
+        return res.status(404).json({ 
+          message: `Không có ảnh trong thư mục ${folderName}` 
+        });
+      }
+      
+      let successCount = 0;
+      let skippedCount = 0;
+      const importedItems = [];
+      
+      for (const image of images) {
+        const imagePath = `/public/images/${folderName}/${image}`;
+        const exists = await AccessoryModel.findOne({ imagePath });
+        
+        if (!exists) {
+          const newAccessory = new AccessoryModel({
+            title: "",
+            description: "",
+            imagePath: imagePath,
+            type: type._id
+          });
+          
+          const saved = await newAccessory.save();
+          successCount++;
+          importedItems.push({
+            _id: saved._id,
+            title: saved.title,
+            imagePath: saved.imagePath
+          });
+        } else {
+          skippedCount++;
+        }
+      }
+      
+      res.json({
+        message: `✅ Import ${folderName} hoàn thành!`,
+        folderName: folderName,
+        typeId: type._id,
+        totalImages: images.length,
+        imported: successCount,
+        skipped: skippedCount,
+        importedItems: importedItems.slice(0, 5)
+      });
+      
+    } catch (error) {
+      console.error("Lỗi import folder:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.delete(
+  "/accessories/cleanup-missing-images",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const accessories = await AccessoryModel.find();
+      const toDelete = [];
+      
+      for (const accessory of accessories) {
+        let filePath;
+        
+        if (accessory.imagePath) {
+          filePath = path.join(__dirname, accessory.imagePath);
+        } else if (accessory.image) {
+          continue;
+        } else {
+          toDelete.push({
+            _id: accessory._id,
+            title: accessory.title,
+            reason: "Không có thông tin ảnh"
+          });
+          continue;
+        }
+        
+        if (!fs.existsSync(filePath)) {
+          toDelete.push({
+            _id: accessory._id,
+            title: accessory.title,
+            imagePath: accessory.imagePath,
+            reason: "File không tồn tại"
+          });
+        }
+      }
+      
+      let deletedCount = 0;
+      if (toDelete.length > 0) {
+        const ids = toDelete.map(item => item._id);
+        const result = await AccessoryModel.deleteMany({ _id: { $in: ids } });
+        deletedCount = result.deletedCount;
+      }
+      
+      res.json({
+        message: `🧹 Đã dọn dẹp ${deletedCount} accessories`,
+        totalChecked: accessories.length,
+        foundMissing: toDelete.length,
+        deleted: deletedCount,
+        deletedItems: toDelete.slice(0, 10)
+      });
+      
+    } catch (error) {
+      console.error("Lỗi cleanup:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.get(
+  "/accessories/by-type/:typeId",
+  verifyToken,
+  authorize(["admin", "assessor", "user"]),
+  async (req, res) => {
+    try {
+      const { typeId } = req.params;
+      const { page = 1, limit = 50 } = req.query;
+      
+      const skip = (page - 1) * limit;
+      
+      const accessories = await AccessoryModel
+        .find({ type: typeId })
+        .limit(parseInt(limit))
+        .skip(skip)
+        .sort({ createdAt: -1 });
+      
+      const total = await AccessoryModel.countDocuments({ type: typeId });
+      
+      res.json({
+        message: "Danh sách accessories",
+        typeId: typeId,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: total,
+        totalPages: Math.ceil(total / limit),
+        accessories: accessories
+      });
+      
+    } catch (error) {
+      console.error("Lỗi lấy accessories:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.get(
+  "/accessories/search",
+  verifyToken,
+  authorize(["admin", "assessor", "user"]),
+  async (req, res) => {
+    try {
+      const { keyword, typeId } = req.query;
+      let query = {};
+      
+      if (keyword) {
+        query.title = { $regex: keyword, $options: 'i' };
+      }
+      
+      if (typeId) {
+        query.type = typeId;
+      }
+      
+      const accessories = await AccessoryModel
+        .find(query)
+        .populate('type', 'title')
+        .limit(100)
+        .sort({ createdAt: -1 });
+      
+      res.json({
+        message: "Kết quả tìm kiếm",
+        total: accessories.length,
+        accessories: accessories
+      });
+      
+    } catch (error) {
+      console.error("Lỗi tìm kiếm:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.delete(
+  "/accessories/clear-by-type/:typeId",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const { typeId } = req.params;
+      
+      const type = await TypeModel.findById(typeId);
+      if (!type) {
+        return res.status(404).json({ 
+          message: "Không tìm thấy Type" 
+        });
+      }
+      
+      const result = await AccessoryModel.deleteMany({ type: typeId });
+      
+      res.json({
+        message: `🗑️ Đã xóa ${result.deletedCount} accessories thuộc type ${type.title}`,
+        typeId: typeId,
+        typeName: type.title,
+        deletedCount: result.deletedCount
+      });
+      
+    } catch (error) {
+      console.error("Lỗi xóa:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+app.delete(
+  "/accessories/clear-all",
+  verifyToken,
+  authorize(["admin"]),
+  async (req, res) => {
+    try {
+      const result = await AccessoryModel.deleteMany({});
+      
+      res.json({
+        message: `🗑️ Đã xóa toàn bộ ${result.deletedCount} accessories`,
+        deletedCount: result.deletedCount
+      });
+      
+    } catch (error) {
+      console.error("Lỗi xóa tất cả:", error);
+      res.status(500).json({ 
+        message: "Lỗi server", 
+        error: error.message 
+      });
+    }
+  }
+);
+
+// ==================== END ACCESSORIES BATCH IMPORT APIs ====================
+
 const FOLDER_CATEGORY_MAPPING = {
   'jtag': 'jtag',
   'testpin': 'testPin', 
@@ -606,34 +1103,30 @@ const FOLDER_CATEGORY_MAPPING = {
   'footprint': 'footprint',
   'unusedport': 'unusedPort',
   'unused-port': 'unusedPort',
-  'up': 'unusedPort',  // Mapping cho "up" → "unusedPort"
+  'up': 'unusedPort',
   'vias': 'vias',
   'spi': 'spi',
   'smb': 'smb'
 };
 
-// Hàm tự động nhận diện category từ tên thư mục
 function detectCategoryFromFolder(folderName) {
   const normalizedName = folderName.toLowerCase()
-    .replace(/[^a-z0-9]/g, '') // Bỏ ký tự đặc biệt
-    .replace(/\s+/g, ''); // Bỏ khoảng trắng
+    .replace(/[^a-z0-9]/g, '')
+    .replace(/\s+/g, '');
   
-  // Tìm kiếm exact match trước
   if (FOLDER_CATEGORY_MAPPING[normalizedName]) {
     return FOLDER_CATEGORY_MAPPING[normalizedName];
   }
   
-  // Tìm kiếm partial match
   for (const [key, category] of Object.entries(FOLDER_CATEGORY_MAPPING)) {
     if (normalizedName.includes(key) || key.includes(normalizedName)) {
       return category;
     }
   }
   
-  return null; // Không tìm thấy
+  return null;
 }
 
-// Endpoint import ảnh hàng loạt với tự động nhận diện category
 app.post(
   "/import-images-batch-weakpoint",
   verifyToken,
@@ -644,7 +1137,7 @@ app.post(
         sourceFolder, 
         customCategory = null,
         namePrefix = "UP mẫu",
-        device = "" // Default là chuỗi rỗng, không bắt buộc
+        device = ""
       } = req.body;
       
       if (!sourceFolder) {
@@ -653,7 +1146,6 @@ app.post(
         });
       }
 
-      // Kiểm tra thư mục có tồn tại không (hỗ trợ đường dẫn tuyệt đối)
       if (!fs.existsSync(sourceFolder)) {
         return res.status(404).json({ 
           message: "Thư mục không tồn tại",
@@ -661,42 +1153,37 @@ app.post(
         });
       }
 
-      // Tự động nhận diện category từ tên thư mục
       const folderName = path.basename(sourceFolder);
       let detectedCategory = detectCategoryFromFolder(folderName);
       
-      // Ưu tiên customCategory nếu được cung cấp
       const finalCategory = customCategory || detectedCategory;
       
       if (!finalCategory) {
         return res.status(400).json({ 
-          message: `Không thể nhận diện hạng mục từ thư mục "${folderName}". Vui lòng cung cấp customCategory.`,
+          message: `Không thể nhận diện hạng mục từ thư mục "${folderName}"`,
           availableCategories: Object.values(FOLDER_CATEGORY_MAPPING)
         });
       }
 
-      // Đọc tất cả file ảnh từ thư mục nguồn
       const images = fs
         .readdirSync(sourceFolder)
         .filter((file) => {
           const ext = path.extname(file).toLowerCase();
           return ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.jfif'].includes(ext);
         })
-        .sort(); // Sắp xếp để đảm bảo thứ tự nhất quán
+        .sort();
 
       if (images.length === 0) {
         return res.status(404).json({ 
-          message: "Không tìm thấy file ảnh nào trong thư mục" 
+          message: "Không tìm thấy file ảnh" 
         });
       }
 
-      // Tạo thư mục đích nếu chưa có (trong thư mục gốc backend)
       const targetDir = path.join(__dirname, "../", finalCategory);
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
 
-      // Import từng ảnh với tên mới theo thứ tự
       const results = [];
       let successCount = 0;
       let errorCount = 0;
@@ -705,29 +1192,24 @@ app.post(
         try {
           const originalFile = path.join(sourceFolder, images[i]);
           const fileExt = path.extname(images[i]);
-          const newFileName = `${namePrefix} ${i + 1}${fileExt}`; // Bỏ timestamp
+          const newFileName = `${namePrefix} ${i + 1}${fileExt}`;
           const targetFile = path.join(targetDir, newFileName);
           
-          // Kiểm tra file gốc có tồn tại không
           if (!fs.existsSync(originalFile)) {
             throw new Error(`File gốc không tồn tại: ${originalFile}`);
           }
           
-          // Copy file với tên mới
           fs.copyFileSync(originalFile, targetFile);
           
-          // Kiểm tra file đã được copy thành công
           if (!fs.existsSync(targetFile)) {
             throw new Error(`Không thể copy file: ${targetFile}`);
           }
           
-          // Tạo đường dẫn cho database
           const imagePath = `/${finalCategory}/${newFileName}`;
 
-          // Lưu vào database WeakPoint
           const newWeakPoint = new WeakPoint({
             name: `${namePrefix} ${i + 1}`,
-            description: "", // Để trống như yêu cầu
+            description: "",
             imagePath: imagePath,
             category: finalCategory,
             device: device || ""
@@ -744,7 +1226,7 @@ app.post(
           successCount++;
           
         } catch (error) {
-          console.error(`Lỗi khi xử lý ${images[i]}:`, error);
+          console.error(`Lỗi xử lý ${images[i]}:`, error);
           results.push({
             original: images[i],
             error: error.message,
@@ -776,7 +1258,6 @@ app.post(
   }
 );
 
-// Endpoint để xem danh sách thư mục có ảnh và gợi ý category
 app.get(
   "/scan-folders-with-images",
   verifyToken,
@@ -813,12 +1294,10 @@ app.get(
                 });
               }
               
-              // Đệ quy tìm trong thư mục con
               items.push(...scanDirectory(fullPath, maxDepth, currentDepth + 1));
             }
           });
         } catch (err) {
-          // Bỏ qua thư mục không thể đọc
         }
         
         return items;
@@ -841,7 +1320,6 @@ app.get(
   }
 );
 
-// Endpoint để xem mapping category hiện tại
 app.get(
   "/category-mapping",
   verifyToken,
@@ -855,7 +1333,6 @@ app.get(
   }
 );
 
-// Endpoint để xóa tất cả WeakPoint theo category
 app.delete(
   "/clear-weakpoints-by-category/:category",
   verifyToken,
@@ -864,10 +1341,8 @@ app.delete(
     try {
       const { category } = req.params;
       
-      // Lấy danh sách WeakPoint để xóa files
       const weakPoints = await WeakPoint.find({ category });
       
-      // Xóa files trong thư mục (trong thư mục gốc backend)
       const targetDir = path.join(__dirname, "../", category);
       if (fs.existsSync(targetDir)) {
         const files = fs.readdirSync(targetDir);
@@ -881,11 +1356,10 @@ app.delete(
         });
       }
       
-      // Xóa records trong database
       const result = await WeakPoint.deleteMany({ category });
       
       res.json({
-        message: `Đã xóa ${result.deletedCount} records và files trong category ${category}`,
+        message: `Đã xóa ${result.deletedCount} records`,
         deletedCount: result.deletedCount,
         category: category
       });
@@ -902,7 +1376,6 @@ app.get(
   "/fpic/sodokhoi",
   verifyToken,
   authorize(["admin", "assessor", "user"]),
-
   async (req, res) => {
     try {
       const list = await SoDoKhoi.find();
@@ -919,7 +1392,6 @@ app.post(
   upload.single("pdf"),
   verifyToken,
   authorize(["admin"]),
-
   async (req, res) => {
     try {
       const { name } = req.body;
@@ -949,19 +1421,16 @@ app.delete(
     try {
       const { id } = req.params;
 
-      // Kiểm tra xem sơ đồ khối có tồn tại không
       const soDoKhoi = await SoDoKhoi.findById(id);
       if (!soDoKhoi) {
         return res.status(404).json({ error: "Sơ đồ khối không tồn tại!" });
       }
 
-      // Xóa file PDF trên server
-      const filePath = path.join(process.cwd(), soDoKhoi.filePath); // Lấy đường dẫn đầy đủ của file
+      const filePath = path.join(process.cwd(), soDoKhoi.filePath);
       if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath); // Xóa file nếu tồn tại
+        fs.unlinkSync(filePath);
       }
 
-      // Xóa dữ liệu trong database
       await SoDoKhoi.findByIdAndDelete(id);
 
       res.status(200).json({ message: "Xóa sơ đồ khối thành công!" });
@@ -983,13 +1452,11 @@ app.put(
       const { name } = req.body;
       const file = req.file;
 
-      // Tìm tài liệu cũ
       const existingFile = await SoDoKhoi.findById(id);
       if (!existingFile) {
         return res.status(404).json({ message: "Không tìm thấy tài liệu" });
       }
 
-      // Xóa file cũ nếu có file mới
       if (file && existingFile.filePath) {
         const oldFilePath = path.join(
           "uploads/",
@@ -1000,11 +1467,10 @@ app.put(
         }
       }
 
-      // Cập nhật dữ liệu mới
       const updatedSoDoKhoi = await SoDoKhoi.findByIdAndUpdate(
         id,
         {
-          name: name || existingFile.name, // Giữ nguyên tên nếu không cập nhật
+          name: name || existingFile.name,
           filePath: file ? file.path : existingFile.filePath,
         },
         { new: true }
@@ -1017,6 +1483,7 @@ app.put(
     }
   }
 );
+
 app.get("/stats", verifyToken, authorize(["admin"]), async (req, res) => {
   try {
     const [
