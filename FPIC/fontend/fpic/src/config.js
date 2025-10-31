@@ -1,5 +1,5 @@
-const REACT_APP_URL_SERVER = "http://14.160.24.69:3000";
-const REACT_APP_URL_BE = "http://14.160.24.69:9999";
-const REACT_APP_URL_PYTHON = "http://localhost:8002";
+const REACT_APP_URL_SERVER = process.env.REACT_APP_URL_SERVER || "http://14.160.24.69:3000";
+const REACT_APP_URL_BE = process.env.REACT_APP_URL_BE||"http://14.160.24.69:9999";
+const REACT_APP_URL_PYTHON = process.env.REACT_APP_URL_PYTHON||"http://localhost:8000";
 
 export { REACT_APP_URL_SERVER, REACT_APP_URL_BE, REACT_APP_URL_PYTHON};

@@ -1,154 +1,179 @@
-import { Typography, Modal, IconButton, Box, Button, Table, TableBody, TableCell, TableRow, TableHead, Paper, TableContainer } from "@mui/material";
+import { Typography, Modal, IconButton, Box, Button, Divider } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Input } from "@mui/material";
 import React, { useRef, useState } from "react";
 import axios from "axios";
-import { CheckCircleOutlined, ZoomInOutlined, RightSquareOutlined, UploadOutlined, ZoomOutOutlined, UnorderedListOutlined, DownloadOutlined } from "@ant-design/icons";
+import { UploadOutlined, DownloadOutlined } from "@ant-design/icons";
 import CloseIcon from "@mui/icons-material/Close";
+import StopIcon from "@mui/icons-material/Stop";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import MenuIcon from '@mui/icons-material/Menu';
 import MemoryIcon from '@mui/icons-material/Memory';
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
 import {REACT_APP_URL_PYTHON} from '../config'
 
 const labels_R = [
-  "FP", "VIAS", "TP", "LPC", "UP", "JTAG", "SMB", "SPI", "WP"
+  "FP", "VIAS", "TP", "LPC", "UP", "JTAG", "SMB", "SPI"
 ];
 
-const labels = [
-  { symbol: "FP", description: "Footprint" },
-  { symbol: "VIAS", description: "Vias" },
-  { symbol: "TP", description: "Test Point" },
-  { symbol: "UP", description: "Unused Port" }
-];
-
-const ocr_lables = [
-  { symbol: "LPC", description: "LPC" },
-  { symbol: "JTAG", description: "Joint Test Action Group" },
-  { symbol: "SMB", description: "SM Bus" },
-  { symbol: "SPI", description: "SPI Bus" }
-];
-
-// ✅ Danh sách các label cần dùng OCR
-const OCR_CLASSES = ["JTAG", "LPC", "SMB", "SPI"];
+// const OCR_CLASSES = ["JTAG", "LPC", "SMB", "SPI"];
 
 function Dashboard() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [imageUrlOld, setImageUrlOld] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [imageUrlsOld, setImageUrlsOld] = useState([]);
+  const [processedImages, setProcessedImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
   const [status, setStatus] = useState(false);
   const [statusNew, setStatusNew] = useState(false);
-  const [size, setSize] = useState(49);
-  const [contLabel, setCountLabel] = useState();
   const [selectLables, setSelectLables] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [icList, setIcList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [rowStates, setRowStates] = useState({});
+  const [userNotes, setUserNotes] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [showOcrResult, setShowOcrResult] = useState(false);
-  
-  // ✅ State để quản lý hiển thị button
-  const [showPredictBtn, setShowPredictBtn] = useState(false);
 
   const fileInputRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
-  // ✅ Cải tiến hàm handleOnChange
   const handleOnChange = (event, value) => {
-    // Kiểm tra xem có chứa OCR class không
-    const hasOcrClass = value.some(v => OCR_CLASSES.includes(v));
-    
-    if (value.length > 0) {
-      setShowPredictBtn(true);
-    } else {
-      setShowPredictBtn(false);
-    }
-    
     setSelectLables(value);
   };
 
   const handleFileChange = (event) => {
+    const newFiles = Array.from(event.target.files);
+    if (newFiles.length === 0) return;
+
     setStatus(true);
-    const file = event.target.files[0];
-    setSelectedFile(file);
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImageUrlOld(reader.result);
-      setStatus(false);
-    };
+    const combinedFiles = [...selectedFiles, ...newFiles];
+    setSelectedFiles(combinedFiles);
 
-    if (file) {
+    const readers = [];
+    const newImageUrls = [];
+    
+    newFiles.forEach((file, index) => {
+      const reader = new FileReader();
+      readers.push(reader);
+      reader.onloadend = () => {
+        newImageUrls[index] = reader.result;
+        
+        if (newImageUrls.filter(Boolean).length === newFiles.length) {
+          setImageUrlsOld(prev => [...prev, ...newImageUrls]);
+          setStatus(false);
+        }
+      };
       reader.readAsDataURL(file);
-    } else {
-      setImageUrlOld(null);
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    const newFiles = [...selectedFiles];
+    const newImages = [...imageUrlsOld];
+    newFiles.splice(index, 1);
+    newImages.splice(index, 1);
+    setSelectedFiles(newFiles);
+    setImageUrlsOld(newImages);
+    
+    if (newFiles.length === 0) {
+      setProcessedImages([]);
+      setCurrentImageIndex(0);
+    }
+  };
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsProcessing(false);
+      setStatusNew(false);
+      console.log("Đã dừng xử lý");
+      alert("Bạn muốn dừng kiểm tra!");
     }
   };
 
   const handleUpload = async () => {
     setStatusNew(true);
+    setIsProcessing(true);
     setShowResult(false);
     setShowOcrResult(false);
     
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-    formData.append("show_conf", false);
-    formData.append("show_labels", true);
-    formData.append("show_boxes", true);
-    formData.append("line_width", 2);
-    formData.append("show_ocr", true);
-    
-    // ✅ Chuyển đổi mảng thành chuỗi
+    if (!selectedFiles.length) {
+      setStatusNew(false);
+      setIsProcessing(false);
+      alert("Chưa chọn ảnh nào!");
+      return;
+    }
+
+    abortControllerRef.current = new AbortController();
+
     const classesString = selectLables.length === 0 
       ? labels_R.join(',') 
       : selectLables.join(',');
-    
-    formData.append("classes", classesString);
 
     try {
-      console.log("Đang gửi request với classes:", classesString);
+      const results = [];
       
-      const response = await axios.post(
-        `${REACT_APP_URL_PYTHON}/api/v1/predict-combined`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          timeout: 30000 
-        }
-      );
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("show_conf", false);
+        formData.append("show_labels", true);
+        formData.append("show_boxes", true);
+        formData.append("line_width", 2);
+        formData.append("show_ocr", true);
+        formData.append("classes", classesString);
 
-      console.log("Nhận được response:", response.data);
+        const response = await axios.post(
+          `${REACT_APP_URL_PYTHON}/api/v1/predict-combined`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            timeout: 30000,
+            signal: abortControllerRef.current.signal
+          }
+        );
 
-      setImageUrl(response.data.image);
-      setCountLabel(response.data.appearances);
+        results.push({
+          originalImage: imageUrlsOld[i],
+          processedImage: response.data.image,
+          appearances: response.data.appearances,
+          fileName: file.name
+        });
+      }
+
+      setProcessedImages(results);
+      setCurrentImageIndex(0);
       
-      // ✅ Xác định loại kết quả để hiển thị
       const yoloClasses = ["FP", "VIAS", "TP", "UP"];
       const ocrClasses = ["JTAG", "LPC", "SMB", "SPI"];
       
       const hasYoloResults = yoloClasses.some(
-        cls => response.data.appearances[cls] > 0
+        cls => results[0].appearances[cls] > 0
       );
       
       const hasOcrResults = ocrClasses.some(
-        cls => response.data.appearances[cls] > 0
+        cls => results[0].appearances[cls] > 0
       );
       
       setShowResult(hasYoloResults);
       setShowOcrResult(hasOcrResults);
       
       setStatusNew(false);
-      
-      console.log("✅ Nhận diện thành công");
+      setIsProcessing(false);
+      console.log("✅ Hoàn thành kiểm tra");
 
     } catch (error) {
-      console.error("❌ Lỗi:", error.response ? error.response.data : error.message);
+      if (axios.isCancel(error)) {
+        console.log("⚠️ Request đã bị hủy bởi người dùng");
+      } else {
+        console.error("❌ Lỗi:", error.response ? error.response.data : error.message);
+        alert("Lỗi khi nhận diện. Vui lòng kiểm tra lại!");
+      }
       setStatusNew(false);
-      alert("Lỗi khi nhận diện. Vui lòng kiểm tra lại!");
+      setIsProcessing(false);
     }
   };
 
@@ -159,69 +184,13 @@ function Dashboard() {
   };
 
   const handleDownload = () => {
-    if (imageUrl) {
+    if (processedImages[currentImageIndex]?.processedImage) {
       const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = 'PCBimage-predict.png';
+      link.href = processedImages[currentImageIndex].processedImage;
+      link.download = `PCBimage-predict-${currentImageIndex + 1}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
-  };
-
-  const handleDownloadJS = async (selectedFile) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await axios.post(
-        `${REACT_APP_URL_PYTHON}/api/v1/predict`, 
-        formData, 
-        {
-          responseType: 'blob',
-          headers: { 'Content-Type': 'multipart/form-data' }
-        }
-      );
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'PCB-predict-bb.json');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Lỗi khi tải file JSON:', error);
-    }
-  };
-
-  const fetchCroppedImages = async () => {
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await axios.post(
-        `${REACT_APP_URL_PYTHON}/api/v1/crop-u-ocr`, 
-        formData, 
-        {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        }
-      );
-
-      const croppedImages = response.data.cropped_images_with_ocr.map((item, index) => ({
-        id: index + 1,
-        name: `IC ${index + 1}`,
-        description: 'Cropped image of IC component',
-        imageSrc: item.cropped_image,
-        ocrData: item.ocr_data
-      }));
-
-      setIcList(croppedImages);
-    } catch (error) {
-      console.error('Lỗi khi lấy ảnh cropped:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -234,401 +203,335 @@ function Dashboard() {
     setIsModalOpen(false);
   };
 
-  const handleOpen = () => {
-    setOpen(true);
-    fetchCroppedImages();
+  const getTotalDetections = () => {
+    if (!processedImages[currentImageIndex]) return 0;
+    const appearances = processedImages[currentImageIndex].appearances;
+    return Object.values(appearances).reduce((sum, count) => sum + count, 0);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setIcList([]);
-  };
-
-  const handleCheckClick = (id) => {
-    setRowStates((prevState) => ({
-      ...prevState,
-      [id]: { isLoading: true },
-    }));
-
-    setTimeout(() => {
-      setRowStates((prevState) => ({
-        ...prevState,
-        [id]: { isVerified: true },
-      }));
-
-      setTimeout(() => {
-        setRowStates((prevState) => ({
-          ...prevState,
-          [id]: {},
-        }));
-      }, 30000);
-    }, 30000);
+  const renderDetectionDetails = () => {
+    if (!processedImages[currentImageIndex]) return null;
+    const appearances = processedImages[currentImageIndex].appearances;
+    
+    return Object.entries(appearances)
+      .filter(([_, count]) => count > 0)
+      .map(([label, count]) => `${label}: ${count}`)
+      .join(', ');
   };
 
   return (
-    <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-        <MemoryIcon sx={{ fontSize: 40, color: '#1976d2' }} />
-        <p>Phát hiện điểm yếu</p>
-      </Box>
-
-      <Box sx={{ marginBottom: "10px", display: "flex", flexDirection: "row", gap: "10px", alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
-          <Button
-            startIcon={<UploadOutlined />}
-            sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }}
-            size="small"
-            onClick={handleUploadButtonClick}
-          >
-            Chọn ảnh
-          </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-
-          {imageUrlOld && (
-            <>
-              {/* ✅ Hiển thị button dựa trên state */}
-              {showPredictBtn && (
-                <Button
-                  startIcon={<RightSquareOutlined />}
-                  sx={{ background: "#3892ee7d", padding: '6px 12px', fontSize: '12px' }}
-                  size="small"
-                  onClick={handleUpload}
-                >
-                  Nhận diện
-                </Button>
-              )}
-
-              <Autocomplete
-                multiple
-                sx={{
-                  width: '25%',
-                  marginLeft: '20px',
-                  '& .MuiOutlinedInput-root': {
-                    padding: '5px 10px',
-                    borderRadius: '8px',
-                    borderColor: '#3892ee',
-                    '&:hover': {
-                      borderColor: '#2a73d3',
-                    },
-                  },
-                  '& .MuiChip-root': {
-                    backgroundColor: '#f5f5f5',
-                    fontSize: '0.85rem',
-                    color: '#333',
-                    '& .MuiChip-deleteIcon': {
-                      color: '#888',
-                    },
-                  },
-                  '& .MuiAutocomplete-clearIndicator': {
-                    color: '#666',
-                  },
-                  '& .MuiAutocomplete-popupIndicator': {
-                    color: '#3892ee',
-                  },
+    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 3, width: '100%', minHeight: '90vh', p: 2 }}>
+      {/* Sidebar bên trái */}
+      <Box sx={{ 
+        width: 340, 
+        minHeight: 600, 
+        bgcolor: '#fff', 
+        borderRadius: 3, 
+        boxShadow: 3, 
+        p: 3, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 2,
+        // ✅ BỎ pointerEvents: 'none' - chỉ dùng opacity
+        opacity: isProcessing ? 0.8 : 1,
+        transition: 'opacity 0.3s'
+      }}>
+        <Typography sx={{ fontWeight: 700, fontSize: 19, mb: 1 }}>
+          Chọn loại kiểm tra
+        </Typography>
+        
+        <Autocomplete
+          multiple
+          disabled={isProcessing}
+          sx={{ width: '100%' }}
+          id="select-labels"
+          options={labels_R}
+          onChange={handleOnChange}
+          value={selectLables}
+          freeSolo={false}
+          disableClearable={false}
+          filterSelectedOptions
+          getOptionLabel={(option) => option}
+          isOptionEqualToValue={(option, value) => option === value}
+          renderInput={(params) => (
+            <TextField 
+              {...params} 
+              label="Loại kiểm tra" 
+              placeholder={selectLables.length === 0 ? "Chọn nhiều loại" : ""} 
+              size="small" 
+            />
+          )}
+        />
+        <Button
+          startIcon={<UploadOutlined />}
+          disabled={isProcessing}
+          sx={{
+            background: isProcessing ? '#ccc' : '#3892ee7d', 
+            p: '8px 14px', 
+            fontSize: '14px', 
+            borderRadius:2, 
+            fontWeight:'bold', 
+            textTransform: 'none',
+            '&:disabled': {
+              color: '#666'
+            }
+          }}
+          onClick={handleUploadButtonClick}
+        >
+          Thêm ảnh ({imageUrlsOld.length})
+        </Button>
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+          disabled={isProcessing}
+        />
+        
+        {imageUrlsOld.length > 0 && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxHeight: 250, overflowY: 'auto', p: 1, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+            {imageUrlsOld.map((img, idx) => (
+              <Box 
+                key={idx} 
+                sx={{ 
+                  position: 'relative', 
+                  width: 80, 
+                  height: 80, 
+                  border: currentImageIndex === idx && processedImages.length > 0 
+                    ? '2.5px solid #257be2' 
+                    : '1.5px solid #3892ee44', 
+                  borderRadius: 2, 
+                  overflow: 'hidden', 
+                  boxShadow: 1,
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  opacity: isProcessing ? 0.5 : 1,
+                  '&:hover': isProcessing ? {} : { boxShadow: 3, transform: 'scale(1.05)' }
                 }}
-                id="tags-outlined"
-                options={labels_R}
-                onChange={handleOnChange}
-                defaultValue={[]}
-                filterSelectedOptions
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Chọn nhãn"
-                    placeholder="Có thể chọn nhiều nhãn"
-                    size="small"
-                    sx={{
-                      '& label.Mui-focused': {
-                        color: '#3892ee',
-                      },
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: '#3892ee',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#2a73d3',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#1a5bbd',
-                        },
-                      },
-                    }}
-                  />
-                )}
-              />
-            </>
+                onClick={() => !isProcessing && processedImages.length > 0 && setCurrentImageIndex(idx)}
+              >
+                <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} alt={`Ảnh ${idx+1}`} />
+                <IconButton 
+                  size="small"
+                  disabled={isProcessing}
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 2, 
+                    right: 2, 
+                    background: '#fffc', 
+                    p: 0.3,
+                    '&:hover': { background: '#fff' },
+                    '&:disabled': { background: '#ddd', opacity: 0.5 }
+                  }} 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    if (!isProcessing) handleRemoveImage(idx); 
+                  }}
+                >
+                  <CloseIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+                <Typography 
+                  sx={{ 
+                    position: 'absolute', 
+                    bottom: 2, 
+                    left: 2, 
+                    background: '#000a', 
+                    color: '#fff', 
+                    px: 0.5, 
+                    py: 0.2,
+                    fontSize: 11, 
+                    borderRadius: 0.5,
+                    fontWeight: 600
+                  }}
+                >
+                  {idx + 1}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+        
+        {/* ✅ FIX: Nút Dừng với pointerEvents riêng */}
+        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleUpload}
+            sx={{ 
+              flex: 1,
+              fontWeight: 600, 
+              fontSize: 15, 
+              p: '9px 0', 
+              borderRadius: 2, 
+              boxShadow: 2, 
+              background: '#257be2', 
+              textTransform: 'none',
+              '&:disabled': {
+                background: '#ccc'
+              }
+            }}
+            disabled={selectLables.length === 0 || imageUrlsOld.length === 0 || isProcessing}
+          >
+            {statusNew ? <CircularProgress size={24} color="inherit" /> : 'Kiểm tra'}
+          </Button>
+          
+          {/* ✅ Nút Dừng luôn clickable */}
+          {isProcessing && (
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleStop}
+              startIcon={<StopIcon />}
+              sx={{ 
+                fontWeight: 600, 
+                fontSize: 15, 
+                p: '9px 16px', 
+                borderRadius: 2,
+                textTransform: 'none',
+                borderColor: '#d32f2f',
+                color: '#d32f2f',
+                // ✅ Đảm bảo luôn clickable
+                pointerEvents: 'auto',
+                zIndex: 10,
+                '&:hover': {
+                  borderColor: '#b71c1c',
+                  background: '#ffebee'
+                }
+              }}
+            >
+              Dừng
+            </Button>
           )}
         </Box>
+      </Box>
 
-        {imageUrl && (
-          <Box sx={{ display: 'flex', flexDirection: 'row', gap: '10px', marginTop: '10px' }}>
-            <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <Button 
-                startIcon={<UnorderedListOutlined />} 
-                sx={{ background: "#3892ee7d", fontSize: '12px', padding: '6px 12px' }} 
-                size="small" 
-                onClick={handleOpen}
-              >
-                Danh sách IC
-              </Button>
-              <Button 
-                startIcon={<DownloadOutlined />} 
-                sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }} 
-                size="small" 
-                onClick={handleDownload}
-              >
-                Tải ảnh
-              </Button>
-              <Button 
-                startIcon={<DownloadOutlined />} 
-                sx={{ background: '#3892ee7d', padding: '6px 12px', fontSize: '12px' }} 
-                size="small" 
-                onClick={() => handleDownloadJS(selectedFile)}
-              >
-                Tải JSON
-              </Button>
+      {/* Vùng kết quả phía phải */}
+      <Box sx={{ flex: 1, minHeight: 600, bgcolor: '#f8fafd', borderRadius: 3, boxShadow: 2, p: 3, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+        {processedImages.length > 0 ? (
+          <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+              <Box sx={{ width: 350, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#fff', borderRadius: 2, boxShadow: 2, p: 2 }}>
+                {statusNew ? (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <CircularProgress />
+                    <Typography sx={{ fontSize: 14, color: '#666' }}>
+                      Đang xử lý...
+                    </Typography>
+                  </Box>
+                ) : (
+                  <img
+                    src={processedImages[currentImageIndex]?.processedImage}
+                    alt="Kết quả nhận diện"
+                    style={{ maxWidth: '100%', maxHeight: 320, cursor: 'pointer', borderRadius: 8 }}
+                    onClick={() => openModal(processedImages[currentImageIndex]?.processedImage)}
+                  />
+                )}
+              </Box>
 
-              {/* Modal danh sách IC */}
-              <Modal
-                open={open}
-                onClose={handleClose}
-                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Box sx={{ position: 'relative', width: '60%', maxHeight: '70%', overflowY: 'auto', bgcolor: 'background.paper', p: 4, borderRadius: 2 }}>
-                  <IconButton onClick={handleClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
-                    <CloseIcon />
-                  </IconButton>
-
-                  <Typography variant="h6" component="h2" sx={{ marginBottom: 2 }}>
-                    DANH SÁCH IC NHẬN DIỆN
+              <Box sx={{ flex: 1, minWidth: 300 }}>
+                <Typography sx={{ fontWeight: 'bold', fontSize: 17, color: '#1976d2', mb: 2 }}>
+                  Kết quả kiểm tra {processedImages.length > 1 ? `(${currentImageIndex + 1}/${processedImages.length})` : ''}
+                </Typography>
+                
+                <Box sx={{ bgcolor: '#fff', borderRadius: 2, p: 2.5, mb: 2, boxShadow: 1 }}>
+                  <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#333', mb: 1.5 }}>
+                    📊 Tổng phát hiện: <span style={{color: '#257be2', fontSize: 18}}>{getTotalDetections()}</span> điểm
                   </Typography>
-
-                  {loading ? (
-                    <Box sx={{ width: "100%", height: "300px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <CircularProgress />
-                    </Box>
-                  ) : (
-                    <TableContainer component={Paper}>
-                      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                        <TableHead style={{ display: 'table-header-group' }}>
-                          <TableRow>
-                            <TableCell align="center"><strong>ID</strong></TableCell>
-                            <TableCell align="center"><strong>Image</strong></TableCell>
-                            <TableCell align="center"><strong>Text</strong></TableCell>
-                            <TableCell align="center"><strong>Actions</strong></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {icList.map((ic) => (
-                            <TableRow key={ic.id}>
-                              <TableCell align="center" style={{ verticalAlign: 'middle' }}>{ic.id}</TableCell>
-                              <TableCell align="center" style={{ verticalAlign: 'middle' }}>
-                                <img
-                                  src={ic.imageSrc}
-                                  alt={ic.name}
-                                  style={{ width: '100px', height: '120px', objectFit: 'contain' }}
-                                />
-                              </TableCell>
-                              <TableCell align="left" style={{ verticalAlign: 'middle' }}>
-                                {ic.ocrData.length > 0 ? (
-                                  <ul>
-                                    {ic.ocrData.map((ocrItem, ocrIndex) => (
-                                      <li key={ocrIndex}>
-                                        <Typography sx={{ whiteSpace: 'pre-wrap' }}>
-                                          {ocrItem.text}
-                                        </Typography>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <Typography sx={{ whiteSpace: 'pre-wrap' }}>Không có dữ liệu OCR</Typography>
-                                )}
-                              </TableCell>
-                              <TableCell align="center" style={{ verticalAlign: 'middle' }}>
-                                {rowStates[ic.id]?.isLoading ? (
-                                  <CircularProgress size={24} />
-                                ) : rowStates[ic.id]?.isVerified ? (
-                                  <Box display="flex" alignItems="center" justifyContent="center">
-                                    <CheckCircleOutlined style={{ fontSize: '24px', color: 'green', marginRight: '8px' }} />
-                                    <Typography sx={{ color: 'green' }}>IC tin cậy</Typography>
-                                  </Box>
-                                ) : (
-                                  <Button
-                                    onClick={() => handleCheckClick(ic.id)}
-                                    sx={{ background: "#3892ee7d", padding: '6px 12px', fontSize: '12px' }}
-                                    size="small"
-                                  >
-                                    kiểm tra
-                                  </Button>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
+                  
+                  <Typography sx={{ fontSize: 14, color: '#555', mb: 2, lineHeight: 1.6 }}>
+                    {renderDetectionDetails() || 'Không phát hiện điểm nào'}
+                  </Typography>
+                  
+                  <Divider sx={{ my: 2 }}/>
+                  
+                  <Typography sx={{ fontSize: 14, fontWeight: 600, mb: 1, color: '#333' }}>
+                    Ghi chú:
+                  </Typography>
+                  <TextField
+                    multiline
+                    rows={3}
+                    fullWidth
+                    size="small"
+                    placeholder="Nhập nhận xét của bạn về kết quả kiểm tra..."
+                    value={userNotes}
+                    onChange={(e) => setUserNotes(e.target.value)}
+                    sx={{ 
+                      bgcolor: '#f9f9f9',
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5
+                      }
+                    }}
+                  />
+                  
+                  <Box sx={{ display:'flex', gap: 2, mt: 2.5 }}>
+                    <Button 
+                      variant="outlined" 
+                      size="small" 
+                      startIcon={<DownloadOutlined/>} 
+                      onClick={handleDownload}
+                      sx={{ fontWeight: 600, color: '#1976d2', borderColor: '#c7dceb', textTransform: 'none' }}
+                    >
+                      Tải xuống
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      size="small" 
+                      sx={{ fontWeight: 600, bgcolor: '#257be2', textTransform: 'none' }}
+                    >
+                      Lưu kết quả
+                    </Button>
+                  </Box>
                 </Box>
-              </Modal>
+              </Box>
             </Box>
+            
+            {processedImages.length > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
+                {processedImages.map((_, idx) => (
+                  <Box
+                    key={idx}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      bgcolor: currentImageIndex === idx ? '#257be2' : '#ccc',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                      '&:hover': { transform: 'scale(1.2)' }
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
+            <MemoryIcon sx={{ fontSize: 80, mb: 2, opacity: 0.3 }} />
+            <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
+              Chưa có kết quả kiểm tra
+            </Typography>
+            <Typography sx={{ fontSize: 14, mt: 1 }}>
+              Vui lòng chọn ảnh và nhấn "Kiểm tra"
+            </Typography>
           </Box>
         )}
       </Box>
 
-      <Box sx={{ display: "flex", width: "100%", justifyContent: "space-between" }}>
-        {status ? (
-          <Box sx={{ width: `${size}%`, overflow: "hidden", margin: "auto", display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box sx={{ width: `${size}%`, overflow: "hidden" }}>
-            {imageUrlOld && (
-              <img
-                src={imageUrlOld}
-                alt="ảnh ban đầu"
-                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "pointer" }}
-                onClick={() => openModal(imageUrlOld)}
-              />
-            )}
-          </Box>
-        )}
-
-        {statusNew ? (
-          <Box sx={{ width: `${98 - size}%`, overflow: "hidden", margin: "auto", display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box sx={{ width: `${98 - size}%`, overflow: "hidden", display: 'flex' }}>
-            {imageUrl && (
-              <img
-                src={imageUrl}
-                alt="Predicted"
-                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "pointer" }}
-                onClick={() => openModal(imageUrl)}
-              />
-            )}
-          </Box>
-        )}
-      </Box>
-
-      {/* Modal hiển thị ảnh phóng to */}
-      <Modal open={isModalOpen} onClose={closeModal} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+      <Modal open={isModalOpen} onClose={closeModal} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ position: 'relative', width: '80vw', height: '85vh', bgcolor: '#000', borderRadius: 3, overflow: 'hidden' }}>
           <IconButton
             onClick={closeModal}
-            sx={{ position: "absolute", top: "10px", right: "10px", color: "white", zIndex: 10 }}
+            sx={{ position: 'absolute', top: 15, right: 15, color: 'white', zIndex: 10, bgcolor: '#0003', '&:hover': { bgcolor: '#0005' } }}
           >
             <CloseIcon />
           </IconButton>
-          <img src={modalImage} alt="Phóng to" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <img src={modalImage} alt="Phóng to" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </Box>
       </Modal>
-
-      {/* Kết quả nhận diện YOLO */}
-      {imageUrl && showResult && (
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-            <CheckCircleOutlinedIcon sx={{ color: 'green', fontSize: '40px' }} />
-            <p>Kết quả nhận diện bằng mô hình</p>
-          </Box>
-          <Box sx={{ marginTop: "5px", display: "flex" }}>
-            <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-              {labels.map((label, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginRight: "20px",
-                    marginBottom: "10px",
-                    padding: "2px 10px",
-                    border: "1px solid #ccc",
-                    backgroundColor: "#dcd6d6",
-                    borderRadius: "8px"
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      marginRight: "5px"
-                    }}
-                  >
-                    {label.symbol}
-                    <span
-                      style={{
-                        fontWeight: "300",
-                        fontSize: "12px",
-                        marginRight: "2px"
-                      }}
-                    >
-                      ({label.description}):
-                    </span>
-                    {contLabel ? contLabel[label.symbol] : ""}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-        </Box>
-      )}
-
-      {/* Kết quả nhận diện OCR */}
-      {showOcrResult && (
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-            <CheckCircleOutlinedIcon sx={{ color: 'green', fontSize: '40px' }} />
-            <p>Kết quả nhận diện bằng OCR</p>
-          </Box>
-          <Box sx={{ marginTop: "5px", display: "flex" }}>
-            <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-              {ocr_lables.map((label, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginRight: "20px",
-                    marginBottom: "10px",
-                    padding: "2px 10px",
-                    border: "1px solid #ccc",
-                    backgroundColor: "#dcd6d6",
-                    borderRadius: "8px"
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      marginRight: "5px"
-                    }}
-                  >
-                    {label.symbol}
-                    <span
-                      style={{
-                        fontWeight: "300",
-                        fontSize: "12px",
-                        marginRight: "2px"
-                      }}
-                    >
-                      ({label.description}):
-                    </span>
-                    {contLabel ? contLabel[label.symbol] : ""}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-        </Box>
-      )}
-    </>
+    </Box>
   );
 }
 

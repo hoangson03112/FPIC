@@ -180,7 +180,7 @@ const Layout = ({ children }) => {
           </ListItem>
         )}
 
-        {/* <ListItem disablePadding>
+        <ListItem disablePadding>
           <ListItemButton
             component={Link}
             to="/identification"
@@ -204,7 +204,7 @@ const Layout = ({ children }) => {
               primaryTypographyProps={{ fontWeight: 500 }}
             />
           </ListItemButton>
-        </ListItem> */}
+        </ListItem>
 
         {/* Xây dựng dữ liệu */}
         <ListItem disablePadding>
