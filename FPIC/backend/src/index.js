@@ -1,11 +1,11 @@
 const express = require("express");
 const app = express();
-const cors = require("cors");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const fs = require("fs");
 const AccessoryModel = require("./models/Accessory");
-
+const DetectionResult = require("./routers/DetectionResultRouter")
+const cors = require("cors")
 const db = require("./config/db");
 const Account = require("./models/Account");
 const SoDoKhoi = require("./models/SoDoKhoi");
@@ -16,6 +16,7 @@ const { default: upload } = require("./config/multer/multer");
 const { authorize, verifyAdmin, verifyToken } = require("./middleware/auth");
 const bodyParse = require("body-parser");
 const AccessoryRouter = require("./routers/AccessoryRouter");
+
 const IMAGES_DIR = path.join(__dirname, "img");
 const multer = require("multer");
 const uploadWeakPoint = multer({ storage: multer.memoryStorage() });
@@ -52,6 +53,12 @@ const type = require("./routers/TypeAccessoryRouter");
 
 db.connect();
 app.use(cors());
+//tăng giới hạn
+app.use(express.json({ limit: '100mb'}));
+app.use(express.urlencoded({
+  limit: '100mb',
+  extended: true
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
@@ -150,8 +157,10 @@ app.get("/authentication", async (req, res) => {
   }
 });
 
+
 app.use(bodyParse.json());
 app.use("/", AccessoryRouter);
+app.use("/", DetectionResult)
 
 app.get(
   "/images",
