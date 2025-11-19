@@ -61,7 +61,7 @@ const Layout = ({ children }) => {
   };
 
   const navigateTo = () => {
-    navigate("/auth/login");
+    navigate("/login");
   };
 
   const toggleSubMenu = (menu) => {
