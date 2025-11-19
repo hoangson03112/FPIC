@@ -1,6 +1,6 @@
 import { 
   Typography, Modal, IconButton, Box, Button, Divider, 
-  LinearProgress, Card
+  LinearProgress, Card, Tabs, Tab
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
@@ -12,20 +12,18 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import MemoryIcon from '@mui/icons-material/Memory';
 import Alert from '@mui/material/Alert';
+import ImageIcon from '@mui/icons-material/Image';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { REACT_APP_URL_PYTHON, REACT_APP_URL_BE } from '../config';
 
 const labels_R = ["FP", "VIAS", "TP", "LPC", "UP", "JTAG", "SMB", "SPI"];
 
 const STORAGE_KEYS = {
-  IMAGE_URLS: 'dashboard_image_urls',
-  PROCESSED_RESULTS: 'dashboard_processed_results',
   SELECT_LABEL: 'dashboard_select_label',
-  USER_NOTES: 'dashboard_user_notes',
-  CURRENT_IMAGE_INDEX: 'dashboard_current_image_index'
 };
 
 function Dashboard() {
-  // State management
+  // ===== STATE MANAGEMENT =====
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [imageUrlsOld, setImageUrlsOld] = useState([]);
   const [processedResults, setProcessedResults] = useState([]);
@@ -38,98 +36,25 @@ function Dashboard() {
   const [userNotes, setUserNotes] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [isSendingResults, setIsSendingResults] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [sendingStates, setSendingStates] = useState({});
+  const [successMessages, setSuccessMessages] = useState({});
+  const [activeImageTabs, setActiveImageTabs] = useState({});
 
-  // Refs
+  // ===== REFS =====
   const fileInputRef = useRef(null);
   const abortControllerRef = useRef(null);
 
-  // ===== LOCAL STORAGE LOGIC =====
+  // ===== EFFECTS =====
   useEffect(() => {
     try {
-      const savedImageUrls = sessionStorage.getItem(STORAGE_KEYS.IMAGE_URLS);
-      const savedProcessedResults = localStorage.getItem(STORAGE_KEYS.PROCESSED_RESULTS);
       const savedSelectLabel = localStorage.getItem(STORAGE_KEYS.SELECT_LABEL);
-      const savedUserNotes = localStorage.getItem(STORAGE_KEYS.USER_NOTES);
-      const savedCurrentImageIndex = localStorage.getItem(STORAGE_KEYS.CURRENT_IMAGE_INDEX);
-
-      if (savedImageUrls) {
-        try {
-          setImageUrlsOld(JSON.parse(savedImageUrls));
-          console.log("✅ Đã restore images từ sessionStorage");
-        } catch (e) {
-          console.warn("Không thể parse image urls");
-        }
-      }
-
-      if (savedProcessedResults) {
-        try {
-          setProcessedResults(JSON.parse(savedProcessedResults));
-          console.log("✅ Đã restore processed results");
-        } catch (e) {
-          console.warn("Không thể parse processed results");
-        }
-      }
-
       if (savedSelectLabel) {
         setSelectLabel(savedSelectLabel);
       }
-
-      if (savedUserNotes) {
-        try {
-          setUserNotes(JSON.parse(savedUserNotes));
-        } catch (e) {
-          console.warn("Không thể parse user notes");
-        }
-      }
-
-      if (savedCurrentImageIndex) {
-        setCurrentImageIndex(JSON.parse(savedCurrentImageIndex));
-      }
-
-      console.log("✅ Load data from storage complete");
     } catch (error) {
-      console.error("Lỗi khi load storage:", error);
+      console.error("Lỗi khi load localStorage:", error);
     }
   }, []);
-
-  // ✅ Save imageUrls vào sessionStorage
-  useEffect(() => {
-    if (imageUrlsOld.length > 0) {
-      try {
-        sessionStorage.setItem(STORAGE_KEYS.IMAGE_URLS, JSON.stringify(imageUrlsOld));
-        console.log(`✅ Saved ${imageUrlsOld.length} images to sessionStorage`);
-      } catch (error) {
-        console.error("Lỗi save image urls:", error);
-      }
-    }
-  }, [imageUrlsOld]);
-
-  useEffect(() => {
-    if (processedResults.length > 0) {
-      try {
-        const lightweightResults = processedResults.map(result => ({
-          filename: result.filename,
-          type: result.type,
-          detections: result.detections,
-          cropDetails: result.cropDetails,
-          texts: result.texts,
-        }));
-
-        const sizeEstimate = new Blob([JSON.stringify(lightweightResults)]).size;
-        
-        if (sizeEstimate < 4 * 1024 * 1024) {
-          localStorage.setItem(STORAGE_KEYS.PROCESSED_RESULTS, JSON.stringify(lightweightResults));
-        }
-      } catch (error) {
-        if (error.name === 'QuotaExceededError') {
-          console.error("localStorage đầy");
-          localStorage.clear();
-        }
-      }
-    }
-  }, [processedResults]);
 
   useEffect(() => {
     try {
@@ -139,93 +64,72 @@ function Dashboard() {
     }
   }, [selectLabel]);
 
-  useEffect(() => {
-    try {
-      const sizeEstimate = new Blob([JSON.stringify(userNotes)]).size;
-      if (sizeEstimate < 1 * 1024 * 1024) {
-        localStorage.setItem(STORAGE_KEYS.USER_NOTES, JSON.stringify(userNotes));
-      }
-    } catch (error) {
-      console.error("Lỗi save notes:", error);
-    }
-  }, [userNotes]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CURRENT_IMAGE_INDEX, JSON.stringify(currentImageIndex));
-    } catch (error) {
-      console.error("Lỗi save index:", error);
-    }
-  }, [currentImageIndex]);
-
-  // ===== SUBMIT RESULTS TO BACKEND =====
-  const handleSendResults = useCallback(async () => {
-    if (processedResults.length === 0) {
-      setError("Chưa có kết quả để gửi!");
+  // ===== HANDLERS =====
+  const handleSendResult = useCallback(async (resultIndex) => {
+    const result = processedResults[resultIndex];
+    
+    if (!result) {
+      setError("Không tìm thấy kết quả!");
       return;
     }
 
-    setIsSendingResults(true);
+    setSendingStates(prev => ({ ...prev, [resultIndex]: true }));
     setError(null);
 
     try {
-      const submitData = processedResults.map((result, idx) => ({
+      const submitData = {
         filename: result.filename,
         type: result.type,
         detections: result.detections,
-        cropDetails: result.cropDetails,
-        texts: result.texts,
-        userNotes: userNotes[idx] || "",
-        originalImage: imageUrlsOld[idx],
+        userNotes: userNotes[resultIndex] || "",
+        originalImage: result.originalImage,
         annotatedImage: result.annotatedImage,
-        crops: result.crops,
-        timestamp: new Date().toISOString()
-      }));
+        timestamp: new Date().toISOString(),
+        detectionType: selectLabel
+      };
 
       const response = await axios.post(
-        `${REACT_APP_URL_BE}/api/v1/detection-results`, // Thay đổi endpoint theo BE của bạn
+        `${REACT_APP_URL_BE}/api/v1/detection-result`,
+        submitData,
         {
-          results: submitData,
-          detectionType: selectLabel,
-          totalResults: processedResults.length,
-          submittedAt: new Date().toISOString()
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           timeout: 30000
         }
       );
 
-      setSuccessMessage("✅ Đã gửi kết quả kiểm tra thành công!");
-      console.log("✅ Response from backend:", response.data);
+      setSuccessMessages(prev => ({ 
+        ...prev, 
+        [resultIndex]: "✅ Đã gửi thành công!" 
+      }));
+      
+      console.log("✅ Response:", response.data);
 
-      // Clear data sau khi gửi thành công
       setTimeout(() => {
-        clearAllData();
-        setSuccessMessage(null);
-      }, 2000);
+        setSuccessMessages(prev => {
+          const newState = { ...prev };
+          delete newState[resultIndex];
+          return newState;
+        });
+      }, 3000);
 
     } catch (error) {
       if (error.response) {
-        setError(`Lỗi: ${error.response.data.message || error.response.statusText}`);
+        setError(`Lỗi gửi kết quả ${resultIndex + 1}: ${error.response.data.message || error.response.statusText}`);
       } else if (error.request) {
-        setError("Không thể kết nối đến server BE. Vui lòng kiểm tra URL.");
+        setError("Không thể kết nối đến server BE.");
       } else {
         setError(`Lỗi: ${error.message}`);
       }
       console.error("❌ Lỗi gửi kết quả:", error);
     } finally {
-      setIsSendingResults(false);
+      setSendingStates(prev => ({ ...prev, [resultIndex]: false }));
     }
-  }, [processedResults, imageUrlsOld, selectLabel, userNotes]);
+  }, [processedResults, userNotes, selectLabel]);
 
   const clearAllData = useCallback(() => {
     if (window.confirm("Xóa tất cả dữ liệu và bắt đầu lại?")) {
       try {
         localStorage.clear();
-        sessionStorage.clear(); // ✅ Clear sessionStorage khi xóa data
       } catch (error) {
         console.error("Lỗi clear storage:", error);
       }
@@ -235,12 +139,14 @@ function Dashboard() {
       setCurrentImageIndex(0);
       setSelectLabel("");
       setUserNotes({});
+      setSendingStates({});
+      setSuccessMessages({});
+      setActiveImageTabs({});
       setError(null);
-      console.log("✅ Tất cả dữ liệu đã được xóa");
+      console.log("✅ Đã xóa tất cả dữ liệu");
     }
   }, []);
 
-  // ===== HANDLERS =====
   const handleOnChange = useCallback((event, value) => {
     setSelectLabel(value);
     setError(null);
@@ -300,7 +206,7 @@ function Dashboard() {
     setSelectedFiles(newFiles);
     setImageUrlsOld(newImages);
     
-    if (newFiles.length === 0) {
+    if (newImages.length === 0) {
       setProcessedResults([]);
       setCurrentImageIndex(0);
       setError(null);
@@ -322,7 +228,7 @@ function Dashboard() {
     setIsProcessing(true);
     setError(null);
     
-    if (!selectedFiles.length) {
+    if (selectedFiles.length === 0) {
       setStatusNew(false);
       setIsProcessing(false);
       setError("Chưa chọn ảnh nào!");
@@ -372,15 +278,16 @@ function Dashboard() {
         originalImage: imageUrlsOld[idx],
         annotatedImage: result.annotated_image,
         detections: result.detections || [],
-        crops: result.crops || [],
-        cropDetails: result.crop_details || [],
-        pageOcr: result.page_ocr || [],
-        texts: result.texts || [],
-        resultImages: result.result_images || [],
       }));
 
       setProcessedResults(formattedResults);
       setCurrentImageIndex(0);
+      
+      const initialTabs = {};
+      formattedResults.forEach((_, idx) => {
+        initialTabs[idx] = 1;
+      });
+      setActiveImageTabs(initialTabs);
       
       const newNotes = {};
       formattedResults.forEach((_, idx) => {
@@ -400,7 +307,7 @@ function Dashboard() {
       } else if (error.response) {
         setError(`Lỗi server: ${error.response.data.detail || error.response.statusText}`);
       } else if (error.request) {
-        setError("Không thể kết nối đến server. Vui lòng kiểm tra URL Python API.");
+        setError("Không thể kết nối đến server Python API.");
       } else {
         setError(`Lỗi: ${error.message}`);
       }
@@ -425,23 +332,21 @@ function Dashboard() {
     setIsModalOpen(false);
   }, []);
 
-  const currentResult = useMemo(() => 
-    processedResults[currentImageIndex] || null, 
-    [processedResults, currentImageIndex]
-  );
-
-  const getTotalDetections = useMemo(() => {
-    if (!currentResult?.detections) return 0;
-    return currentResult.detections.length;
-  }, [currentResult]);
+  const handleImageTabChange = useCallback((idx, newValue) => {
+    setActiveImageTabs(prev => ({
+      ...prev,
+      [idx]: newValue
+    }));
+  }, []);
 
   const isUploadDisabled = useMemo(() => {
     return !selectLabel || imageUrlsOld.length === 0 || isProcessing;
   }, [selectLabel, imageUrlsOld, isProcessing]);
 
+  // ===== RENDER =====
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', gap: 3, width: '100%', minHeight: '90vh', p: 2 }}>
-      {/* ===== SIDEBAR BÊN TRÁI ===== */}
+      {/* ===== SIDEBAR ===== */}
       <Box sx={{ 
         width: 340, 
         minHeight: 600, 
@@ -463,12 +368,6 @@ function Dashboard() {
           </Alert>
         )}
 
-        {successMessage && (
-          <Alert severity="success" onClose={() => setSuccessMessage(null)} sx={{ mb: 1 }}>
-            {successMessage}
-          </Alert>
-        )}
-        
         <Autocomplete
           disabled={isProcessing}
           sx={{ width: '100%' }}
@@ -500,14 +399,8 @@ function Dashboard() {
             fontWeight: 'bold', 
             textTransform: 'none',
             color: '#000',
-            '&:disabled': { 
-              background: '#ccc',
-              color: '#666'
-            },
-            '&:hover': { 
-              background: '#257be2',
-              color: '#fff'
-            }
+            '&:disabled': { background: '#ccc', color: '#666' },
+            '&:hover': { background: '#257be2', color: '#fff' }
           }}
           onClick={handleUploadButtonClick}
         >
@@ -646,8 +539,6 @@ function Dashboard() {
                 textTransform: 'none',
                 borderColor: '#d32f2f',
                 color: '#d32f2f',
-                pointerEvents: 'auto',
-                zIndex: 10,
                 '&:hover': { borderColor: '#b71c1c', background: '#ffebee' }
               }}
             >
@@ -665,13 +556,14 @@ function Dashboard() {
         <Button
           size="small"
           onClick={clearAllData}
+          disabled={isProcessing}
           sx={{ textTransform: 'none', color: '#d32f2f' }}
         >
           Xóa tất cả dữ liệu
         </Button>
       </Box>
 
-      {/* ===== VÙNG KẾT QUẢ PHÍA PHẢI ===== */}
+      {/* ===== RESULTS AREA ===== */}
       <Box sx={{ 
         flex: 1, 
         minHeight: 600, 
@@ -698,46 +590,15 @@ function Dashboard() {
 
         {!statusNew && processedResults.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Header + Submit Button */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Typography sx={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', mb: 1 }}>
-                  📋 Kết quả kiểm tra ({processedResults.length} ảnh)
-                </Typography>
-                <Typography sx={{ fontSize: 13, color: '#666' }}>
-                  Loại: <strong>{selectLabel}</strong> | Tổng cộng: <strong>{processedResults.length}</strong> ảnh
-                </Typography>
-              </Box>
-
-              {/* ✅ BUTTON GỬI ĐÁNH GIÁ */}
-              <Button
-                variant="contained"
-                startIcon={<SendOutlined />}
-                onClick={handleSendResults}
-                disabled={isSendingResults || processedResults.length === 0}
-                sx={{
-                  background: '#4caf50',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  fontSize: 14,
-                  p: '8px 20px',
-                  borderRadius: 2,
-                  '&:hover': { background: '#388e3c' },
-                  '&:disabled': { background: '#ccc' }
-                }}
-              >
-                {isSendingResults ? (
-                  <>
-                    <CircularProgress size={20} sx={{ mr: 1, color: '#fff' }} />
-                    Đang gửi...
-                  </>
-                ) : (
-                  'Gửi đánh giá'
-                )}
-              </Button>
+            <Box>
+              <Typography sx={{ fontWeight: 'bold', fontSize: 18, color: '#1976d2', mb: 1 }}>
+                📋 Kết quả kiểm tra ({processedResults.length} ảnh)
+              </Typography>
+              <Typography sx={{ fontSize: 13, color: '#666' }}>
+                Loại: <strong>{selectLabel}</strong> | Tổng cộng: <strong>{processedResults.length}</strong> ảnh
+              </Typography>
             </Box>
 
-            {/* Results Cards */}
             {processedResults.map((result, idx) => (
               <Card 
                 key={idx}
@@ -747,143 +608,111 @@ function Dashboard() {
                   boxShadow: 1,
                   border: currentImageIndex === idx ? '2px solid #257be2' : '1px solid #e0e0e0',
                   transition: 'all 0.3s',
-                  cursor: isProcessing ? 'not-allowed' : 'pointer',
-                  opacity: isProcessing ? 0.8 : 1,
-                  '&:hover': {
-                    boxShadow: 3,
-                    border: '2px solid #257be2'
-                  }
+                  cursor: 'pointer',
+                  '&:hover': { boxShadow: 3, border: '2px solid #257be2' }
                 }}
-                onClick={() => !isProcessing && setCurrentImageIndex(idx)}
+                onClick={() => setCurrentImageIndex(idx)}
               >
-                {/* Result Header */}
-                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                {/* ===== IMAGE COMPARISON SECTION ===== */}
+                <Box 
+                  sx={{ display: 'flex', gap: 2, mb: 2 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Box sx={{ 
-                    width: 120, 
-                    height: 120, 
-                    borderRadius: 2, 
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                    bgcolor: '#f5f5f5',
+                    width: '100%',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    flexDirection: 'column',
                   }}>
-                    <img
-                      src={result.annotatedImage}
-                      alt={`Kết quả ${idx + 1}`}
-                      style={{ maxWidth: '100%', maxHeight: '100%', cursor: 'pointer' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openModal(result.annotatedImage);
+                    <Tabs 
+                      value={activeImageTabs[idx] ?? 1} 
+                      onChange={(e, newValue) => handleImageTabChange(idx, newValue)}
+                      sx={{ 
+                        minHeight: 40,
+                        mb: 1,
+                        '& .MuiTab-root': { 
+                          minHeight: 40,
+                          fontSize: 13,
+                          textTransform: 'none',
+                          fontWeight: 600
+                        }
                       }}
-                    />
-                  </Box>
+                    >
+                      <Tab 
+                        icon={<ImageIcon sx={{ fontSize: 16 }} />} 
+                        iconPosition="start" 
+                        label="Ảnh gốc" 
+                        value={0}
+                      />
+                      <Tab 
+                        icon={<CheckCircleIcon sx={{ fontSize: 16 }} />} 
+                        iconPosition="start" 
+                        label={`Kết quả nhận diện (${result.detections.length} điểm)`}
+                        value={1}
+                      />
+                    </Tabs>
 
-                  <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#333', mb: 1 }}>
-                      📁 {result.filename}
-                    </Typography>
-                    <Typography sx={{ fontSize: 13, color: '#666', mb: 1 }}>
-                      📊 Phát hiện: <span style={{ color: '#257be2', fontWeight: 600 }}>{result.detections.length}</span> điểm
-                    </Typography>
-                    <Typography sx={{ fontSize: 12, color: '#999' }}>
-                      Loại: {result.type.toUpperCase()}
-                    </Typography>
+                    <Box sx={{ 
+                      width: '100%',
+                      height: 500,
+                      borderRadius: 2, 
+                      overflow: 'hidden',
+                      bgcolor: '#f5f5f5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid #e0e0e0',
+                      position: 'relative'
+                    }}>
+                      <img
+                        src={activeImageTabs[idx] === 0 ? result.originalImage : result.annotatedImage}
+                        alt={activeImageTabs[idx] === 0 ? "Ảnh gốc" : "Kết quả nhận diện"}
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '100%', 
+                          cursor: 'pointer',
+                          objectFit: 'contain'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(activeImageTabs[idx] === 0 ? result.originalImage : result.annotatedImage);
+                        }}
+                      />
+                      
+                      <Box sx={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        bgcolor: activeImageTabs[idx] === 0 ? '#2196f3' : '#4caf50',
+                        color: '#fff',
+                        px: 2,
+                        py: 1,
+                        borderRadius: 2,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        boxShadow: 2
+                      }}>
+                        {activeImageTabs[idx] === 0 
+                          ? 'Gốc' 
+                          : `✓ ${result.detections.length} linh kiện`}
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ mt: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+                      <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#333' }}>
+                        📁 {result.filename}
+                      </Typography>
+                      <Typography sx={{ fontSize: 13, color: '#666' }}>
+                        Loại: <span style={{ color: '#257be2', fontWeight: 600 }}>{result.type.toUpperCase()}</span>
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 1.5 }} />
+                <Divider sx={{ my: 2 }} />
 
-                {/* Detections */}
-                {result.detections.length > 0 ? (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#333', mb: 1 }}>
-                      Chi tiết phát hiện:
-                    </Typography>
-                    {result.detections.map((det, detIdx) => (
-                      <Box 
-                        key={detIdx} 
-                        sx={{ 
-                          p: 1, 
-                          mb: 0.5,
-                          bgcolor: '#f9f9f9', 
-                          borderRadius: 1,
-                          borderLeft: '3px solid #257be2'
-                        }}
-                      >
-                        <Typography sx={{ fontSize: 12, fontWeight: 500 }}>
-                          {det.class_name} - Confidence: {(det.confidence * 100).toFixed(1)}%
-                        </Typography>
-                        {det.ocr?.best_text && (
-                          <Typography sx={{ fontSize: 11, color: '#666', mt: 0.3 }}>
-                            OCR: {det.ocr.best_text}
-                          </Typography>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                ) : (
-                  <Box sx={{ p: 1, bgcolor: '#f9f9f9', borderRadius: 1, mb: 2 }}>
-                    <Typography sx={{ fontSize: 12, color: '#999' }}>
-                      Không phát hiện điểm nào
-                    </Typography>
-                  </Box>
-                )}
-
-                <Divider sx={{ my: 1.5 }} />
-
-                {/* Crops */}
-                {result.crops && result.crops.length > 0 && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#333', mb: 1 }}>
-                      🔍 Crops ({result.crops.length})
-                    </Typography>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      gap: 1, 
-                      overflowX: 'auto',
-                      p: 1,
-                      bgcolor: '#f5f5f5',
-                      borderRadius: 1,
-                      '&::-webkit-scrollbar': { height: '6px' },
-                      '&::-webkit-scrollbar-thumb': { background: '#257be2', borderRadius: '3px' }
-                    }}>
-                      {result.crops.map((crop, cropIdx) => (
-                        <Box
-                          key={cropIdx}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openModal(crop);
-                          }}
-                          sx={{
-                            width: 50,
-                            height: 50,
-                            flexShrink: 0,
-                            borderRadius: 1,
-                            overflow: 'hidden',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': { transform: 'scale(1.1)' }
-                          }}
-                        >
-                          <img
-                            src={crop}
-                            alt={`Crop ${cropIdx + 1}`}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-
-                <Divider sx={{ my: 1.5 }} />
-
-                {/* Notes */}
-                <Box sx={{ mb: 1.5 }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#333', mb: 1 }}>
-                    Ghi chú:
+                <Box sx={{ mb: 2 }} onClick={(e) => e.stopPropagation()}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#333', mb: 1 }}>
+                    💬 Ghi chú:
                   </Typography>
                   <TextField
                     multiline
@@ -898,7 +727,7 @@ function Dashboard() {
                         [idx]: e.target.value
                       }));
                     }}
-                    disabled={isProcessing || isSendingResults}
+                    disabled={sendingStates[idx]}
                     sx={{ 
                       bgcolor: '#f9f9f9',
                       '& .MuiOutlinedInput-root': { borderRadius: 1 }
@@ -906,33 +735,64 @@ function Dashboard() {
                   />
                 </Box>
 
-                {/* Download Button */}
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<DownloadOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const link = document.createElement('a');
-                    link.href = result.annotatedImage;
-                    link.download = `PCB-${result.filename || `image-${idx + 1}`}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                  disabled={isProcessing || isSendingResults}
-                  sx={{ 
-                    fontWeight: 600, 
-                    color: '#1976d2', 
-                    borderColor: '#c7dceb', 
-                    textTransform: 'none',
-                    fontSize: 12,
-                    '&:hover': { borderColor: '#1976d2', bgcolor: '#e3f2fd' },
-                    '&:disabled': { color: '#ccc', borderColor: '#eee' }
-                  }}
+                {successMessages[idx] && (
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    {successMessages[idx]}
+                  </Alert>
+                )}
+
+                <Box 
+                  sx={{ display: 'flex', gap: 1 }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Tải ảnh
-                </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DownloadOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const link = document.createElement('a');
+                      link.href = result.annotatedImage;
+                      link.download = `PCB-${result.filename || `image-${idx + 1}`}.png`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    disabled={sendingStates[idx]}
+                    sx={{ 
+                      fontWeight: 600, 
+                      color: '#1976d2', 
+                      borderColor: '#c7dceb', 
+                      textTransform: 'none',
+                      fontSize: 13,
+                      '&:hover': { borderColor: '#1976d2', bgcolor: '#e3f2fd' },
+                      '&:disabled': { color: '#ccc', borderColor: '#eee' }
+                    }}
+                  >
+                    Tải ảnh kết quả
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={sendingStates[idx] ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <SendOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSendResult(idx);
+                    }}
+                    disabled={sendingStates[idx]}
+                    sx={{ 
+                      fontWeight: 600, 
+                      bgcolor: '#4caf50', 
+                      textTransform: 'none',
+                      fontSize: 13,
+                      '&:hover': { bgcolor: '#388e3c' },
+                      '&:disabled': { bgcolor: '#ccc' }
+                    }}
+                  >
+                    {sendingStates[idx] ? 'Đang gửi...' : 'Gửi đánh giá'}
+                  </Button>
+                </Box>
               </Card>
             ))}
           </Box>
@@ -964,8 +824,8 @@ function Dashboard() {
       >
         <Box sx={{ 
           position: 'relative', 
-          width: '80vw', 
-          height: '85vh', 
+          width: '90vw', 
+          height: '90vh', 
           bgcolor: '#000', 
           borderRadius: 3, 
           overflow: 'hidden' 
