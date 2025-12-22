@@ -35,7 +35,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { REACT_APP_URL_PYTHON, REACT_APP_URL_BE } from "../config";
 import api from "../api";
 
-const labels_R = ["FP", "VIAS", "TP", "LPC", "UP", "JTAG", "SMB", "SPI"];
+const labels_R = ["FP", "VIAS", "TP", "LPC", "UP", "JTAG", "SMB", "SPI", "C", "BTN", "CR", "IC", "F", "FB", "JP", "L", "LED", "J", "M", "P", "Q", "QA", "CRA", "R", "D", "SW", "T", "U", "V", "RA", "RN"];
 
 const STORAGE_KEYS = {
   SELECT_LABEL: "dashboard_select_label",
@@ -142,7 +142,7 @@ function Dashboard() {
           timestamp: new Date().toISOString(),
         };
 
-        const response = await api.post(`${REACT_APP_URL_BE}/api/v1/detection-result`, submitData);
+        const response = await api.post(`${REACT_APP_URL_BE}/detection-result`, submitData);
 
         setSuccessMessages((prev) => ({
           ...prev,
@@ -700,11 +700,7 @@ function Dashboard() {
                   mb: 1,
                 }}
               >
-                📋 Kết quả kiểm tra ({processedResults.length} ảnh)
-              </Typography>
-              <Typography sx={{ fontSize: 13, color: "#666" }}>
-                Loại: <strong>{selectLabel}</strong> | Tổng cộng:{" "}
-                <strong>{processedResults.length}</strong> ảnh
+                📋 Kết quả kiểm tra
               </Typography>
             </Box>
 
@@ -762,7 +758,7 @@ function Dashboard() {
                       <Tab
                         icon={<CheckCircleIcon sx={{ fontSize: 16 }} />}
                         iconPosition="start"
-                        label={`Kết quả nhận diện (${result.detections.length} điểm)`}
+                        label={`Kết quả nhận diện`}
                         value={1}
                       />
                     </Tabs>
@@ -826,7 +822,7 @@ function Dashboard() {
                       >
                         {activeImageTabs[idx] === 0
                           ? "Gốc"
-                          : `✓ ${result.detections.length} linh kiện`}
+                          : `✓ Nhận dạng linh kiện`}
                       </Box>
                     </Box>
 

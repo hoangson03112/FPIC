@@ -16,6 +16,7 @@ import BlockDiagram from "./components/BlockDiagram";
 import MainBoard from "./components/MainBoard";
 import { AuthProvider } from "./context/AuthContext";
 import Identification from "./components/Identification";
+import ListIdentificationResult from "./components/ListIdentificationResult";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -90,6 +91,14 @@ root.render(
             element={
               <Layout>
                 <MainBoard />
+              </Layout>
+            }
+          ></Route>
+          <Route
+            path="/reviewed-product-catalog"
+            element={
+              <Layout>
+                <ListIdentificationResult />
               </Layout>
             }
           ></Route>

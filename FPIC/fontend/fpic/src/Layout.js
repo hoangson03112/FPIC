@@ -280,8 +280,7 @@ const Layout = ({ children }) => {
         <Collapse in={subMenus.menu2} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {[
-              { text: "Danh mục sản phẩm đã đánh giá", path: "#" },
-              { text: "Kết quả đánh giá", path: "#" },
+              { text: "Danh mục sản phẩm đã đánh giá", path: "/reviewed-product-catalog" },
             ].map((item) => (
               <ListItemButton
                 key={item.text}
