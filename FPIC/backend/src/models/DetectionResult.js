@@ -9,7 +9,7 @@ const DetectionResultSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ["fp", "tp", "up", "smb", "spi", "vias", "lpc", "jtag"]
+    enum: ["fp", "tp", "up", "smb", "spi", "vias", "lpc", "jtag", "c", "btn", "cr", "ic", "f", "fb", "jp", "l", "led", "j", "m", "p", "q", "qa", "cra", "r", "d", "sw", "t", "u", "v", "ra", "rn"]
   },
   
   detectionType: {
